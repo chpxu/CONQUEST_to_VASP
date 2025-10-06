@@ -1,7 +1,7 @@
 {
   description = "Opinionated Flake for Python/C/C++/JS Development";
   inputs.nixpkgs = {
-    url = "github:NixOS/nixpkgs/aa9d4729cbc99dabacb50e3994dcefb3ea0f7447";
+    url = "github:NixOS/nixpkgs/";
   };
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
@@ -24,10 +24,10 @@
         inherit pkgs;
         lib = pkgs.lib;
         installC = true;
-        installPython = true;
+        installPython = false;
         installJS = false;
-        installLatex = true;
-        useLLVM = true;
+        installLatex = false;
+        useLLVM = false;
         llvmVer = "17";
         pythonVer = "310";
         nodeVer = "20";

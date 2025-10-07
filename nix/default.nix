@@ -11,7 +11,7 @@
   llvmVer ? "17",
   pythonVer ? "310",
   nodeVer ? "20",
-  gccVer ? "12",
+  gccVer ? "14",
   # Allows the use of `misc/write_vscode_settings.nix`, which integrates nicely into VSCode configuration for the project.
   # Default false
   enableVSCodeSetup ? false,

@@ -1,0 +1,4 @@
+[flake8]
+max-complexity = 4
+exclude = tests/*
+max-line-length = 100

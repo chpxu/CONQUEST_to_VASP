@@ -10,7 +10,6 @@
         numpy
         scipy
         matplotlib
-        pygments
         #formatter
         black
         #static type analysis
@@ -20,6 +19,7 @@
         # use the version provided by VSCode extension
         # Could uncomment for other editors
         # pylint
+        pytest
       ]
       ++ (lib.optional jupyter (import (./. + "/jupyter.nix")));
 in {

@@ -24,7 +24,7 @@
         inherit pkgs;
         lib = pkgs.lib;
         installC = true;
-        installPython = false;
+        installPython = true;
         installJS = false;
         installLatex = false;
         useLLVM = false;

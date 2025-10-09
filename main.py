@@ -3,7 +3,6 @@ import os
 from os.path import abspath
 from pathlib import Path
 from typing import IO, Any, TextIO
-import numpy as np
 from dataclasses import dataclass
 
 bohr_to_angstrom = 0.529177249
@@ -341,11 +340,3 @@ class extxyz_writer(xyz_writer):
             lattice.append(single_vector[1])
             lattice.append(single_vector[2])
         return f'Lattice="{" ".join(str(x) for x in lattice)}" Properties=species:S:1:pos:R:3 Time={str(self.time)}'
-
-
-conq = CONQUEST_COORDINATES(
-    "./test/test.dat", CONQUEST_input=CONQUEST_INPUT({"1": "Bi", "2": "Mn", "3": "O"})
-)
-vasp_writer("test/test.vasp", data=conq)
-xyz_writer("test/test.xyz", data=conq)
-extxyz_writer("test/test.extxyz", data=conq)

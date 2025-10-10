@@ -14,15 +14,17 @@ Usage is simple and there are **no external library dependencies**. Either use `
     3 16.000000 O
   %endblock
   ```
-  Your `dict` will be `{1: "Bi", 2: "O"}`. Note that the `dict` integers do not match the ones specified in `Conquest_input` and are completely arbitrary please ensure however, that the element labels represent real elements (see `main.py`, `CONQUEST_INPUT` class)!
-2. Create an instance of `CONQUEST_INPUT`, e.g. `CONQUEST_INPUT({1: "Bi", 2: "O"})`
+  Your `dict` will be `{1: "Bi", 2: "Bi", 3: "O"}`. Note that the `dict` integers should match the ones specified in `Conquest_input` and are completely arbitrary. please ensure however, that the element labels represent real elements (see `main.py`, `CONQUEST_INPUT` class)!
+
+2. Create an instance of `CONQUEST_INPUT`, e.g. `CONQUEST_INPUT({1: "Bi", 2: "Bi", 3: "O"})`
+
 3. Create an instance of `CONQUEST_COORDINATES`, feeding in the coordinate file you want to post-process and the instance of `CONQUEST_INPUT` created in Step 2:
   ```py
   conq = CONQUEST_COORDINATES(
-      "./test/test.dat", CONQUEST_input=CONQUEST_INPUT({1: "Bi", 2: "O"})
+      "./test/test.dat", CONQUEST_input=CONQUEST_INPUT({1: "Bi", 2: "Bi", 3: "O"})
   )
   ```
-4. You may now call any of the writers:
+4. You may now call any of the writers with the path to the desination file, in this case, `test/test.ABC`:
    1. `vasp_writer("test/test.vasp", data=conq)`
    2. `xyz_writer("test/test.xyz", data=conq)`
    3. `extxyz_writer("test/test.extxyz", data=conq)`

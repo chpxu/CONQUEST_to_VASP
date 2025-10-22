@@ -265,7 +265,6 @@ class vasp_writer(FileWriter):
             for lattice_vect in self.data.lattice_vectors:
                 file.write(rf"  {" ".join(str(x * bohr_to_angstrom) for x in lattice_vect)}")
                 file.write("\n")
-            file.write("\n")
             file.write(f"{ele_string}\n")
             file.write(f"{num_string}\n")
             file.write("Direct\n")

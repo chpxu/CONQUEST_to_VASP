@@ -3,4 +3,5 @@ __*
 .mypy_cache
 venv
 .vscode
-.py*
+.pytest*
+.mypy*

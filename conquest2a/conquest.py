@@ -2,7 +2,6 @@ from dataclasses import dataclass
 import os
 from os.path import abspath
 from pathlib import Path
-from typing import Literal
 from collections.abc import Sequence
 @dataclass
 class Atom:
@@ -12,15 +11,16 @@ class Atom:
     label: str = ""
 
 
-class CONQUEST_INPUT:
+class conquest_input:
     def __init__(self, species_dict: dict[str, str]) -> None:
-        """Constructor for CONQUEST_INPUT
+        """Constructor for conquest_input
 
         Args:
             species_dict (dict[int, str]): dict mapping the species index to an element label
-            It is not completely reliable to directly read Conquest_input because in order to have multiple spins, you essentially must duplicate an element (and call it a new Conquest species) - however the labels are free to be named. Moreover, in the case isotopes are used, differentiating by elemental mass is not sufficient.
-
-            Therefore we expect a dictionary to be passed in independently. This can be useful for large-scale post-processing too.
+                It is not completely reliable to directly read conquest_input
+                E.g., for multiple spins, must duplicate an element and call it a new Conquest species,
+                however labels can be any alphanumeric string
+                Therefore we expect a dictionary to be passed in independently.
         """
         self.species_dict = species_dict
         self.allowed_element_labels: list[str] = [
@@ -143,39 +143,39 @@ class CONQUEST_INPUT:
         return set(species_dict_values).issubset(self.allowed_element_labels)
 
 
-class CONQUEST_COORDINATES:
+class conquest_coordinates:
     def __init__(
         self,
-        CONQUEST_input: CONQUEST_INPUT,
+        conquest_input: conquest_input,
     ) -> None:
         self.Atoms: list[Atom] = []
-        self.CONQUEST_input = CONQUEST_input
+        self.conquest_input = conquest_input
         self.lattice_vectors: list[list[float]] = []
         self.natoms: str
         self.element_map: dict[str, list[Atom]]
     def assign_atom_labels(self) -> None:
         """Assign each Atom its label"""
         for atom in self.Atoms:
-            atom.label = self.CONQUEST_input.species_dict[atom.species]
+            atom.label = self.conquest_input.species_dict[atom.species]
 
     def index_to_atom_map(self) -> None:
         """Every Atom now has its element label. External file formats require a count of the number of Atoms per element, so we now form a dict of elements to Atoms in preparation for writing"""
-        ele_to_atom: dict[str, list[Atom]] = dict()
-        for element in self.CONQUEST_input.unique_elements:
+        ele_to_atom: dict[str, list[Atom]] = {}
+        for element in self.conquest_input.unique_elements:
             print(list(a for a in self.Atoms if a.label == element))
             ele_to_atom[element] = list(a for a in self.Atoms if a.label == element)
         self.element_map = ele_to_atom
 
     def number_of_elements(self) -> dict[str, int]:
-        num_eles: dict[str, int] = dict()
+        num_eles: dict[str, int] = {}
         for element in list(self.element_map.keys()):
             num_eles[element] = len(self.element_map[element])
         return num_eles
 
 
-class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
-    def __init__(self, path: Path | str, CONQUEST_input: CONQUEST_INPUT) -> None:
-        super().__init__(CONQUEST_input)
+class conquest_coordinates_processor(conquest_coordinates):
+    def __init__(self, path: Path | str, conquest_input: conquest_input) -> None:
+        super().__init__(conquest_input)
         self.input_coord_path = path
         self.abs_coord_path: str | Path
         try:
@@ -183,22 +183,18 @@ class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
             self.open_file()
             self.assign_atom_labels()
             self.index_to_atom_map()
-        except Exception as e:
+        except FileNotFoundError as e:
             print(e)
-        
-    def resolve_path(self) -> bool:
+    def resolve_path(self) -> None:
         try:
             abs_coord_path = Path(abspath(self.input_coord_path))
             assert abs_coord_path.exists() is True
             assert abs_coord_path.is_file() is True
             assert os.stat(abs_coord_path).st_size > 0
-            print(abs_coord_path)
             self.abs_coord_path = abs_coord_path
-            return True
-        except Exception as e:
+        except FileNotFoundError as e:
             print(e)
             print("Error opening specified CONQUEST coordinates file")
-            return False
 
     def open_file(self) -> None:
         """
@@ -208,14 +204,14 @@ class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
         the following lines are of the for_summary_m:
           <double> <double> <double> <int> <char> <char> <char>
         """
-        with open(self.abs_coord_path, "r", encoding="utf-8") as CONQUEST_coord_file:
-            conquest_lattice_data_str = [next(CONQUEST_coord_file).strip() for _ in range(3)]
+        with open(self.abs_coord_path, "r", encoding="utf-8") as conquest_coord_file:
+            conquest_lattice_data_str = [next(conquest_coord_file).strip() for _ in range(3)]
             print(conquest_lattice_data_str)
             for lattice_vect in conquest_lattice_data_str:
                 coords = lattice_vect.split()
                 self.lattice_vectors.append([float(x) for x in coords])
-            self.natoms = next(CONQUEST_coord_file)
-            atom_data = CONQUEST_coord_file.readlines()
+            self.natoms = next(conquest_coord_file)
+            atom_data = conquest_coord_file.readlines()
             for atom in atom_data:
                 split_atom_data = atom.strip().split()
                 self.Atoms.append(
@@ -225,7 +221,5 @@ class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
                         coords=list(map(float, split_atom_data[:3])),
                     )
                 )
-        CONQUEST_coord_file.close()
-        return
-
-   
+        conquest_coord_file.close()
+           

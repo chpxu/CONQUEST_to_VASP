@@ -1,15 +1,10 @@
-"""
-script to make supercells in CONQUEST coordinates format
-"""
-
-from typing import Optional
-from src.conquest import *
-from dataclasses import dataclass
 import copy
+from collections.abc import Sequence
+from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
 
 
-class SUPERCELL:
-    def __init__(self, Nx: int, Ny: int, Nz: int, coords: CONQUEST_COORDINATES_PROCESSOR) -> None:
+class supercell:
+    def __init__(self, repeats_x: int, repeats_y: int, repeats_z: int, coords: conquest_coordinates_processor) -> None:
         """
         Args:
             Nx (int): Number of repeats along "a" lattice vector
@@ -17,18 +12,18 @@ class SUPERCELL:
             Nz (int): Number of repeats along "c" lattice vector
             coords (CONQUEST_COORDINATES): CONQUEST_COORDINATES instance for the cell to be supercell'd
         """
-        if Nx < 0 or Ny < 0 or Nz < 0:
+        if repeats_x < 0 or repeats_y < 0 or repeats_z < 0:
             raise ValueError("One of, or multiple of, Nx Ny, Nz was not at least 0.")
-        if (not isinstance(Nx, int)) or (not isinstance(Ny, int)) or (not isinstance(Nz, int)):
+        if (not isinstance(repeats_x, int)) or (not isinstance(repeats_y, int)) or (not isinstance(repeats_z, int)):
             raise TypeError("One of, or multiple of, Nx Ny, Nz was not an integer.")
 
-        self.Nx = Nx
-        self.Ny = Ny
-        self.Nz = Nz
+        self.repeats_x = repeats_x
+        self.repeats_y = repeats_y
+        self.repeats_z = repeats_z
         self.coords = coords
         # Create new CONQUEST_COORDINATES
-        self.supercell_coords: CONQUEST_COORDINATES = CONQUEST_COORDINATES(
-            self.coords.CONQUEST_input
+        self.supercell_coords: conquest_coordinates = conquest_coordinates(
+            self.coords.conquest_input
         )
         self.scale_lattice_vectors()
         self.create_supercell()
@@ -41,14 +36,14 @@ class SUPERCELL:
         CONQUEST deals with orthorhombic cells only
         """
         self.supercell_coords.lattice_vectors = [
-            [self.coords.lattice_vectors[0][0] * (self.Nx + 1), 0, 0],
-            [0, self.coords.lattice_vectors[1][1] * (self.Ny + 1), 0],
-            [0, 0, self.coords.lattice_vectors[2][2] * (self.Nz + 1)],
+            [self.coords.lattice_vectors[0][0] * (self.repeats_x + 1), 0, 0],
+            [0, self.coords.lattice_vectors[1][1] * (self.repeats_y + 1), 0],
+            [0, 0, self.coords.lattice_vectors[2][2] * (self.repeats_z + 1)],
         ]
 
     def new_num_atoms(self) -> int:
         natoms = len(self.supercell_coords.Atoms)
-        self.supercell_coords.natoms = natoms
+        self.supercell_coords.natoms = str(natoms)
         return natoms
 
     def create_atom(
@@ -94,20 +89,20 @@ class SUPERCELL:
         However, the original (0,0,0) now has duplicates in x,y,z, namely the new atoms at (0,0,0) + {(1/3, 0, 0), (0, 1/2, 0), (0,0,1/2), ...}
         """
         # No repeats at all -> just return original crystal
-        if self.Nx == 0 and self.Ny == 0 and self.Nz == 0:
+        if self.repeats_x == 0 and self.repeats_y == 0 and self.repeats_z == 0:
             self.supercell_coords.Atoms = copy.deepcopy(self.coords.Atoms)
             self.supercell_coords.natoms = self.coords.natoms
             return
         for atom in self.coords.Atoms:
-            for l in self.range(self.Nx):
-                for m in self.range(self.Ny):
-                    for n in self.range(self.Nz):
+            for l in self.range(self.repeats_x):
+                for m in self.range(self.repeats_y):
+                    for n in self.range(self.repeats_z):
                         new_atom = Atom(
                             atom.species,
                             [
-                                (atom.coords[0] + l) / (self.Nx + 1),
-                                (atom.coords[1] + m) / (self.Ny + 1),
-                                (atom.coords[2] + n) / (self.Nz + 1),
+                                (atom.coords[0] + l) / (self.repeats_x + 1),
+                                (atom.coords[1] + m) / (self.repeats_y + 1),
+                                (atom.coords[2] + n) / (self.repeats_z + 1),
                             ],
                             can_move=atom.can_move,
                             label=atom.label,

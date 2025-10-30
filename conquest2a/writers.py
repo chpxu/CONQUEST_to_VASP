@@ -1,14 +1,10 @@
 from io import TextIOWrapper
-import os
-from os.path import abspath
 from pathlib import Path
-from typing import IO, Any, TextIO
-from dataclasses import dataclass
-from src.conquest import *
+from typing import IO, Any
+from conquest2a.conquest import conquest_coordinates_processor, conquest_coordinates
 
-bohr_to_angstrom = 0.529177249
-from src.conquest import *
-class FileWriter:
+BOHR_TO_ANGSTROM = 0.529177249
+class file_writer:
     def __init__(self, dest: Path | str, encoding: str = "utf-8") -> None:
         self.mode = "w"
         self.dest_path = dest
@@ -24,8 +20,8 @@ class FileWriter:
     def write(self) -> None:
         pass
 
-class conquest_writer(FileWriter):
-    def __init__(self, dest, coords: CONQUEST_COORDINATES, encoding = "utf-8", precision: int = 15):
+class conquest_writer(file_writer):
+    def __init__(self, dest, coords: conquest_coordinates, encoding: str = "utf-8", precision: int = 15):
         super().__init__(dest, encoding)
         self.coords = coords
         self.precision = precision
@@ -39,11 +35,11 @@ class conquest_writer(FileWriter):
         self.file.write(self.coords.natoms)
         for atom in self.coords.Atoms:
             self.file.write(f"{atom.coords[0]:.{self.precision}f} {atom.coords[1]:.{self.precision}f} {atom.coords[2]:.{self.precision}f} {atom.species} {atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}\n")
-class vasp_writer(FileWriter):
+class vasp_writer(file_writer):
     def __init__(
         self,
         dest: Path | str,
-        data: CONQUEST_COORDINATES_PROCESSOR,
+        data: conquest_coordinates_processor,
         encoding: str = "utf-8",
     ) -> None:
         super().__init__(dest, encoding)
@@ -63,7 +59,7 @@ class vasp_writer(FileWriter):
             file.write(f"{ele_string}\n")
             file.write("1.0\n")
             for lattice_vect in self.data.lattice_vectors:
-                file.write(rf"  {" ".join(str(x * bohr_to_angstrom) for x in lattice_vect)}")
+                file.write(rf"  {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}")
                 file.write("\n")
             file.write(f"{ele_string}\n")
             file.write(f"{num_string}\n")
@@ -74,13 +70,13 @@ class vasp_writer(FileWriter):
                     file.write("\n")
 
 
-class xyz_writer(FileWriter):
+class xyz_writer(file_writer):
     """Class to generate .xyz for basic XYZ file format."""
 
     def __init__(
         self,
         dest: Path | str,
-        data: CONQUEST_COORDINATES_PROCESSOR,
+        data: conquest_coordinates_processor,
         encoding: str = "utf-8",
         comment_line: str = "comment line",
     ) -> None:
@@ -115,7 +111,7 @@ class xyz_writer(FileWriter):
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
                     file.write(
-                        rf"{atoms} {" ".join(str(x * bohr_to_angstrom) for x in self.fractional_to_cartesian(atom.coords))}"
+                        rf"{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords))}"
                     )
                     file.write("\n")
 
@@ -124,7 +120,7 @@ class extxyz_writer(xyz_writer):
     def __init__(
         self,
         dest: Path | str,
-        data: CONQUEST_COORDINATES_PROCESSOR,
+        data: conquest_coordinates_processor,
         encoding: str = "utf-8",
         time: float = 0.0,
     ) -> None:

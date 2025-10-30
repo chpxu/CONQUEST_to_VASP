@@ -1,13 +1,15 @@
+from ctypes import Union
 from dataclasses import dataclass
 import os
 from os.path import abspath
 from pathlib import Path
+from typing import Literal
  
 @dataclass
 class Atom:
     species: str
     coords: list[float]
-    can_move: list[str]
+    can_move: list[Literal['T', 'F']]
     label: str = ""
 
 
@@ -151,7 +153,24 @@ class CONQUEST_COORDINATES:
         self.lattice_vectors: list[list[float]] = []
         self.natoms: str
         self.element_map: dict[str, list[Atom]]
-      
+    def assign_atom_labels(self) -> None:
+        """Assign each Atom its label"""
+        for atom in self.Atoms:
+            atom.label = self.CONQUEST_input.species_dict[atom.species]
+
+    def index_to_atom_map(self) -> None:
+        """Every Atom now has its element label. External file formats require a count of the number of Atoms per element, so we now form a dict of elements to Atoms in preparation for writing"""
+        ele_to_atom: dict[str, list[Atom]] = dict()
+        for element in self.CONQUEST_input.unique_elements:
+            print(list(a for a in self.Atoms if a.label == element))
+            ele_to_atom[element] = list(a for a in self.Atoms if a.label == element)
+        self.element_map = ele_to_atom
+
+    def number_of_elements(self) -> dict[str, int]:
+        num_eles: dict[str, int] = dict()
+        for element in list(self.element_map.keys()):
+            num_eles[element] = len(self.element_map[element])
+        return num_eles
 
 
 class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
@@ -201,25 +220,7 @@ class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
                         )
                     )
             CONQUEST_coord_file.close()
-            # print(atom.strip().split())
             return
         print("Error opening specified CONQUEST coordinates file")
 
-    def assign_atom_labels(self) -> None:
-        """Assign each Atom its label"""
-        for atom in self.Atoms:
-            atom.label = self.CONQUEST_input.species_dict[atom.species]
-
-    def index_to_atom_map(self) -> None:
-        """Every Atom now has its element label. External file formats require a count of the number of Atoms per element, so we now form a dict of elements to Atoms in preparation for writing"""
-        ele_to_atom: dict[str, list[Atom]] = dict()
-        for element in self.CONQUEST_input.unique_elements:
-            print(list(a for a in self.Atoms if a.label == element))
-            ele_to_atom[element] = list(a for a in self.Atoms if a.label == element)
-        self.element_map = ele_to_atom
-
-    def number_of_elements(self) -> dict[str, int]:
-        num_eles: dict[str, int] = dict()
-        for element in list(self.element_map.keys()):
-            num_eles[element] = len(self.element_map[element])
-        return num_eles
+   

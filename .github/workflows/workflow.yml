@@ -21,7 +21,7 @@ jobs:
         pip install pylint black pytest flake8 mypy
     - name: Static type analysis with mypy
       run: |
-        mypy $(git ls-files './conquest2a/*.py')
+        mypy conquest2a
     - name: "Test with pytest"
       run: |
         python3 -m pytest

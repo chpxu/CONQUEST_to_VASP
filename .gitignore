@@ -1,7 +1,7 @@
 .direnv
-__*
+__py*
 .mypy_cache
 venv
-.vscode
+.vscode*
 .pytest*
 .mypy*

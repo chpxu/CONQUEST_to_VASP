@@ -34,5 +34,5 @@ jobs:
         black $(git ls-files 'conquest2a/*.py')
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files './conquest2a/*.py') --threshold=9.0
+        pylint $(git ls-files './conquest2a/*.py')
       continue-on-error: true

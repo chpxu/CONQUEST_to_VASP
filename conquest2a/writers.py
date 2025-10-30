@@ -34,7 +34,8 @@ class conquest_writer(file_writer):
         self.file.write(f"{0.0:.{self.precision}f} {0.0:.{self.precision}f} {self.coords.lattice_vectors[2][2]:.{self.precision}f}\n")
         self.file.write(self.coords.natoms)
         for atom in self.coords.Atoms:
-            self.file.write(f"{atom.coords[0]:.{self.precision}f} {atom.coords[1]:.{self.precision}f} {atom.coords[2]:.{self.precision}f} {atom.species} {atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}\n")
+            self.file.write(f"{atom.coords[0]:.{self.precision}f} {atom.coords[1]:.{self.precision}f} {atom.coords[2]:.{self.precision}f} {atom.species} {atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}")
+            self.file.write("\n")
 class vasp_writer(file_writer):
     def __init__(
         self,
@@ -59,14 +60,14 @@ class vasp_writer(file_writer):
             file.write(f"{ele_string}\n")
             file.write("1.0\n")
             for lattice_vect in self.data.lattice_vectors:
-                file.write(rf"  {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}")
+                file.write(rf'  {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}')
                 file.write("\n")
             file.write(f"{ele_string}\n")
             file.write(f"{num_string}\n")
             file.write("Direct\n")
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
-                    file.write(rf" {" ".join(str(x) for x in atom.coords)}")
+                    file.write(rf' {" ".join(str(x) for x in atom.coords)}')
                     file.write("\n")
 
 

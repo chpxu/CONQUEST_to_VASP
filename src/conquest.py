@@ -1,15 +1,14 @@
-from ctypes import Union
 from dataclasses import dataclass
 import os
 from os.path import abspath
 from pathlib import Path
 from typing import Literal
- 
+from collections.abc import Sequence
 @dataclass
 class Atom:
     species: str
     coords: list[float]
-    can_move: list[Literal['T', 'F']]
+    can_move: Sequence[str]
     label: str = ""
 
 
@@ -135,7 +134,8 @@ class CONQUEST_INPUT:
             "Rg",
             "Cn",
         ]
-        assert self.dict_contains_only_real_elements()
+        if not self.dict_contains_only_real_elements():
+            raise Exception("Provided species map contains fake chemical elements.")
         self.unique_elements = list(set(self.species_dict.values()))
 
     def dict_contains_only_real_elements(self) -> bool:
@@ -177,20 +177,27 @@ class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
     def __init__(self, path: Path | str, CONQUEST_input: CONQUEST_INPUT) -> None:
         super().__init__(CONQUEST_input)
         self.input_coord_path = path
-        self.open_file()
-        self.assign_atom_labels()
-        self.index_to_atom_map()
-
+        self.abs_coord_path: str | Path
+        try:
+            self.resolve_path()
+            self.open_file()
+            self.assign_atom_labels()
+            self.index_to_atom_map()
+        except Exception as e:
+            print(e)
+        
     def resolve_path(self) -> bool:
         try:
             abs_coord_path = Path(abspath(self.input_coord_path))
             assert abs_coord_path.exists() is True
             assert abs_coord_path.is_file() is True
             assert os.stat(abs_coord_path).st_size > 0
+            print(abs_coord_path)
             self.abs_coord_path = abs_coord_path
             return True
         except Exception as e:
             print(e)
+            print("Error opening specified CONQUEST coordinates file")
             return False
 
     def open_file(self) -> None:
@@ -201,26 +208,24 @@ class CONQUEST_COORDINATES_PROCESSOR(CONQUEST_COORDINATES):
         the following lines are of the for_summary_m:
           <double> <double> <double> <int> <char> <char> <char>
         """
-        if self.resolve_path():
-            with open(self.abs_coord_path, "r", encoding="utf-8") as CONQUEST_coord_file:
-                conquest_lattice_data_str = [next(CONQUEST_coord_file).strip() for _ in range(3)]
-                print(conquest_lattice_data_str)
-                for lattice_vect in conquest_lattice_data_str:
-                    coords = lattice_vect.split()
-                    self.lattice_vectors.append([float(x) for x in coords])
-                self.natoms = next(CONQUEST_coord_file)
-                atom_data = CONQUEST_coord_file.readlines()
-                for atom in atom_data:
-                    split_atom_data = atom.strip().split()
-                    self.Atoms.append(
-                        Atom(
-                            species=split_atom_data[3],
-                            can_move=split_atom_data[4:],
-                            coords=list(map(float, split_atom_data[:3])),
-                        )
+        with open(self.abs_coord_path, "r", encoding="utf-8") as CONQUEST_coord_file:
+            conquest_lattice_data_str = [next(CONQUEST_coord_file).strip() for _ in range(3)]
+            print(conquest_lattice_data_str)
+            for lattice_vect in conquest_lattice_data_str:
+                coords = lattice_vect.split()
+                self.lattice_vectors.append([float(x) for x in coords])
+            self.natoms = next(CONQUEST_coord_file)
+            atom_data = CONQUEST_coord_file.readlines()
+            for atom in atom_data:
+                split_atom_data = atom.strip().split()
+                self.Atoms.append(
+                    Atom(
+                        species=split_atom_data[3],
+                        can_move=split_atom_data[4:],
+                        coords=list(map(float, split_atom_data[:3])),
                     )
-            CONQUEST_coord_file.close()
-            return
-        print("Error opening specified CONQUEST coordinates file")
+                )
+        CONQUEST_coord_file.close()
+        return
 
    

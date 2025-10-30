@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import IO, Any, TextIO
 from dataclasses import dataclass
 bohr_to_angstrom = 0.529177249
-from conquest import *
+from src.conquest import *
 class FileWriter:
     def __init__(self, dest: Path | str, encoding: str = "utf-8") -> None:
         self.mode = "w"

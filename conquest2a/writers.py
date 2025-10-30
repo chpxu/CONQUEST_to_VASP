@@ -21,7 +21,7 @@ class file_writer:
         pass
 
 class conquest_writer(file_writer):
-    def __init__(self, dest, coords: conquest_coordinates, encoding: str = "utf-8", precision: int = 15):
+    def __init__(self, dest: Path | str, coords: conquest_coordinates, encoding: str = "utf-8", precision: int = 15):
         super().__init__(dest, encoding)
         self.coords = coords
         self.precision = precision
@@ -29,7 +29,7 @@ class conquest_writer(file_writer):
             raise ValueError("Cannot have less than 1 decimal of float precision.")
         self.close_file(file=self.file)
     def write(self) -> None:
-        self.file.write(f"{self.coords.lattice_vectors[0][0]:.{self.precision}f} {0.0:.self.precisionf} {0.0:.{self.precision}f}\n")
+        self.file.write(f"{self.coords.lattice_vectors[0][0]:.{self.precision}f} {0.0:.{self.precision}f} {0.0:.{self.precision}f}\n")
         self.file.write(f"{0.0:.{self.precision}f} {self.coords.lattice_vectors[1][1]:.{self.precision}f} {0.0:.{self.precision}f}\n")
         self.file.write(f"{0.0:.{self.precision}f} {0.0:.{self.precision}f} {self.coords.lattice_vectors[2][2]:.{self.precision}f}\n")
         self.file.write(self.coords.natoms)

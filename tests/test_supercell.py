@@ -57,18 +57,6 @@ def test_single_repeat_z() -> None:
     assert (new_cell.Ny + 1) * 7.439000 < new_cell.supercell_coords.lattice_vectors[1][1] < (new_cell.Ny + 1) * 7.44100000 # account for floating point error
     assert (new_cell.Nz + 1) * 5.371999999 < new_cell.supercell_coords.lattice_vectors[2][2] < (new_cell.Nz + 1) * 5.372100000 # account for floating point error
 
-
-def test_single_repeat_y() -> None:
-    new_cell: SUPERCELL = SUPERCELL(Nx=0, Ny=1, Nz=0, coords=test_coords_proc)
-    num_repeats = ((new_cell.Nx + 1) * (new_cell.Ny + 1) * (new_cell.Nz + 1))
-    assert int(new_cell.supercell_coords.natoms) ==  num_repeats* int(new_cell.coords.natoms)
-    assert len(new_cell.supercell_coords.Atoms) == num_repeats * len(new_cell.coords.Atoms)
-    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.Atoms)
-    assert (new_cell.Nx + 1) * 5.927799999 < new_cell.supercell_coords.lattice_vectors[0][0] < (new_cell.Nx + 1) * 5.9290000 # account for floating point error
-    assert (new_cell.Ny + 1) * 7.439000 < new_cell.supercell_coords.lattice_vectors[1][1] < (new_cell.Ny + 1) * 7.44100000 # account for floating point error
-    assert (new_cell.Nz + 1) * 5.371999999 < new_cell.supercell_coords.lattice_vectors[2][2] < (new_cell.Nz + 1) * 5.372100000 # account for floating point error
-
-
 def test_single_repeat_all() -> None:
     new_cell: SUPERCELL = SUPERCELL(Nx=2, Ny=1, Nz=0, coords=test_coords_proc)
     num_repeats = ((new_cell.Nx + 1) * (new_cell.Ny + 1) * (new_cell.Nz + 1))

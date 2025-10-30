@@ -22,10 +22,7 @@ jobs:
     - name: Static type analysis with mypy
       run: |
         mypy $(git ls-files './conquest2a/*.py')
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files './conquest2a/*.py') --threshold=9.0
-      continue-on-error: true
+    - name: "Test with pytest"
       run: |
         python3 -m pytest
     - name: Format with flake8
@@ -35,4 +32,7 @@ jobs:
     - name: Format with black
       run: |
         black $(git ls-files 'conquest2a/*.py')
-
+    - name: Analysing the code with pylint
+      run: |
+        pylint $(git ls-files './conquest2a/*.py') --threshold=9.0
+      continue-on-error: true

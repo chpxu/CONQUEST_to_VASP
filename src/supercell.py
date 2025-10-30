@@ -2,6 +2,7 @@
 script to make supercells in CONQUEST coordinates format
 """
 
+from typing import Optional
 from src.conquest import *
 from dataclasses import dataclass
 import copy
@@ -20,7 +21,7 @@ class SUPERCELL:
             raise ValueError("One of, or multiple of, Nx Ny, Nz was not at least 0.")
         if (not isinstance(Nx, int)) or (not isinstance(Ny, int)) or (not isinstance(Nz, int)):
             raise TypeError("One of, or multiple of, Nx Ny, Nz was not an integer.")
-        
+
         self.Nx = Nx
         self.Ny = Ny
         self.Nz = Nz
@@ -30,8 +31,8 @@ class SUPERCELL:
             self.coords.CONQUEST_input
         )
         self.scale_lattice_vectors()
-        self.new_num_atoms()
         self.create_supercell()
+        self.supercell_coords.natoms = str(self.new_num_atoms())
         self.supercell_coords.assign_atom_labels()
         self.supercell_coords.index_to_atom_map()
 
@@ -46,10 +47,36 @@ class SUPERCELL:
         ]
 
     def new_num_atoms(self) -> int:
-        natoms = int(self.coords.natoms) * (self.Nx + self.Ny + self.Nz)
-        self.supercell_coords.natoms = str(natoms)
+        natoms = len(self.supercell_coords.Atoms)
+        self.supercell_coords.natoms = natoms
         return natoms
 
+    def create_atom(
+        self,
+        species: str,
+        can_move: Sequence[str],
+        label: str,
+        coord_0: int | float,
+        coord_1: int | float,
+        coord_2: int | float,
+        disp_0: int | float = 0.0,
+        disp_1: int | float = 0.0,
+        disp_2: int | float = 0.0,
+    ) -> Atom:
+        return Atom(
+            species,
+            [
+                coord_0 + disp_0,
+                coord_1 + disp_1,
+                coord_2 + disp_2,
+            ],
+            can_move=can_move,
+            label=label,
+        )
+    def range(self, upper_bound: int) -> list[int] | range:
+        if upper_bound == 0:
+            return [0]
+        return range(0,upper_bound + 1, 1)
     def create_supercell(self) -> None:
         """
         In terms of fractional coordinates, we set new coords of the original atoms to be
@@ -66,34 +93,23 @@ class SUPERCELL:
 
         However, the original (0,0,0) now has duplicates in x,y,z, namely the new atoms at (0,0,0) + {(1/3, 0, 0), (0, 1/2, 0), (0,0,1/2), ...}
         """
-        # Rescale original atoms
-        if (self.Nx == 0 and self.Ny == 0 and self.Nz == 0): return
+        # No repeats at all -> just return original crystal
+        if self.Nx == 0 and self.Ny == 0 and self.Nz == 0:
+            self.supercell_coords.Atoms = copy.deepcopy(self.coords.Atoms)
+            self.supercell_coords.natoms = self.coords.natoms
+            return
         for atom in self.coords.Atoms:
-            self.supercell_coords.Atoms.append(
-                Atom(
-                    atom.species,
-                    [atom.coords[0] / (self.Nx + 1), atom.coords[1] / (self.Ny + 1), atom.coords[2] / (self.Nz + 1)],
-                    can_move=atom.can_move,
-                    label=atom.label,
-                )
-            )
-        # We will be cloning and displacing the scaled original atoms to place the new atoms
-        # so we keep a deep copy to loop through, and avoid infinitely duplicating atoms
-        initial_scaled_atoms = copy.deepcopy(self.supercell_coords.Atoms)
-        for atom in initial_scaled_atoms:
-            for l in range(1,self.Nx,1):
-                for m in range(1,self.Ny,1):
-                    for n in range(1,self.Nz,1):
+            for l in self.range(self.Nx):
+                for m in self.range(self.Ny):
+                    for n in self.range(self.Nz):
                         new_atom = Atom(
-                                atom.species,
-                                [
-                                    atom.coords[0] + (l / self.Nx),
-                                    atom.coords[1] + (m / self.Ny),
-                                    atom.coords[2] + (n / self.Nz),
-                                ],
-                                can_move=atom.can_move,
-                                label=atom.label,
-                            )
-                        self.supercell_coords.Atoms.append(
-                            new_atom
+                            atom.species,
+                            [
+                                (atom.coords[0] + l) / (self.Nx + 1),
+                                (atom.coords[1] + m) / (self.Ny + 1),
+                                (atom.coords[2] + n) / (self.Nz + 1),
+                            ],
+                            can_move=atom.can_move,
+                            label=atom.label,
                         )
+                        self.supercell_coords.Atoms.append(new_atom)

@@ -7,7 +7,7 @@ from collections.abc import Sequence
 @dataclass
 class Atom:
     species: str
-    coords: list[float]
+    coords: list[float | int]
     can_move: Sequence[str]
     label: str = ""
 

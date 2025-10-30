@@ -112,7 +112,7 @@ class xyz_writer(file_writer):
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
                     file.write(
-                        rf"{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords))}"
+                        rf'{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords))}'
                     )
                     file.write("\n")
 
@@ -134,4 +134,4 @@ class extxyz_writer(xyz_writer):
             lattice.append(single_vector[0])
             lattice.append(single_vector[1])
             lattice.append(single_vector[2])
-        return f'Lattice="{" ".join(str(x) for x in lattice)}" Properties=species:S:1:pos:R:3 Time={str(self.time)}'
+        return f'Lattice=\"{" ".join(str(x) for x in lattice)}\" Properties=species:S:1:pos:R:3 Time={str(self.time)}'

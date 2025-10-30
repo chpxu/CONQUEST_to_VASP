@@ -4,6 +4,8 @@ from os.path import abspath
 from pathlib import Path
 from typing import IO, Any, TextIO
 from dataclasses import dataclass
+from src.conquest import *
+
 bohr_to_angstrom = 0.529177249
 from src.conquest import *
 class FileWriter:
@@ -11,15 +13,32 @@ class FileWriter:
         self.mode = "w"
         self.dest_path = dest
         self.encoding = encoding
-
+        self.file = self.open_file()
     def open_file(self) -> TextIOWrapper | IO[Any]:
         file = open(self.dest_path, self.mode, encoding=self.encoding)
         return file
 
     def close_file(self, file: TextIOWrapper | IO[Any]) -> None:
         file.close()
+    
+    def write(self) -> None:
+        pass
 
-
+class conquest_writer(FileWriter):
+    def __init__(self, dest, coords: CONQUEST_COORDINATES, encoding = "utf-8", precision: int = 15):
+        super().__init__(dest, encoding)
+        self.coords = coords
+        self.precision = precision
+        if self.precision < 1:
+            raise ValueError("Cannot have less than 1 decimal of float precision.")
+        self.close_file(file=self.file)
+    def write(self) -> None:
+        self.file.write(f"{self.coords.lattice_vectors[0][0]:.{self.precision}f} {0.0:.self.precisionf} {0.0:.{self.precision}f}\n")
+        self.file.write(f"{0.0:.{self.precision}f} {self.coords.lattice_vectors[1][1]:.{self.precision}f} {0.0:.{self.precision}f}\n")
+        self.file.write(f"{0.0:.{self.precision}f} {0.0:.{self.precision}f} {self.coords.lattice_vectors[2][2]:.{self.precision}f}\n")
+        self.file.write(self.coords.natoms)
+        for atom in self.coords.Atoms:
+            self.file.write(f"{atom.coords[0]:.{self.precision}f} {atom.coords[1]:.{self.precision}f} {atom.coords[2]:.{self.precision}f} {atom.species} {atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}\n")
 class vasp_writer(FileWriter):
     def __init__(
         self,
@@ -29,7 +48,6 @@ class vasp_writer(FileWriter):
     ) -> None:
         super().__init__(dest, encoding)
         self.data = data
-        self.file = self.open_file()
         self.write()
         self.close_file(file=self.file)
 
@@ -69,7 +87,6 @@ class xyz_writer(FileWriter):
         super().__init__(dest, encoding)
         self.data = data
         self.comment_line = comment_line
-        self.file = self.open_file()
         self.write()
         self.close_file(file=self.file)
 

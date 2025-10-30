@@ -1,21 +1,20 @@
 [project]
-name = "c2v"
-version = "1.0.0"
+name = "conquest2a"
+version = "0.2.0"
 authors = [{ name = "Chung", email = "dev.chpxu@outlook.com" }]
-description = "A bot to collate rhythm games news, videos and events."
+description = "A Python utility that deals with some pre- and post-processing functions for the linear scaling DFT program, CONQUEST."
 readme = "README.md"
 requires-python = ">=3.12"
 
 [project.urls]
-Homepage = "https://github.com/chpxu/rhythmington"
-Issues = "https://github.com/chpxu/rhythmington/issues"
+Homepage = "https://github.com/chpxu/CONQUEST_TO_VASP"
+Issues = "https://github.com/chpxu/CONQUEST_TO_VASP/issues"
 
 [tool.pyright]
 reportPrivateUsage = false
 
 [tool.mypy]
 strict = true
-plugins = ["numpy.typing.mypy_plugin"]
 disallow_any_generics = true
 disallow_untyped_defs = true
 ignore_missing_imports = true
@@ -25,7 +24,6 @@ warn_return_any = true
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-
 disable_error_code = [
   # "abstract",
   # "arg-type",
@@ -51,7 +49,7 @@ module = ["nest_asyncio.*", "requests.*"]
 
 [tool.black]
 line-length = 100
-target-version = ['py312']
+target-version = ['py312', 'py313']
 extend-exclude = '''
 (
   ^/_*
@@ -61,5 +59,5 @@ extend-exclude = '''
 '''
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"

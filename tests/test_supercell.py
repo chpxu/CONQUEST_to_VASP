@@ -2,7 +2,7 @@ from conquest2a.conquest import *
 from conquest2a.supercell import *
 from conquest2a.writers import *
 import pytest
-test_input = CONQUEST_INPUT({"1": "Bi", "2": "Mn", "3": "Mn", "4": "O"})
+test_input = conquest_input({"1": "Bi", "2": "Mn", "3": "Mn", "4": "O"})
 test_coords_proc = conquest_coordinates_processor("tests/test.dat", test_input)
 
 def test_integer_params() -> None:

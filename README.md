@@ -1,10 +1,22 @@
 # CONQUEST2a
 
-A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool written in Python to convert its coordinates format into `.vasp` and `.(ext)xyz` formats for quick and easy visualisation, e.g. in [VESTA](https://jp-minerals.org/vesta/en/).
+A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool written in Python to do multiple, useful things:
+- convert CONQUEST coordinates format into `.vasp` and `.(ext)xyz` formats for quick and easy visualisation, e.g. in [VESTA](https://jp-minerals.org/vesta/en/).
+- Create supercells (larger cells formed of repeats of a unit cell)
 
 ## Usage
 
-Usage is simple and there are **no external library dependencies**. Either use `main.py` from the Releases tab, or clone the repo and copy `main.py` to your desired location.
+### From 0.2.0
+Usage is simple. In your `venv`, simply
+```
+pip3 install conquest2a
+```
+If you are attempting to integrate this directly into your Nix devShell, you will have to manually build the package with `buildPythonPackage`. Support for this as a standalone package will come soon.
+
+You may also simply just copy the `conquest2a` directory and use the files as scripts.
+
+### 0.1.0
+Usage is simple and there are **no external library dependencies** (currently). Either use `main.py` from the Releases tab, or clone the repo and copy `main.py` to your desired location.
 
 1. Define a `dict` mapping your CONQUEST species to elements. E.g., if `Conquest_input` has a block like this:
   ```

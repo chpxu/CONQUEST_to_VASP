@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 from os.path import abspath
 from pathlib import Path
@@ -8,7 +8,7 @@ class Atom:
     species: str
     coords: list[float | int]
     can_move: Sequence[str]
-    spins: list[float | int ]  = [0.0, 0.0, 0.0] 
+    spins: list[float | int ]  = field(default_factory=lambda: [0.0, 0.0, 0.0])
     label: str = ""
 
         

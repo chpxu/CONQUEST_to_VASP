@@ -8,9 +8,10 @@ class Atom:
     species: str
     coords: list[float | int]
     can_move: Sequence[str]
+    spins: list[float | int ]  = [0.0, 0.0, 0.0] 
     label: str = ""
 
-
+        
 class conquest_input:
     def __init__(self, species_dict: dict[str, str]) -> None:
         """Constructor for conquest_input
@@ -223,3 +224,53 @@ class conquest_coordinates_processor(conquest_coordinates):
                 )
         conquest_coord_file.close()
            
+class atom_charge:
+    """
+    Class to process AtomCharge.dat from CONQUEST output files.
+
+    It is assumed each row of AtomCharge.dat is arranged such that it is equivalent to the CONQUEST input coordinates file.
+
+    In particular, make use of the conquest_cordinates class to contain the list of Atoms 
+    """
+    def __init__(self, coordinates: conquest_coordinates, atom_charge_path: Path | str) -> None:
+        self.coordinates = coordinates
+        self.atom_charge_path = atom_charge_path
+        self.abs_atom_charge_path: str | Path
+        self.conquest_charge_data: list[list[float | int]] = []
+
+        try:
+            self.resolve_path()
+            self.open_file()
+        except FileNotFoundError as e:
+            print(e)
+        self.assign_atom_charge()
+    def resolve_path(self) -> None:
+        try:
+            abs_atom_charge_path = Path(abspath(self.atom_charge_path))
+            assert abs_atom_charge_path.exists() is True
+            assert abs_atom_charge_path.is_file() is True
+            assert os.stat(abs_atom_charge_path).st_size > 0
+            self.abs_atom_charge_path = abs_atom_charge_path
+        except FileNotFoundError as e:
+            print(e)
+            print("Error opening specified CONQUEST coordinates file")
+    def open_file(self) -> None:
+        """
+        CONQUEST AtomCharge.dat
+          <double> <double> <double>
+          total, "up", "down" - CONQUEST only deals with collinear spins
+        """
+        with open(self.abs_atom_charge_path, "r", encoding="utf-8") as conquest_charge_file:
+            for line in conquest_charge_file:
+                total_up_down = line.split()
+                total_up_down = [float(x) for x in total_up_down]
+                self.conquest_charge_data.append(total_up_down)
+        
+        conquest_charge_file.close()
+    def assign_atom_charge(self) -> None:
+        """
+        Assign each Atom its spin values from the AtomCharge.dat file
+        """
+        for i, atom in enumerate(self.coordinates.Atoms):
+            split_charge_data = self.conquest_charge_data[i]
+            atom.spins = [0.0,0.0, split_charge_data[1]-split_charge_data[2]]

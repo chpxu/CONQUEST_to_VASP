@@ -22,7 +22,7 @@ class file_writer:
 
 class conquest_writer(file_writer):
     def __init__(self, dest: Path | str, coords: conquest_coordinates, encoding: str = "utf-8", precision: int = 15):
-        super().__init__(dest, encoding)
+        super().__init__(dest=dest, encoding=encoding)
         self.coords = coords
         self.precision = precision
         if self.precision < 1:
@@ -43,7 +43,7 @@ class vasp_writer(file_writer):
         data: conquest_coordinates_processor,
         encoding: str = "utf-8",
     ) -> None:
-        super().__init__(dest, encoding)
+        super().__init__(dest=dest, encoding=encoding)
         self.data = data
         self.write()
         self.close_file(file=self.file)
@@ -81,7 +81,7 @@ class xyz_writer(file_writer):
         encoding: str = "utf-8",
         comment_line: str = "comment line",
     ) -> None:
-        super().__init__(dest, encoding)
+        super().__init__(dest=dest, encoding=encoding)
         self.data = data
         self.comment_line = comment_line
         self.write()
@@ -126,7 +126,7 @@ class extxyz_writer(xyz_writer):
         time: float = 0.0,
     ) -> None:
         self.time = time
-        super().__init__(dest, data, encoding)
+        super().__init__(dest=dest, data=data, encoding=encoding)
 
     def create_comment_line(self) -> str:
         lattice: list[float] = []
@@ -144,7 +144,7 @@ class xsf_writer(file_writer):
         data: conquest_coordinates_processor,
         encoding: str = "utf-8",
     ) -> None:
-        super().__init__(dest, encoding)
+        super().__init__(dest=dest, encoding=encoding)
         self.data = data
         self.write()
         self.close_file(file=self.file)

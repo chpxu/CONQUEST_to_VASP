@@ -5,11 +5,12 @@ from conquest2a.conquest import conquest_coordinates_processor, conquest_coordin
 
 BOHR_TO_ANGSTROM = 0.529177249
 class file_writer:
-    def __init__(self, dest: Path | str, mode: str = "w", encoding: str = "utf-8") -> None:
+    def __init__(self, dest: Path | str, mode: str = "w", encoding: str = "utf-8", is_angstrom: bool = False) -> None:
         self.mode = mode
         self.dest_path = dest
         self.encoding = encoding
         self.file = self.open_file()
+        self.B2A = BOHR_TO_ANGSTROM if not is_angstrom else 1.0
     def open_file(self) -> TextIOWrapper | IO[Any]:
         file = open(self.dest_path, mode=self.mode, encoding=self.encoding)
         return file
@@ -42,8 +43,9 @@ class vasp_writer(file_writer):
         dest: Path | str,
         data: conquest_coordinates_processor,
         encoding: str = "utf-8",
+        *args, **kwargs
     ) -> None:
-        super().__init__(dest=dest, encoding=encoding)
+        super().__init__(dest=dest, encoding=encoding, *args, **kwargs)
         self.data = data
         self.write()
         self.close_file(file=self.file)
@@ -60,7 +62,7 @@ class vasp_writer(file_writer):
             file.write(f"{ele_string}\n")
             file.write("1.0\n")
             for lattice_vect in self.data.lattice_vectors:
-                file.write(rf'  {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}')
+                file.write(rf'  {" ".join(str(x * self.B2A) for x in lattice_vect)}')
                 file.write("\n")
             file.write(f"{ele_string}\n")
             file.write(f"{num_string}\n")
@@ -112,7 +114,7 @@ class xyz_writer(file_writer):
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
                     file.write(
-                        rf'{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords))}'
+                        rf'{atoms} {" ".join(str(x * self.B2A) for x in self.fractional_to_cartesian(atom.coords))}'
                     )
                     file.write("\n")
 
@@ -154,13 +156,13 @@ class xsf_writer(file_writer):
             file.write("CRYSTAL\n")
             file.write("PRIMVEC\n")
             for lattice_vect in self.data.lattice_vectors:
-                file.write(rf' {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}')
+                file.write(rf' {" ".join(str(x * self.B2A) for x in lattice_vect)}')
                 file.write("\n")
             file.write("PRIMCOORD\n")
             file.write(f"{self.data.natoms} 1\n")
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
-                    file.write(rf' {atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in atom.coords)}')
+                    file.write(rf' {atoms} {" ".join(str(x * self.B2A) for x in atom.coords)}')
                     file.write("\n")
     
 class xsf_writer_spins(file_writer):

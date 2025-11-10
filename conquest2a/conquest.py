@@ -213,7 +213,8 @@ class conquest_coordinates_processor(conquest_coordinates):
                 self.lattice_vectors.append([float(x) for x in coords])
             self.natoms = next(conquest_coord_file)
             atom_data = conquest_coord_file.readlines()
-            for atom in atom_data:
+            atom_data_stripped = [atom for atom in atom_data if atom.strip()]
+            for atom in atom_data_stripped:
                 split_atom_data = atom.strip().split()
                 self.Atoms.append(
                     Atom(

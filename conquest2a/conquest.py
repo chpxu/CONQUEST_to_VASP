@@ -143,7 +143,26 @@ class conquest_input:
         species_dict_values = list(self.species_dict.values())
         return set(species_dict_values).issubset(self.allowed_element_labels)
 
-
+class processor_base:
+    def __init__(
+        self, path: Path | str, err_str: str | None = None
+    ) -> None:
+        self.input_path = path
+        self.abs_input_path: str | Path
+        self.err_str = err_str
+    def resolve_path(self) -> None:
+        try:
+            abs_coord_path = Path(abspath(self.input_path))
+            assert abs_coord_path.exists() is True
+            assert abs_coord_path.is_file() is True
+            assert os.stat(abs_coord_path).st_size > 0
+            self.abs_input_path = abs_coord_path
+        except FileNotFoundError as e:
+            print(e)
+            if self.err_str is not None:
+                print(self.err_str)
+    def open_file(self) -> None:
+        pass
 class conquest_coordinates:
     def __init__(
         self,
@@ -174,11 +193,13 @@ class conquest_coordinates:
         return num_eles
 
 
-class conquest_coordinates_processor(conquest_coordinates):
+class conquest_coordinates_processor(conquest_coordinates, processor_base):
     def __init__(self, path: Path | str, conquest_input: conquest_input) -> None:
-        super().__init__(conquest_input)
-        self.input_coord_path = path
-        self.abs_coord_path: str | Path
+        conquest_coordinates.__init__(self,conquest_input=conquest_input)
+        processor_base.__init__(self, path=path, err_str="Error opening specified CONQUEST coordinates file.")
+        # super().__init__(conquest_input=conquest_input, path=path)
+        # self.input_coord_path = path
+        # self.abs_coord_path: str | Path
         try:
             self.resolve_path()
             self.open_file()
@@ -186,16 +207,6 @@ class conquest_coordinates_processor(conquest_coordinates):
             self.index_to_atom_map()
         except FileNotFoundError as e:
             print(e)
-    def resolve_path(self) -> None:
-        try:
-            abs_coord_path = Path(abspath(self.input_coord_path))
-            assert abs_coord_path.exists() is True
-            assert abs_coord_path.is_file() is True
-            assert os.stat(abs_coord_path).st_size > 0
-            self.abs_coord_path = abs_coord_path
-        except FileNotFoundError as e:
-            print(e)
-            print("Error opening specified CONQUEST coordinates file")
 
     def open_file(self) -> None:
         """
@@ -205,9 +216,8 @@ class conquest_coordinates_processor(conquest_coordinates):
         the following lines are of the for_summary_m:
           <double> <double> <double> <int> <char> <char> <char>
         """
-        with open(self.abs_coord_path, "r", encoding="utf-8") as conquest_coord_file:
+        with open(self.abs_input_path, "r", encoding="utf-8") as conquest_coord_file:
             conquest_lattice_data_str = [next(conquest_coord_file).strip() for _ in range(3)]
-            print(conquest_lattice_data_str)
             for lattice_vect in conquest_lattice_data_str:
                 coords = lattice_vect.split()
                 self.lattice_vectors.append([float(x) for x in coords])
@@ -225,7 +235,7 @@ class conquest_coordinates_processor(conquest_coordinates):
                 )
         conquest_coord_file.close()
            
-class atom_charge:
+class atom_charge(processor_base):
     """
     Class to process AtomCharge.dat from CONQUEST output files.
 
@@ -234,6 +244,7 @@ class atom_charge:
     In particular, make use of the conquest_cordinates class to contain the list of Atoms 
     """
     def __init__(self, coordinates: conquest_coordinates, atom_charge_path: Path | str) -> None:
+        processor_base.__init__(self, path=atom_charge_path, err_str="Error opening specified CONQUEST AtomCharge.dat file.")
         self.coordinates = coordinates
         self.atom_charge_path = atom_charge_path
         self.abs_atom_charge_path: str | Path
@@ -245,16 +256,7 @@ class atom_charge:
         except FileNotFoundError as e:
             print(e)
         self.assign_atom_charge()
-    def resolve_path(self) -> None:
-        try:
-            abs_atom_charge_path = Path(abspath(self.atom_charge_path))
-            assert abs_atom_charge_path.exists() is True
-            assert abs_atom_charge_path.is_file() is True
-            assert os.stat(abs_atom_charge_path).st_size > 0
-            self.abs_atom_charge_path = abs_atom_charge_path
-        except FileNotFoundError as e:
-            print(e)
-            print("Error opening specified CONQUEST coordinates file")
+    
     def open_file(self) -> None:
         """
         CONQUEST AtomCharge.dat
@@ -264,13 +266,16 @@ class atom_charge:
         with open(self.abs_atom_charge_path, "r", encoding="utf-8") as conquest_charge_file:
             for line in conquest_charge_file:
                 total_up_down = line.split()
-                total_up_down = [float(x) for x in total_up_down]
-                self.conquest_charge_data.append(total_up_down)
-        
+                if total_up_down:
+                    total_up_down = [float(x) for x in total_up_down]
+                    self.conquest_charge_data.append(total_up_down)
+                else:
+                    continue
+            
         conquest_charge_file.close()
     def assign_atom_charge(self) -> None:
         """
-        Assign each Atom its spin values from the AtomCharge.dat file
+        Assign each Atom its spin values from the AtomCharge.dat file: up - down
         """
         for i, atom in enumerate(self.coordinates.Atoms):
             split_charge_data = self.conquest_charge_data[i]

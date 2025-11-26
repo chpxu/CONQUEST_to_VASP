@@ -1,9 +1,11 @@
 # CONQUEST2a
 
 A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool written in Python to do multiple, useful things:
-- convert CONQUEST coordinates format into `.vasp` and `.(ext)xyz` formats for quick and easy visualisation, e.g. in [VESTA](https://jp-minerals.org/vesta/en/).
+- Convert CONQUEST coordinates format into `.vasp` and `.(ext)xyz` formats for quick and easy visualisation, e.g. in [VESTA](https://jp-minerals.org/vesta/en/).
+- Create `xsf` files using `AtomCharge.dat` to visualise net spins
 - Create supercells (larger cells formed of repeats of a unit cell)
-
+- Process and sort (p)DOS files into something easy to use for plotting via matplotlib
+- Process and sort `BandStructure.dat` into something easy to use for plotting via matplotlib
 ## Usage
 
 ### From 0.2.0

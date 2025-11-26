@@ -10,6 +10,8 @@
     - Modify the `Atom` class with a `spin` attribute that can optionally be filed
     - Create a `atom_charge` class to process `AtomCharge.dat` 
     - create an `xsf_writer` class in `src/writers.py` to write this data
+- pDOS processing (NEW!)
+    - Supports 
 ## Misc
 
 - Added flake8, pylint, mypy and black to the repo

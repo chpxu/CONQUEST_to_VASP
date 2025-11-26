@@ -163,6 +163,8 @@ class processor_base:
                 print(self.err_str)
     def open_file(self) -> None:
         pass
+    def remove_blank_lines(self, lines: list[str]) -> list[str]:
+        return [line for line in lines if line.strip()]
 class conquest_coordinates:
     def __init__(
         self,

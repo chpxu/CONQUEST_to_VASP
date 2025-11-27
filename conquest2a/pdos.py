@@ -44,8 +44,9 @@ class pdos_l_processor(pdos_processor):
     def l_map(self) -> None:
         # From column 3, there are only l-contributions, and is sorted by ascending l values, and each row is just ech l-contribution at that energy
         l_dict = {}
-        for block in self.blocks:
+        for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
+            self.energy_values[idx + 1] = energy
             pdos_values = block[:, 2:]
             num_l = pdos_values.shape[1]
             for l in range(num_l):
@@ -72,8 +73,10 @@ class pdos_lm_processor(pdos_processor):
         # We sort self.blocks to a dictionary with keys denoted by "l,m" and values as the corresponding PDOS arrays
         # We also create a map of energies for each spin
         lm_dict = {}
-        for block in self.blocks:
+        for idx,block in enumerate(self.blocks):
             energy = block[:, 0]
+            self.energy_values[idx + 1] = energy
+
             pdos_values = block[:, 2:]
             num_lm = pdos_values.shape[1]
             l = 0

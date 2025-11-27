@@ -1,12 +1,5 @@
 from pathlib import Path
-import re
 import numpy as np
-dos_file = "/home/chung-ping/Projects/CONQUEST_TO_VASP/tests/Atom00000002DOS_lm.dat"
-# pdos_lm = np.genfromtxt(dos_file, delimiter="&")
-# print(pdos_lm)
-
-blocks = []
-current_block = []
 
 class pdos_processor:
     def __init__(self, dos_file: str | Path) -> None:
@@ -103,7 +96,3 @@ class pdos_lm_processor(pdos_processor):
                     lm_dict[lm_key].append(pdos_values[:, i])
                     m_count += 1
         self.lm_dict = lm_dict
-
-
-pdos_lm_processor_instance = pdos_lm_processor(dos_file=dos_file)
-print(pdos_lm_processor_instance.lm_dict)

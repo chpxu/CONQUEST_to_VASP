@@ -9,9 +9,10 @@
 - `xsf` file-format with spin (NEW)
     - Modify the `Atom` class with a `spin` attribute that can optionally be filed
     - Create a `atom_charge` class to process `AtomCharge.dat` 
-    - create an `xsf_writer` class in `src/writers.py` to write this data
+    - create an `xsf_writer` class in `src/writers.py` to write this data, including the spin
 - pDOS processing (NEW!)
-    - Supports 
+    - Supports reading pDOS files for $l,m$ and $l$ decomposed situations
+    - Reads `Conquest_input` to search for the used coordinates file, and maps each file to its atom number.
 ## Misc
 
 - Added flake8, pylint, mypy and black to the repo

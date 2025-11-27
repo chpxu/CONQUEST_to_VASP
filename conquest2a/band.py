@@ -49,6 +49,4 @@ class bst_processor:
                         current_block = []
                 else:
                     current_block.append(line.split())
-            if current_block:
-                self.blocks.append(np.array(current_block, dtype=float))
             self.num_spins = num_spins

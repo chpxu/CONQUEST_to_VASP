@@ -70,7 +70,7 @@ class pdos_l_processor(pdos_processor):
         # e.g., l = 0,  l =1,  l = 2, etc.
         # So dict will be of the form {"l": [array(spin1), array(spin2), ...],}
         self.energy_values: dict[int, np.ndarray| list[float]] = {}
-        self.l_map()
+        # self.l_map()
     def l_map(self) -> None:
         # From column 3, there are only l-contributions, and is sorted by ascending l values, and each row is just ech l-contribution at that energy
         l_dict = {}
@@ -96,7 +96,7 @@ class pdos_lm_processor(pdos_processor):
         # e.g., l = 0,  l =1, m = -1, 0, 1, l = 2, m = -2, -1, 0, 1, 2, etc.
         # So dict will be of the form {"l,m": [array(spin1), array(spin2), ...],}
         self.energy_values: dict[int, np.ndarray| list[float]] = {}
-        self.lm_map()
+        # self.lm_map()
     
     def lm_map(self) -> None:
         # for every l, (2l + 1) m values in interval [-l, l]

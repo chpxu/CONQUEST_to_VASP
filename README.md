@@ -54,7 +54,7 @@ Remark 1: in CONQUEST, you can choose to output pdos only for specific atoms, bu
 
 Remark 2: Reading pdos files automatically, and storing all of their data at once, is not implemented.
 
-`pdos_lm_processor` and `pdos_l_processor` each have their own methods, `lm_map()` and `l_map()` respectively, that is called whenever a class instance is defined. This automatically groups each column of pdos files by their $(l,m)$ or $l$-value, thus forming a `dict` like
+`pdos_lm_processor` and `pdos_l_processor` each have their own methods, `lm_map()` and `l_map()` respectively. This must be called after a read, e.g. as `lmpdos.lm_map()`. This groups each column of pdos files by their $(l,m)$ or $l$-value, thus forming a `dict` like
 ```py
 {
   "0,0": [np.array(...), np.array(...)], # [spin 1, spin 2,....]
@@ -64,7 +64,7 @@ Remark 2: Reading pdos files automatically, and storing all of their data at onc
   # etc
 }
 ```
-where again the numpy arrays are in ascending order of spins.
+where again the numpy arrays are in ascending order of spins. These dicts can be accessed as `self.lm_dict` or `self.l_dict`.
 
 See `examples/plot_test_pdos.py` for an example of plotting the data obtained from a pDOS file.
 

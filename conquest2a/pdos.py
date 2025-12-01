@@ -50,12 +50,13 @@ class pdos_processor:
         abs_path = self.resolve_path()
         pdos_rgx = re.compile(fr'Atom[0-9]{{7}}DOS\_{self.lm}\.dat')
         file_list: list[str] = []
-        for (root,dirs,files) in os.walk(self.conquest_rundir,topdown=True): 
+        for (root,dirs,files) in os.walk(abs_path,topdown=True): 
             file_list = files
             break
         for filename in file_list:
             res =  re.match(pdos_rgx, filename)
             if res: self.all_pdos_files.append(filename)
+        self.all_pdos_files = sorted(self.all_pdos_files) 
         return self.all_pdos_files
 class pdos_l_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:

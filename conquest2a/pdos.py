@@ -1,14 +1,21 @@
 from pathlib import Path
+from typing import Literal
+from os.path import abspath
 import numpy as np
-
+import re
+import os
 class pdos_processor:
-    def __init__(self, dos_file: str | Path) -> None:
-        self.dos_file = dos_file
+    def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
+        # self.dos_file = dos_file
         self.blocks: list[np.ndarray | list[float | int]]= []
-        self.read_pdos_file()
-
-    def read_pdos_file(self) -> None:
-        with open(self.dos_file, "r", encoding="utf-8") as f:
+        # self.read_pdos_file()
+        self.all_pdos_files: list[str]
+        self.conquest_rundir = conquest_rundir
+        self.lm = lm
+        self.resolve_path()
+        self.locate_pdos_files()
+    def read_pdos_file(self, filename: str) -> None:
+        with open(filename, "r", encoding="utf-8") as f:
             current_block = []
             num_spins = 0
             for line in f:
@@ -27,11 +34,33 @@ class pdos_processor:
             if current_block:
                 self.blocks.append(np.array(current_block, dtype=float))
             self.num_spins = num_spins
-    
+    def resolve_path(self) -> str | Path:
+        abs_run_path = ""
+        if self.conquest_rundir is not None:
+            abs_run_path = Path(abspath(self.conquest_rundir))
+            assert abs_run_path.exists() is True
+            return abs_run_path
+        else:
+            raise FileNotFoundError(f'Conquest directory specified: "{abs_run_path}", does not exist.')
+
+    def locate_pdos_files(self) -> list[str]:
+        if self.lm == "t":
+            self.all_pdos_files = ["DOS.dat"]
+            return self.all_pdos_files
+        abs_path = self.resolve_path()
+        pdos_rgx = re.compile(fr'Atom[0-9]{{8}}DOS\_{self.lm}\.dat')
+        file_list: list[str] = []
+        for (root,dirs,files) in os.walk(self.conquest_rundir,topdown=True): 
+            file_list = files
+            break
+        for filename in file_list:
+            res =  re.match(pdos_rgx, filename)
+            if res: self.all_pdos_files.append(filename)
+        return self.all_pdos_files
 class pdos_l_processor(pdos_processor):
-    def __init__(self, dos_file: str | Path) -> None:
+    def __init__(self, conquest_rundir: str | Path) -> None:
         self.num_spins: int = 0
-        super().__init__(dos_file=dos_file)
+        super().__init__(conquest_rundir=conquest_rundir, lm="l")
         # PDOS file is split into blocks separated by "&" lines
         # The first column of each block is the energy values
         # The second column is the total PDOS, i.e sum of all l, at that energy
@@ -55,9 +84,9 @@ class pdos_l_processor(pdos_processor):
                 l_dict[str(l)].append(pdos_values[:, l])
 
 class pdos_lm_processor(pdos_processor):
-    def __init__(self, dos_file: str | Path) -> None:
+    def __init__(self, conquest_rundir: str | Path) -> None:
         self.num_spins: int = 0
-        super().__init__(dos_file=dos_file)
+        super().__init__(conquest_rundir=conquest_rundir, lm="lm")
         # PDOS file is split into blocks separated by "&" lines
         # The first column of each block is the energy values
         # The second column is the total PDOS, i.e sum of all l and m, at that energy
@@ -76,7 +105,6 @@ class pdos_lm_processor(pdos_processor):
         for idx,block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
-
             pdos_values = block[:, 2:]
             num_lm = pdos_values.shape[1]
             l = 0

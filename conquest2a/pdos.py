@@ -9,7 +9,7 @@ class pdos_processor:
         # self.dos_file = dos_file
         self.blocks: list[np.ndarray | list[float | int]]= []
         # self.read_pdos_file()
-        self.all_pdos_files: list[str]
+        self.all_pdos_files: list[str] = []
         self.conquest_rundir = conquest_rundir
         self.lm = lm
         self.resolve_path()
@@ -48,7 +48,7 @@ class pdos_processor:
             self.all_pdos_files = ["DOS.dat"]
             return self.all_pdos_files
         abs_path = self.resolve_path()
-        pdos_rgx = re.compile(fr'Atom[0-9]{{8}}DOS\_{self.lm}\.dat')
+        pdos_rgx = re.compile(fr'Atom[0-9]{{7}}DOS\_{self.lm}\.dat')
         file_list: list[str] = []
         for (root,dirs,files) in os.walk(self.conquest_rundir,topdown=True): 
             file_list = files

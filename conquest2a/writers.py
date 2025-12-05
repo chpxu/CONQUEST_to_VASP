@@ -2,8 +2,7 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import IO, Any
 from conquest2a.conquest import conquest_coordinates_processor, conquest_coordinates, atom_charge
-
-BOHR_TO_ANGSTROM = 0.529177249
+from conquest2a.constants import BOHR_TO_ANGSTROM
 class file_writer:
     def __init__(self, dest: Path | str, mode: str = "w", encoding: str = "utf-8", is_angstrom: bool = False) -> None:
         self.mode = mode

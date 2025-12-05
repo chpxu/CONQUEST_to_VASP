@@ -3,6 +3,7 @@ import os
 from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
+from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
 @dataclass
 class Atom:
     species: str
@@ -184,7 +185,7 @@ class conquest_coordinates:
         """Every Atom now has its element label. External file formats require a count of the number of Atoms per element, so we now form a dict of elements to Atoms in preparation for writing"""
         ele_to_atom: dict[str, list[Atom]] = {}
         for element in self.conquest_input.unique_elements:
-            print(list(a for a in self.Atoms if a.label == element))
+            #print(list(a for a in self.Atoms if a.label == element))
             ele_to_atom[element] = list(a for a in self.Atoms if a.label == element)
         self.element_map = ele_to_atom
 
@@ -199,9 +200,6 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
     def __init__(self, path: Path | str, conquest_input: conquest_input) -> None:
         conquest_coordinates.__init__(self,conquest_input=conquest_input)
         processor_base.__init__(self, path=path, err_str="Error opening specified CONQUEST coordinates file.")
-        # super().__init__(conquest_input=conquest_input, path=path)
-        # self.input_coord_path = path
-        # self.abs_coord_path: str | Path
         try:
             self.resolve_path()
             self.open_file()
@@ -209,6 +207,8 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
             self.index_to_atom_map()
         except FileNotFoundError as e:
             print(e)
+        self.volume_bohr: float = self.lattice_vectors[0][0] * self.lattice_vectors[1][1] + self.lattice_vectors[2][2]
+        self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
 
     def open_file(self) -> None:
         """

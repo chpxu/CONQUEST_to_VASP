@@ -269,8 +269,8 @@ class atom_charge(processor_base):
             for line in conquest_charge_file:
                 total_up_down = line.split()
                 if total_up_down:
-                    total_up_down = [float(x) for x in total_up_down]
-                    self.conquest_charge_data.append(total_up_down)
+                    total_up_down_float = [float(x) for x in total_up_down]
+                    self.conquest_charge_data.append(total_up_down_float)
                 else:
                     continue
             

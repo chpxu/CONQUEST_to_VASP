@@ -42,9 +42,9 @@ class vasp_writer(file_writer):
         dest: Path | str,
         data: conquest_coordinates_processor,
         encoding: str = "utf-8",
-        *args, **kwargs
+        is_angstrom: bool = False
     ) -> None:
-        super().__init__(dest=dest, encoding=encoding, *args, **kwargs)
+        super().__init__(dest=dest, encoding=encoding, is_angstrom=is_angstrom)
         self.data = data
         self.write()
         self.close_file(file=self.file)

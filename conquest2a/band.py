@@ -1,5 +1,5 @@
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 import re
@@ -9,19 +9,19 @@ import re
 class band:
     spin: int
     index: int # band index
-    kpoint: list[int] | npt.NDArray # kpoint index. 
-    energies: list[float | int] | npt.NDArray # energies at that kpoint for this band
+    kpoint: npt.NDArray[np.integer] = field(default=np.empty((1,3), dtype=np.integer)) # kpoint index. 
+    energies: npt.NDArray[np.number] = field(default=np.empty((1,3), dtype=np.floating)) # energies at that kpoint for this band
 
 class bst_processor:
     def __init__(self, bst_file: str | Path) -> None:
         self.bst_file = bst_file
-        self.blocks: list[np.ndarray | list[float | int]]= []
+        self.blocks: list[np.ndarray]= []
         self.bands: list[band] = []
         self.fermi_level: float = 0.0
         self.read_bst_file()
     def read_bst_file(self) -> None:
         with open(self.bst_file, "r", encoding="utf-8") as f:
-            current_block = []
+            current_block: list[npt.NDArray[np.number]] = []
             num_spins = 0
             block_counter = 0
             for line in f:
@@ -35,7 +35,10 @@ class bst_processor:
                     continue
                 if "# Band " in stripped_line:
                     band_index = re.findall(r"\d+", stripped_line)
-                    self.bands.append(band(index=int(band_index[0]), kpoint=[], energies=[], spin = num_spins))
+                    self.bands.append(
+                        band(index=int(band_index[0]), 
+                             spin = num_spins)
+                        )
                     continue
                 if not stripped_line or stripped_line.startswith("# Bands shifted"):
                     continue
@@ -48,5 +51,5 @@ class bst_processor:
                         block_counter += 1
                         current_block = []
                 else:
-                    current_block.append(line.split())
+                    current_block.append(np.array(line.split()).astype(np.floating))
             self.num_spins = num_spins

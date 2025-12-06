@@ -2,12 +2,13 @@ from pathlib import Path
 from typing import Literal
 from os.path import abspath
 import numpy as np
+import numpy.typing as npt
 import re
 import os
 class pdos_processor:
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
         # self.dos_file = dos_file
-        self.blocks: list[np.ndarray | list[float | int]]= []
+        self.blocks: list[np.ndarray]= []
         # self.read_pdos_file()
         self.all_pdos_files: list[str] = []
         self.conquest_rundir = conquest_rundir
@@ -16,7 +17,7 @@ class pdos_processor:
         self.locate_pdos_files()
     def read_pdos_file(self, filename: str) -> None:
         with open(filename, "r", encoding="utf-8") as f:
-            current_block = []
+            current_block: list[npt.NDArray[np.number]] = []
             num_spins = 0
             for line in f:
                 stripped_line = line.strip()
@@ -30,15 +31,13 @@ class pdos_processor:
                         self.blocks.append(np.array(current_block, dtype=float))
                         current_block = []
                 else:
-                    current_block.append(line.split())
+                    current_block.append(np.array(line.split()).astype(np.floating))
             if current_block:
                 self.blocks.append(np.array(current_block, dtype=float))
             self.num_spins = num_spins
-    def resolve_path(self) -> str | Path:
-        abs_run_path = ""
-        if self.conquest_rundir is not None:
-            abs_run_path = Path(abspath(self.conquest_rundir))
-            assert abs_run_path.exists() is True
+    def resolve_path(self) -> Path:
+        abs_run_path = Path(abspath(self.conquest_rundir))
+        if abs_run_path.exists():
             return abs_run_path
         else:
             raise FileNotFoundError(f'Conquest directory specified: "{abs_run_path}", does not exist.')
@@ -73,7 +72,7 @@ class pdos_l_processor(pdos_processor):
         # self.l_map()
     def l_map(self) -> None:
         # From column 3, there are only l-contributions, and is sorted by ascending l values, and each row is just ech l-contribution at that energy
-        l_dict = {}
+        l_dict: dict[str, list[npt.NDArray[np.number]]] = {}
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
@@ -83,7 +82,7 @@ class pdos_l_processor(pdos_processor):
                 if str(l) not in l_dict:
                     l_dict[str(l)] = []
                 l_dict[str(l)].append(pdos_values[:, l])
-
+        self.l_dict = l_dict
 class pdos_lm_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
         self.num_spins: int = 0
@@ -102,7 +101,7 @@ class pdos_lm_processor(pdos_processor):
         # for every l, (2l + 1) m values in interval [-l, l]
         # We sort self.blocks to a dictionary with keys denoted by "l,m" and values as the corresponding PDOS arrays
         # We also create a map of energies for each spin
-        lm_dict = {}
+        lm_dict: dict[str, list[npt.NDArray[np.number]]] = {}
         for idx,block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy

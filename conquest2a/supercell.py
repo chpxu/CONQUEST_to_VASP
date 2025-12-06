@@ -4,7 +4,9 @@ from conquest2a.conquest import conquest_coordinates, conquest_coordinates_proce
 
 
 class supercell:
-    def __init__(self, repeats_x: int, repeats_y: int, repeats_z: int, coords: conquest_coordinates_processor) -> None:
+    def __init__(
+        self, repeats_x: int, repeats_y: int, repeats_z: int, coords: conquest_coordinates_processor
+    ) -> None:
         """
         Args:
             Nx (int): Number of repeats along "a" lattice vector
@@ -14,7 +16,11 @@ class supercell:
         """
         if repeats_x < 0 or repeats_y < 0 or repeats_z < 0:
             raise ValueError("One of, or multiple of, Nx Ny, Nz was not at least 0.")
-        if (not isinstance(repeats_x, int)) or (not isinstance(repeats_y, int)) or (not isinstance(repeats_z, int)):
+        if (
+            (not isinstance(repeats_x, int))
+            or (not isinstance(repeats_y, int))
+            or (not isinstance(repeats_z, int))
+        ):
             raise TypeError("One of, or multiple of, Nx Ny, Nz was not an integer.")
 
         self.repeats_x = repeats_x
@@ -68,10 +74,12 @@ class supercell:
             can_move=can_move,
             label=label,
         )
+
     def range(self, upper_bound: int) -> list[int] | range:
         if upper_bound == 0:
             return [0]
-        return range(0,upper_bound + 1, 1)
+        return range(0, upper_bound + 1, 1)
+
     def create_supercell(self) -> None:
         """
         In terms of fractional coordinates, we set new coords of the original atoms to be

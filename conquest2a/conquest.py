@@ -4,15 +4,17 @@ from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
+
+
 @dataclass
 class Atom:
     species: str
     coords: list[float | int]
     can_move: Sequence[str]
-    spins: list[float | int ]  = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    spins: list[float | int] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     label: str = ""
 
-        
+
 class conquest_input:
     def __init__(self, species_dict: dict[str, str]) -> None:
         """Constructor for conquest_input
@@ -144,13 +146,13 @@ class conquest_input:
         species_dict_values = list(self.species_dict.values())
         return set(species_dict_values).issubset(self.allowed_element_labels)
 
+
 class processor_base:
-    def __init__(
-        self, path: Path | str, err_str: str | None = None
-    ) -> None:
+    def __init__(self, path: Path | str, err_str: str | None = None) -> None:
         self.input_path = path
         self.abs_input_path: str | Path
         self.err_str = err_str
+
     def resolve_path(self) -> None:
         try:
             abs_coord_path = Path(abspath(self.input_path))
@@ -162,10 +164,14 @@ class processor_base:
             print(e)
             if self.err_str is not None:
                 print(self.err_str)
+
     def open_file(self) -> None:
         pass
+
     def remove_blank_lines(self, lines: list[str]) -> list[str]:
         return [line for line in lines if line.strip()]
+
+
 class conquest_coordinates:
     def __init__(
         self,
@@ -176,6 +182,7 @@ class conquest_coordinates:
         self.lattice_vectors: list[list[float]] = []
         self.natoms: str
         self.element_map: dict[str, list[Atom]]
+
     def assign_atom_labels(self) -> None:
         """Assign each Atom its label"""
         for atom in self.Atoms:
@@ -185,7 +192,7 @@ class conquest_coordinates:
         """Every Atom now has its element label. External file formats require a count of the number of Atoms per element, so we now form a dict of elements to Atoms in preparation for writing"""
         ele_to_atom: dict[str, list[Atom]] = {}
         for element in self.conquest_input.unique_elements:
-            #print(list(a for a in self.Atoms if a.label == element))
+            # print(list(a for a in self.Atoms if a.label == element))
             ele_to_atom[element] = list(a for a in self.Atoms if a.label == element)
         self.element_map = ele_to_atom
 
@@ -198,8 +205,10 @@ class conquest_coordinates:
 
 class conquest_coordinates_processor(conquest_coordinates, processor_base):
     def __init__(self, path: Path | str, conquest_input: conquest_input) -> None:
-        conquest_coordinates.__init__(self,conquest_input=conquest_input)
-        processor_base.__init__(self, path=path, err_str="Error opening specified CONQUEST coordinates file.")
+        conquest_coordinates.__init__(self, conquest_input=conquest_input)
+        processor_base.__init__(
+            self, path=path, err_str="Error opening specified CONQUEST coordinates file."
+        )
         try:
             self.resolve_path()
             self.open_file()
@@ -207,7 +216,9 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
             self.index_to_atom_map()
         except FileNotFoundError as e:
             print(e)
-        self.volume_bohr: float = self.lattice_vectors[0][0] * self.lattice_vectors[1][1] + self.lattice_vectors[2][2]
+        self.volume_bohr: float = (
+            self.lattice_vectors[0][0] * self.lattice_vectors[1][1] + self.lattice_vectors[2][2]
+        )
         self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
 
     def open_file(self) -> None:
@@ -236,17 +247,23 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
                     )
                 )
         conquest_coord_file.close()
-           
+
+
 class atom_charge(processor_base):
     """
     Class to process AtomCharge.dat from CONQUEST output files.
 
     It is assumed each row of AtomCharge.dat is arranged such that it is equivalent to the CONQUEST input coordinates file.
 
-    In particular, make use of the conquest_cordinates class to contain the list of Atoms 
+    In particular, make use of the conquest_cordinates class to contain the list of Atoms
     """
+
     def __init__(self, coordinates: conquest_coordinates, atom_charge_path: Path | str) -> None:
-        processor_base.__init__(self, path=atom_charge_path, err_str="Error opening specified CONQUEST AtomCharge.dat file.")
+        processor_base.__init__(
+            self,
+            path=atom_charge_path,
+            err_str="Error opening specified CONQUEST AtomCharge.dat file.",
+        )
         self.coordinates = coordinates
         self.atom_charge_path = atom_charge_path
         self.abs_atom_charge_path: str | Path
@@ -258,7 +275,7 @@ class atom_charge(processor_base):
         except FileNotFoundError as e:
             print(e)
         self.assign_atom_charge()
-    
+
     def open_file(self) -> None:
         """
         CONQUEST AtomCharge.dat
@@ -273,12 +290,13 @@ class atom_charge(processor_base):
                     self.conquest_charge_data.append(total_up_down_float)
                 else:
                     continue
-            
+
         conquest_charge_file.close()
+
     def assign_atom_charge(self) -> None:
         """
         Assign each Atom its spin values from the AtomCharge.dat file: up - down
         """
         for i, atom in enumerate(self.coordinates.Atoms):
             split_charge_data = self.conquest_charge_data[i]
-            atom.spins = [0.0,0.0, split_charge_data[1]-split_charge_data[2]]
+            atom.spins = [0.0, 0.0, split_charge_data[1] - split_charge_data[2]]

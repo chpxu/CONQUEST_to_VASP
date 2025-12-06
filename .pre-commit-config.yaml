@@ -1,4 +1,4 @@
-files: 'conquest2a/*'
+files: 'conquest2a/*.py'
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0

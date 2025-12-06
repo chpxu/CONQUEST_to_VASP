@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint black pytest flake8 mypy
+        pip install numpy pylint black pytest flake8 mypy
     - name: Static type analysis with mypy
       run: |
         mypy conquest2a

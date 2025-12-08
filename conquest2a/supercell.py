@@ -1,7 +1,7 @@
 import copy
 from collections.abc import Sequence
 from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
-
+import numpy as np
 
 class supercell:
     def __init__(
@@ -42,9 +42,9 @@ class supercell:
         CONQUEST deals with orthorhombic cells only
         """
         self.supercell_coords.lattice_vectors = [
-            [self.coords.lattice_vectors[0][0] * (self.repeats_x + 1), 0, 0],
-            [0, self.coords.lattice_vectors[1][1] * (self.repeats_y + 1), 0],
-            [0, 0, self.coords.lattice_vectors[2][2] * (self.repeats_z + 1)],
+            np.array([self.coords.lattice_vectors[0][0] * (self.repeats_x + 1), 0, 0]),
+            np.array([0, self.coords.lattice_vectors[1][1] * (self.repeats_y + 1), 0]),
+            np.array([0, 0, self.coords.lattice_vectors[2][2] * (self.repeats_z + 1)]),
         ]
 
     def new_num_atoms(self) -> int:
@@ -67,11 +67,11 @@ class supercell:
     ) -> Atom:
         return Atom(
             species,
-            [
+            np.array([
                 coord_0 + disp_0,
                 coord_1 + disp_1,
                 coord_2 + disp_2,
-            ],
+            ]),
             can_move=can_move,
             label=label,
             number=atom_number
@@ -113,11 +113,11 @@ class supercell:
                     for n in self.range(self.repeats_z):
                         new_atom = Atom(
                             atom.species,
-                            [
+                            np.array([
                                 (atom.coords[0] + l) / (self.repeats_x + 1),
                                 (atom.coords[1] + m) / (self.repeats_y + 1),
                                 (atom.coords[2] + n) / (self.repeats_z + 1),
-                            ],
+                            ]),
                             can_move=atom.can_move,
                             label=atom.label,
                             number=len(self.supercell_coords.Atoms) + 1

@@ -4,15 +4,15 @@ from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
-
+from conquest2a._types import *
 
 @dataclass
 class Atom:
     species: str
-    coords: list[float | int]
+    coords: REAL_ARRAY
     can_move: Sequence[str]
     number: int
-    spins: list[float | int] = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    spins: REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     label: str = ""
 
 
@@ -180,7 +180,7 @@ class conquest_coordinates:
     ) -> None:
         self.Atoms: list[Atom] = []
         self.conquest_input = conquest_input
-        self.lattice_vectors: list[list[float]] = []
+        self.lattice_vectors: list[REAL_ARRAY] = []
         self.natoms: str
         self.element_map: dict[str, list[Atom]]
 
@@ -236,7 +236,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
             conquest_lattice_data_str = [next(conquest_coord_file).strip() for _ in range(3)]
             for lattice_vect in conquest_lattice_data_str:
                 coords = lattice_vect.split()
-                self.lattice_vectors.append([float(x) for x in coords])
+                self.lattice_vectors.append(np.array(coords).astype(float))
             self.natoms = next(conquest_coord_file)
             atom_data = conquest_coord_file.readlines()
             atom_data_stripped = [atom for atom in atom_data if atom.strip()]
@@ -247,7 +247,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
                     Atom(
                         species=split_atom_data[3],
                         can_move=split_atom_data[4:],
-                        coords=list(map(float, split_atom_data[:3])),
+                        coords=np.array(split_atom_data[:3]).astype(float),
                         number=atom_number
                     )
                 )
@@ -274,7 +274,7 @@ class atom_charge(processor_base):
         self.coordinates = coordinates
         self.atom_charge_path = atom_charge_path
         self.abs_atom_charge_path: str | Path
-        self.conquest_charge_data: list[list[float | int]] = []
+        self.conquest_charge_data: list[REAL_ARRAY] = []
 
         try:
             self.resolve_path()
@@ -293,8 +293,8 @@ class atom_charge(processor_base):
             for line in conquest_charge_file:
                 total_up_down = line.split()
                 if total_up_down:
-                    total_up_down_float = [float(x) for x in total_up_down]
-                    self.conquest_charge_data.append(total_up_down_float)
+    
+                    self.conquest_charge_data.append(np.array(total_up_down).astype(float))
                 else:
                     continue
 
@@ -306,4 +306,4 @@ class atom_charge(processor_base):
         """
         for i, atom in enumerate(self.coordinates.Atoms):
             split_charge_data = self.conquest_charge_data[i]
-            atom.spins = [0.0, 0.0, split_charge_data[1] - split_charge_data[2]]
+            atom.spins = np.array([0.0, 0.0, split_charge_data[1] - split_charge_data[2]])

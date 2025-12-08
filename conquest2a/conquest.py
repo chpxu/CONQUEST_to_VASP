@@ -11,6 +11,7 @@ class Atom:
     species: str
     coords: list[float | int]
     can_move: Sequence[str]
+    number: int
     spins: list[float | int] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     label: str = ""
 
@@ -20,10 +21,10 @@ class conquest_input:
         """Constructor for conquest_input
 
         Args:
-            species_dict (dict[int, str]): dict mapping the species index to an element label
+            species_dict (dict[int, str]): hashmap species_index <-> element_label
                 It is not completely reliable to directly read conquest_input
-                E.g., for multiple spins, must duplicate an element and call it a new Conquest species,
-                however labels can be any alphanumeric string
+                E.g., for multiple spins, must duplicate an element and call it a
+                new Conquest species, however labels can be any alphanumeric string
                 Therefore we expect a dictionary to be passed in independently.
         """
         self.species_dict = species_dict
@@ -189,7 +190,9 @@ class conquest_coordinates:
             atom.label = self.conquest_input.species_dict[atom.species]
 
     def index_to_atom_map(self) -> None:
-        """Every Atom now has its element label. External file formats require a count of the number of Atoms per element, so we now form a dict of elements to Atoms in preparation for writing"""
+        """Every Atom now has its element label.
+        External file formats require a count of the number of Atoms per element,
+        so we now form a dict of elements to Atoms in preparation for writing"""
         ele_to_atom: dict[str, list[Atom]] = {}
         for element in self.conquest_input.unique_elements:
             # print(list(a for a in self.Atoms if a.label == element))
@@ -237,6 +240,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
             self.natoms = next(conquest_coord_file)
             atom_data = conquest_coord_file.readlines()
             atom_data_stripped = [atom for atom in atom_data if atom.strip()]
+            atom_number = 1
             for atom in atom_data_stripped:
                 split_atom_data = atom.strip().split()
                 self.Atoms.append(
@@ -244,8 +248,10 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
                         species=split_atom_data[3],
                         can_move=split_atom_data[4:],
                         coords=list(map(float, split_atom_data[:3])),
+                        number=atom_number
                     )
                 )
+                atom_number += 1
         conquest_coord_file.close()
 
 
@@ -253,9 +259,10 @@ class atom_charge(processor_base):
     """
     Class to process AtomCharge.dat from CONQUEST output files.
 
-    It is assumed each row of AtomCharge.dat is arranged such that it is equivalent to the CONQUEST input coordinates file.
+    It is assumed each row of AtomCharge.dat is arranged such that it is equivalent to the
+    same CONQUEST input coordinates file.
 
-    In particular, make use of the conquest_cordinates class to contain the list of Atoms
+    In particular, make use of the conquest_coordinates class to contain the list of Atoms
     """
 
     def __init__(self, coordinates: conquest_coordinates, atom_charge_path: Path | str) -> None:

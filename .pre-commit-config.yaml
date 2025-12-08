@@ -1,4 +1,3 @@
-files: 'conquest2a/*.py'
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
@@ -6,11 +5,12 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
-    
+
 -   repo: https://github.com/psf/black-pre-commit-mirror
     rev: 25.11.0
     hooks:
     -   id: black
+        entry: bash -c "cd conquest2a && black ."
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'c2738302f5cf2bfb559c1f210950badb133613ea'  # Use the sha / tag you want to point at
     hooks:

@@ -5,7 +5,7 @@ import conquest2a._types as c2at
 from conquest2a.conquest import *
 import heapq
 from typing import Sequence, Any
-
+import copy
 
 class KDNode:
     def __init__(self, index: c2at.INTEGER, axis: c2at.INTEGER) -> None:
@@ -23,10 +23,15 @@ class KDBranch(KDNode):
 
 
 class PeriodicKDTree:
-    def __init__(self, points: c2at.REAL_ARRAY, box: c2at.REAL_ARRAY) -> None:
-        self.points = points
+    def __init__(self, atoms: list[Atom], box: c2at.REAL_ARRAY) -> None:
+        self.atoms = atoms
+        self.points = np.array([atom.coords for atom in atoms]) # fractional
         self.box = box
-        idx = np.arange(len(points))
+        self.points[:,0] *= box[0]
+        self.points[:,1] *= box[1]
+        self.points[:,2] *= box[2]
+        print(self.points)
+        idx = np.arange(len(self.points))
         self.root = self._build_tree(idx, depth=0)
 
     def _build_tree(self, idx: np.ndarray[tuple[int]], depth: c2at.INTEGER) -> KDBranch | KDNode | None:
@@ -47,10 +52,10 @@ class PeriodicKDTree:
         )
 
     def squared_distance(
-        self, p: np.ndarray[tuple[int]], q: np.ndarray[tuple[int]], box: c2at.REAL_ARRAY
+        self, p: np.ndarray[tuple[int]], q: np.ndarray[tuple[int]]
     ) -> c2at.FLOAT:
         d = p - q
-        d -= np.rint(d / box) * box
+        d -= np.rint(d / self.box) * self.box
         return np.dot(d, d)
 
     def add_to_heap(
@@ -65,39 +70,51 @@ class PeriodicKDTree:
     def search(
         self,
         node: KDBranch | KDNode | None,
-        points: c2at.REAL_ARRAY,
         box: c2at.REAL_ARRAY,
         heap: list[Any],
         k: c2at.INTEGER,
-        query: np.ndarray,
+        query: Atom,
     ) -> None:
-        if not isinstance(node, KDBranch):
+        if node is None or not isinstance(node, KDBranch):
             return
+        
 
-        point = points[node.index]
-        d_sq = self.squared_distance(query, point, box)
+        point = self.points[node.index]
+        print("Visiting node:", node.index, "at point", point)
+        d_sq = self.squared_distance(query.coords, point)
+        print(d_sq)
         self.add_to_heap(d_sq=d_sq, idx=node.index, heap=heap, k=k)
 
         axis = node.axis
-        diff = query[axis] - point[axis]
+        diff = query.coords[axis] - point[axis]
         # map onto canonical unit cell
         diff -= np.round(diff / box[axis]) * box[axis]
         if diff < 0:
             first, second = node.left, node.right
         else:
             first, second = node.right, node.left
-        self.search(first, points, box, heap, k, query)
+        self.search(first, box, heap, k, query)
         plane_dist_sq = diff * diff
         if len(heap) < k or plane_dist_sq < -heap[0][0]:
-            self.search(second, points, box, heap, k, query)
+            self.search(second, box, heap, k, query)
         
     def knn(
-        self, query: np.ndarray, k: c2at.INTEGER
+        self, query: Atom, k: c2at.INTEGER
     ) -> Sequence[tuple[int | np.integer, float | np.floating]]:
         heap: list[Any] = []
         if self.root is None:
             raise TypeError("Your root tree is None - unexpected!")
-        self.search(node=self.root, points=self.points, box=self.box, heap=heap, k=k, query=query)
-        out = [(idx, np.sqrt(d_sq)) for (d_sq, idx) in [(-h[0], h[1]) for h in heap]]
+        query_cart = copy.deepcopy(query)
+        query_cart.coords[0] *= self.box[0]
+        query_cart.coords[1] *= self.box[1]
+        query_cart.coords[2] *= self.box[2]
+
+        self.search(node=self.root, box=self.box, heap=heap, k=k, query=query_cart)
+        out = []
+        # out = [(idx, np.sqrt(d_sq)) for (d_sq, idx) in [(-h[0], h[1]) for h in heap]]
+        for neg_d_sq, idx in heap:
+            d = np.sqrt(-neg_d_sq)
+            out.append((self.atoms[idx], d))
+
         out.sort(key=lambda x: x[1])
         return out

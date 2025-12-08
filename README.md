@@ -16,9 +16,72 @@ If you are attempting to integrate this directly into your Nix devShell, you wil
 
 ## Usage
 
+1. [Initialising your input](#initialising-your-input)
+2. [Bandstructures](#bandstructures)
+3. [pDOS](#pdos)
+4. [kNN](#k-nearest-neighbours)
+
 These steps assume you are already in the directory where `Conquest_input` and other relevant files sit. There is however, file path checking + absolute path resolution, for implementing when using in your own scripts, so relative paths _shouldn't_ be an issue.
 
-### (partial) Density of States
+### Initialising your input
+
+First, import everything you might want to use:
+```py
+from conquest2a.conquest import * # necessary, (1)
+from conquest2a.supercell import * # for supercell creation
+from conquest2a.writers import * # to write output files to disk
+from conquest2a.pdos import * # to process (p)DOS
+from conquest2a.band import * # to process BandStructure.dat
+from conquest2a.algo.kdtree import PeriodicKDTree # for nearest-neighbour searching
+```
+Next, get the path to your Conquest coordinates file, and instantiate `(1)` as
+```py
+test_input = conquest_input({"1": "Bi", "2": "Mn", "3": "O"}) # replace this dict with your dict
+test_coords_proc = conquest_coordinates_processor("./tests/test.dat", test_input)
+```
+
+Your `dict` inside `conquest_input()` will represent be the Conquest species index to element label map. Note that the `dict` integers should match the ones specified in `Conquest_input` and the coordinates file. Please ensure that the element labels represent real elements - the code will error out if it isn't.
+
+### k-Nearest Neighbours
+
+Traditional nearest-neighbour methods involve searching all atoms and specifying an arbitrary cutoff which is expensive for ridiculously large systems (around tens or hundreds of thousands or more atoms). 
+
+CONQUEST2a gives each atom a number depending on their location in a Conquest_coordinates file (* need to fix the numbering properly when generated via the supercell class).
+
+The algorithm used is a periodic KDTree, which automatically finds nearest neighbours using a binary tree. By specifying a number of neighbours $k$, you can then automatically get the $k$ closest neighbours, their interatomic distances, the element and their coordinates, assuming you initialised the Atoms correctly [above](#initialising-your-input).
+
+```py
+
+from conquest2a.algo.kdtree import PeriodicKDTree
+test_input = conquest_input({"1": "Bi", "2": "Mn", "3": "O"})
+test_coords_proc = conquest_coordinates_processor("./tests/test.dat", test_input)
+tree = PeriodicKDTree(atoms=test_coords_proc.Atoms, box=np.array([test_coords_proc.lattice_vectors[i][i] for i in range(3)]))
+nn = tree.knn(query=test_coords_proc.Atoms[0], k=5) # look for the 5 closest atoms
+print(nn)
+```
+
+Gotchas:
+1. Please make sure the `box` parameter is just `[alat, blat, clat]`, i.e. the lengths of the orthorhombic unit cell.
+2. Printing is currently ugly, but will be of the form `Atom(...), np.float64(interatomic distance)`.
+
+This will be cleared up in the future.
+
+### Bandstructures
+
+First, ensure `conquest2a.band` is imported at the start of your file.
+
+Get the path to your bandstructure file, and initialise the `bst_processor` class:
+
+```py
+from conquest2a.band import *
+test_bst = bst_processor("./tests/test_BandStructure.dat")
+```
+
+Now, all the bands have been stored in a list of `band`, and can be accessed as  `test_bst.bands`. The default CONQUEST BandStructure outputs all k-points as the "x-axis" for all bands and the specific options `Process.BandStrucAxis` may/may not work.
+
+You can then just iterate through the `bands` list and plot, see `examples/plot_test_band.py`.
+
+### pDOS
 
 In CONQUEST, there are multiple types of density of states (DOS) output:
 

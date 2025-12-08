@@ -56,6 +56,7 @@ class supercell:
         self,
         species: str,
         can_move: Sequence[str],
+        atom_number: int,
         label: str,
         coord_0: int | float,
         coord_1: int | float,
@@ -73,6 +74,7 @@ class supercell:
             ],
             can_move=can_move,
             label=label,
+            number=atom_number
         )
 
     def range(self, upper_bound: int) -> list[int] | range:
@@ -85,16 +87,20 @@ class supercell:
         In terms of fractional coordinates, we set new coords of the original atoms to be
         x' = x/Nx, y' = y/Ny, z' = z/Nz
 
-        We then take these new coordinates, and create new atoms of the same elements with coords (x', y', z') for every Nx, Ny, Nz
+        We then take these new coordinates, and create new atoms of the same elements,
+        with coords (x', y', z') for every Nx, Ny, Nz
         i.e. we add 1/Nx, 1/Ny, 1/Nz in the appropriate direction.
 
         Example:
-        Consider a bcc crystal defined by A: (0,0,0) and B: (1/2, 1/2, 1/2). Suppose we want to make a 3x2x2 supercell, We expect 24 atoms in the final cell.
-        i.e. duplicate 3 in the "a" direction, and twice in the other 2 directions. We first rescale the lattice parameters, then we rescale the fractional coordinates
+        Consider a bcc crystal defined by A: (0,0,0) and B: (1/2, 1/2, 1/2). 
+        Suppose we want to make a 3x2x2 supercell: expect 24 atoms in the final cell.
+        i.e. duplicate 3 in the "a" direction, twice in the other 2 directions.
+        We first rescale the lattice parameters, then we rescale the fractional coordinates
 
         (0,0,0) is trivial, but B gets rescaled to (1/2 * 1/3, 1/2 * 1/2, 1/2 * 1/2) = (1/6, 1/4, 1/4)
 
-        However, the original (0,0,0) now has duplicates in x,y,z, namely the new atoms at (0,0,0) + {(1/3, 0, 0), (0, 1/2, 0), (0,0,1/2), ...}
+        However, the original (0,0,0) now has duplicates in x,y,z, 
+        namely the new atoms at (0,0,0) + {(1/3, 0, 0), (0, 1/2, 0), (0,0,1/2), ...}
         """
         # No repeats at all -> just return original crystal
         if self.repeats_x == 0 and self.repeats_y == 0 and self.repeats_z == 0:
@@ -114,5 +120,6 @@ class supercell:
                             ],
                             can_move=atom.can_move,
                             label=atom.label,
+                            number=len(self.supercell_coords.Atoms) + 1
                         )
                         self.supercell_coords.Atoms.append(new_atom)

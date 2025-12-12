@@ -5,9 +5,9 @@ import numpy as np
 import numpy.typing as npt
 import re
 import os
+from conquest2a.conquest import block_processor
 
-
-class pdos_processor:
+class pdos_processor(block_processor):
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
         # self.dos_file = dos_file
         self.blocks: list[np.ndarray] = []
@@ -15,29 +15,24 @@ class pdos_processor:
         self.all_pdos_files: list[str] = []
         self.conquest_rundir = conquest_rundir
         self.lm = lm
+        super().__init__()
         self.resolve_path()
         self.locate_pdos_files()
-
-    def read_pdos_file(self, filename: str) -> None:
-        with open(filename, "r", encoding="utf-8") as f:
-            current_block: list[npt.NDArray[np.number]] = []
-            num_spins = 0
-            for line in f:
-                stripped_line = line.strip()
-                if "# Spin" in stripped_line:
-                    num_spins += 1
-                    continue
-                if not stripped_line or stripped_line.startswith("#"):
-                    continue
-                if stripped_line == "&":
-                    if current_block:
-                        self.blocks.append(np.array(current_block, dtype=float))
-                        current_block = []
-                else:
-                    current_block.append(np.array(line.split()).astype(np.floating))
-            if current_block:
-                self.blocks.append(np.array(current_block, dtype=float))
-            self.num_spins = num_spins
+    def process_headers(self, line: str, num_spins: int) -> None:
+        if "# Spin" in line:
+            num_spins += 1
+        if "# Original" in line:
+            result = re.findall(self.re_float, line)
+            self.fermi_level = float(result[0])
+        if not line.startswith("# DOS shifted"):
+            self.is_shifted_to_fermi = False
+    def process_block(self, line: str) -> None:
+        if line == "&":
+            if self.current_block:
+                self.blocks.append(np.array(self.current_block, dtype=float))
+                self.current_block = []
+        else:
+            self.current_block.append(np.array(line.split()).astype(np.float32))
 
     def resolve_path(self) -> Path:
         abs_run_path = Path(abspath(self.conquest_rundir))

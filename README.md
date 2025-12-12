@@ -99,16 +99,16 @@ from conquest2a.pdos import pdos_processor, pdos_l_processor, pdos_lm_processor
 If you care only about the total DOS and nothing else, use `pdos_processor` with `lm = "t"`, i.e.:
 ```py
 tdos = pdos_processor(conquest_rundir="/yourpath", lm="t")
-tdos.read_pdos_file(tdos.all_pdos_files[0]) # reads "DOS.dat"
+tdos.read_file(tdos.all_pdos_files[0]) # reads "DOS.dat"
 ```
 
 This will search your directory, here `/yourpath`, for `DOS.dat` (if parameter `lm = "t"`, which is the default), and store the results in `self.blocks`, where each element of the list is a numpy array of pdos values, in order of the spin. In CONQUEST, spins are output in ascending order, so the first "block" is for Spin 1 etc.
 
-Alternatively, you can get CONQUEST to output angular momentum-resolved DOS. In this case, you can either use `pdos_l_processor` or `pdos_lm_processor` depending on whether you have `AtomXXXXXXXX_l.dat` or `AtomXXXXXXXX_lm.dat` files respectively. Since they are also different objects, you may use both too. The valid filenames are then stored in `self.all_pdos_files` as a list of strings. To extract the data from a file, follow the same format
+Alternatively, you can get CONQUEST to output angular momentum-resolved DOS. In this case, you can either use `pdos_l_processor` or `pdos_lm_processor` depending on whether you have `AtomXXXXXXX_l.dat` or `AtomXXXXXXX_lm.dat` files respectively. Since they are also different objects, you may use both too. The valid filenames are then stored in `self.all_pdos_files` as a list of strings. To extract the data from a file, follow the same format
 
 ```py 
 lmpdos = pdos_lm_processor(conquest_rundir="/yourpath") # lm is set automatically
-lmpdos.read_pdos_file(lmpdos.all_pdos_files[0]) # reads, e.g. "Atom00000001_lm.dat" if that exists in your directory.
+lmpdos.read_file(lmpdos.all_pdos_files[0]) # reads, e.g. "Atom00000001_lm.dat" if that exists in your directory.
 atom1 = lmpdos.blocks # NOTE: this is a SHALLOW COPY. If you do another read, this will be OVERWRITTEN
 # atom1 = copy.deepcopy(lmpdos.blocks) # you may prefer to do this instead, if you need to read and store all the pdos output separately
 ```
@@ -127,7 +127,7 @@ Remark 2: Reading pdos files automatically, and storing all of their data at onc
   # etc
 }
 ```
-where again the numpy arrays are in ascending order of spins. These dicts can be accessed as `self.lm_dict` or `self.l_dict`.
+where again the numpy arrays are in ascending order of spins. These dicts can be accessed as `processor_instance.lm_dict` or `processor_instance.l_dict`.
 
 See `examples/plot_test_pdos.py` for an example of plotting the data obtained from a pDOS file.
 

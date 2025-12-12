@@ -5,7 +5,9 @@ from pathlib import Path
 from collections.abc import Sequence
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
 from conquest2a._types import *
-
+from io import TextIOWrapper
+from typing import Any
+import re
 @dataclass
 class Atom:
     species: str
@@ -307,3 +309,37 @@ class atom_charge(processor_base):
         for i, atom in enumerate(self.coordinates.Atoms):
             split_charge_data = self.conquest_charge_data[i]
             atom.spins = np.array([0.0, 0.0, split_charge_data[1] - split_charge_data[2]])
+
+
+class block_processor:
+    """Generic class to process CONQUEST output files split into blocks via &
+
+    Sometimes these blocks are categorised by spins and have comments
+    # at the start of the category
+    """
+    def __init__(self) -> None:
+        self.blocks: list[npt.NDArray[np.number]] = []
+        self.current_block: list[npt.NDArray[np.number]] = [] # temp storage
+        self.re_float = re.compile(r"[-+]?\d*\.\d+")
+        self.re_index = re.compile(r"\d+")
+    def process_headers(self, *args, **kwargs) -> Any:
+        """This function can be overridden by subclasses to process header lines starting with #
+        Bandstructure and DOS/pDOS files have slightly different headers
+        """
+        pass
+    def process_block(self, line: str) -> None:
+        """In CONQUEST, blocks are separated by & on its own newline
+        """
+        pass
+    def read_file(self, filename: str | Path) -> None:
+        with open(filename, "r", encoding="utf-8") as f:
+            num_spins = 0
+            for line in f:
+                stripped_line = line.strip()
+                if not stripped_line:
+                    continue
+                if line.startswith("#"):
+                    self.process_headers(line=stripped_line, num_spins=num_spins)
+                else:
+                    self.process_block(stripped_line)
+            self.num_spins = num_spins

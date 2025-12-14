@@ -8,6 +8,7 @@ from conquest2a._types import *
 from io import TextIOWrapper
 from typing import Any
 import re
+import numpy as np
 
 
 @dataclass

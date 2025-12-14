@@ -59,7 +59,7 @@ class PeriodicKDTree:
 
     def squared_distance(self, p: c2at.REAL_ARRAY, q: c2at.REAL_ARRAY) -> c2at.REAL_NUMBER:
         d = p - q
-        d -= np.rint(d / self.box) * self.box
+        d -= np.rint(d / self.box) * self.box  # type: ignore
         return np.float64(np.dot(d, d))
 
     def add_to_heap(

@@ -4,8 +4,8 @@ version = "0.2.0"
 authors = [{ name = "Chung", email = "dev.chpxu@outlook.com" }]
 description = "A Python utility that deals with some pre- and post-processing functions for the linear scaling DFT program, CONQUEST."
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = ["numpy>=2.3.0"]
+requires-python = ">=3.10"
+dependencies = ["numpy>=2.0.0"]
 [project.urls]
 Homepage = "https://github.com/chpxu/CONQUEST_TO_VASP"
 Issues = "https://github.com/chpxu/CONQUEST_TO_VASP/issues"
@@ -21,7 +21,7 @@ ignore_missing_imports = true
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_return_any = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
 disable_error_code = [
@@ -41,7 +41,7 @@ disable_error_code = [
   # "return-value",
   # "return",
   # "syntax",
-  # "unused-coroutine",
+  "unused-ignore",
   # "union-attr",
   # "var-annotated",
 ]
@@ -49,7 +49,7 @@ module = ["nest_asyncio.*", "requests.*"]
 
 [tool.black]
 line-length = 100
-target-version = ['py311', 'py312', 'py313']
+target-version = ['py310', 'py311', 'py312', 'py313']
 extend-exclude = '''
 (
   ^/_*

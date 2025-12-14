@@ -4,6 +4,7 @@ from multiprocessing import Value
 import numpy as np
 import conquest2a._types as c2at
 from conquest2a.conquest import processor_base
+from conquest2a.constants import HARTREE_TO_EV
 from pathlib import Path
 import re
 
@@ -26,7 +27,6 @@ class eigenvalues_processor(processor_base):
         self.num_eigenvalues_per_block: int = 0
         self.fermi_energies: c2at.REAL_ARRAY
         self.open_file()
-        print(self.num_eigenvalues_per_block)
 
     def open_file(self) -> None:
         with open(self.abs_input_path, "r") as eigfile:
@@ -77,20 +77,14 @@ class eigenvalues_processor(processor_base):
                     vbm = vmax
                     block_with_VBm = block
             if len(conduction_eigenvalues) > 0:
-                cmin = np.min(valence_eigenvalues)
-                if cmin > cbm:
+                cmin = np.min(conduction_eigenvalues)
+                if cmin < cbm:
                     cbm = cmin
                     block_with_CBm = block
-
+        print(vbm)
+        print(cbm)
         return block_with_CBm, block_with_VBm, vbm, cbm
 
     def get_bandgap(self) -> tuple[k_point_blocks, k_point_blocks, c2at.REAL_NUMBER]:
         temp = self.get_VBM_CBm_eigen()
-        return temp[0], temp[1], temp[3] - temp[2]
-
-
-eigvproc = eigenvalues_processor(
-    "/home/chunix/Projects/CONQUEST_TO_VASP/tests/test_eigenvalues.dat"
-)
-
-eigvproc.get_bandgap()
+        return temp[0], temp[1], (temp[3] - temp[2]) * HARTREE_TO_EV

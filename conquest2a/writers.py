@@ -1,8 +1,10 @@
 from io import TextIOWrapper
 from pathlib import Path
 from typing import IO, Any
+import conquest2a._types as c2at
 from conquest2a.conquest import conquest_coordinates_processor, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
+import numpy as np
 
 
 class file_writer:
@@ -84,7 +86,7 @@ class vasp_writer(file_writer):
             file.write(f"{ele_string}\n")
             file.write("1.0\n")
             for lattice_vect in self.data.lattice_vectors:
-                file.write(rf'  {" ".join(str(x * self.B2A) for x in lattice_vect)}')
+                file.write(rf'  {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}')
                 file.write("\n")
             file.write(f"{ele_string}\n")
             file.write(f"{num_string}\n")
@@ -120,12 +122,14 @@ class xyz_writer(file_writer):
         num_string = " ".join(str(x) for x in num_ele.values())
         return ele_string, num_string
 
-    def fractional_to_cartesian(self, vector: list[float]) -> list[float]:
-        return [
-            vector[0] * self.data.lattice_vectors[0][0],
-            vector[1] * self.data.lattice_vectors[1][1],
-            vector[0] * self.data.lattice_vectors[2][2],
-        ]
+    def fractional_to_cartesian(self, vector: c2at.REAL_ARRAY) -> c2at.REAL_ARRAY:
+        return np.array(
+            [
+                vector[0] * self.data.lattice_vectors[0][0],
+                vector[1] * self.data.lattice_vectors[1][1],
+                vector[2] * self.data.lattice_vectors[2][2],
+            ]
+        )
 
     def write(self) -> None:
         """XYZ format expects cells in Cartesian coordinates. Since CONQUEST only deals with orthorhombic unit cells, we can just multiply the non-zero coordinates of the lattice vectors with the fractional coordinates"""
@@ -136,7 +140,7 @@ class xyz_writer(file_writer):
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
                     file.write(
-                        rf'{atoms} {" ".join(str(x * self.B2A) for x in self.fractional_to_cartesian(atom.coords))}'
+                        rf'{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords))}'
                     )
                     file.write("\n")
 
@@ -178,7 +182,7 @@ class xsf_writer(file_writer):
             file.write("CRYSTAL\n")
             file.write("PRIMVEC\n")
             for lattice_vect in self.data.lattice_vectors:
-                file.write(rf' {" ".join(str(x * self.B2A) for x in lattice_vect)}')
+                file.write(rf' {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}')
                 file.write("\n")
             file.write("PRIMCOORD\n")
             file.write(f"{self.data.natoms} 1\n")
@@ -202,7 +206,7 @@ class xsf_writer_spins(file_writer):
             raise ValueError(
                 "Destination path for modified XSF file cannot be the same as the original XSF file path."
             )
-        super().__init__(dest, encoding=self.encoding)
+        super().__init__(dest=dest, encoding=self.encoding)
         self.process_xsf_file()
 
     def process_xsf_file(self) -> None:

@@ -161,16 +161,12 @@ class processor_base:
         self.re_index = re.compile(r"\d+")
 
     def resolve_path(self) -> None:
-        try:
-            abs_coord_path = Path(abspath(self.input_path))
-            assert abs_coord_path.exists() is True
-            assert abs_coord_path.is_file() is True
-            assert os.stat(abs_coord_path).st_size > 0
-            self.abs_input_path = abs_coord_path
-        except FileNotFoundError as e:
-            print(e)
-            if self.err_str is not None:
-                print(self.err_str)
+        abs_coord_path = Path(abspath(self.input_path))
+        if not abs_coord_path.exists():
+            raise FileNotFoundError(f"{abs_coord_path} not found.")
+        if not (abs_coord_path.is_file() and os.stat(abs_coord_path).st_size > 0):
+            raise RuntimeError(f"{abs_coord_path} was an existing file, but has no file contents.")
+        self.abs_input_path = abs_coord_path
 
     def open_file(self) -> None:
         pass

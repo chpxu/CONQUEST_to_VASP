@@ -8,7 +8,6 @@
     with ps;
       [
         numpy
-        scipy
         matplotlib
         #formatter
         black
@@ -18,8 +17,9 @@
         # v3 of pylint is already out
         # use the version provided by VSCode extension
         # Could uncomment for other editors
-        # pylint
+        pylint
         pytest
+        hatchling
       ]
       ++ (lib.optional jupyter (import (./. + "/jupyter.nix")));
 in {

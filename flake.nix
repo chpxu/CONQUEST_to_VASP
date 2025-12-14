@@ -23,7 +23,7 @@
       attrs = {
         inherit pkgs;
         lib = pkgs.lib;
-        installC = true;
+        installC = false;
         installPython = true;
         installJS = false;
         installLatex = false;

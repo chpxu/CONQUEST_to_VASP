@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
 import numpy as np
 
+
 class supercell:
     def __init__(
         self, repeats_x: int, repeats_y: int, repeats_z: int, coords: conquest_coordinates_processor
@@ -54,7 +55,7 @@ class supercell:
 
     def create_atom(
         self,
-        species: str,
+        species: int,
         can_move: Sequence[str],
         atom_number: int,
         label: str,
@@ -67,14 +68,16 @@ class supercell:
     ) -> Atom:
         return Atom(
             species,
-            np.array([
-                coord_0 + disp_0,
-                coord_1 + disp_1,
-                coord_2 + disp_2,
-            ]),
+            np.array(
+                [
+                    coord_0 + disp_0,
+                    coord_1 + disp_1,
+                    coord_2 + disp_2,
+                ]
+            ),
             can_move=can_move,
             label=label,
-            number=atom_number
+            number=atom_number,
         )
 
     def range(self, upper_bound: int) -> list[int] | range:
@@ -92,14 +95,14 @@ class supercell:
         i.e. we add 1/Nx, 1/Ny, 1/Nz in the appropriate direction.
 
         Example:
-        Consider a bcc crystal defined by A: (0,0,0) and B: (1/2, 1/2, 1/2). 
+        Consider a bcc crystal defined by A: (0,0,0) and B: (1/2, 1/2, 1/2).
         Suppose we want to make a 3x2x2 supercell: expect 24 atoms in the final cell.
         i.e. duplicate 3 in the "a" direction, twice in the other 2 directions.
         We first rescale the lattice parameters, then we rescale the fractional coordinates
 
         (0,0,0) is trivial, but B gets rescaled to (1/2 * 1/3, 1/2 * 1/2, 1/2 * 1/2) = (1/6, 1/4, 1/4)
 
-        However, the original (0,0,0) now has duplicates in x,y,z, 
+        However, the original (0,0,0) now has duplicates in x,y,z,
         namely the new atoms at (0,0,0) + {(1/3, 0, 0), (0, 1/2, 0), (0,0,1/2), ...}
         """
         # No repeats at all -> just return original crystal
@@ -113,13 +116,15 @@ class supercell:
                     for n in self.range(self.repeats_z):
                         new_atom = Atom(
                             atom.species,
-                            np.array([
-                                (atom.coords[0] + l) / (self.repeats_x + 1),
-                                (atom.coords[1] + m) / (self.repeats_y + 1),
-                                (atom.coords[2] + n) / (self.repeats_z + 1),
-                            ]),
+                            np.array(
+                                [
+                                    (atom.coords[0] + l) / (self.repeats_x + 1),
+                                    (atom.coords[1] + m) / (self.repeats_y + 1),
+                                    (atom.coords[2] + n) / (self.repeats_z + 1),
+                                ]
+                            ),
                             can_move=atom.can_move,
                             label=atom.label,
-                            number=len(self.supercell_coords.Atoms) + 1
+                            number=len(self.supercell_coords.Atoms) + 1,
                         )
                         self.supercell_coords.Atoms.append(new_atom)

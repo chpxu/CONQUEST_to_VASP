@@ -13,7 +13,7 @@ import numpy as np
 
 @dataclass
 class Atom:
-    species: str
+    species: int
     coords: REAL_ARRAY
     can_move: Sequence[str]
     number: int
@@ -22,7 +22,7 @@ class Atom:
 
 
 class conquest_input:
-    def __init__(self, species_dict: dict[str, str]) -> None:
+    def __init__(self, species_dict: dict[int, str]) -> None:
         """Constructor for conquest_input
 
         Args:
@@ -248,7 +248,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
                 split_atom_data = atom.strip().split()
                 self.Atoms.append(
                     Atom(
-                        species=split_atom_data[3],
+                        species=int(split_atom_data[3]),
                         can_move=split_atom_data[4:],
                         coords=np.array(split_atom_data[:3]).astype(float),
                         number=atom_number,

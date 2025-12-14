@@ -36,7 +36,7 @@ from conquest2a.algo.kdtree import PeriodicKDTree # for nearest-neighbour search
 ```
 Next, get the path to your Conquest coordinates file, and instantiate `(1)` as
 ```py
-test_input = conquest_input({"1": "Bi", "2": "Mn", "3": "O"}) # replace this dict with your dict
+test_input = conquest_input({1: "Bi", 2: "Mn", 3: "O"}) # replace this dict with your dict
 test_coords_proc = conquest_coordinates_processor("./tests/test.dat", test_input)
 ```
 
@@ -53,7 +53,7 @@ The algorithm used is a periodic KDTree, which automatically finds nearest neigh
 ```py
 
 from conquest2a.algo.kdtree import PeriodicKDTree
-test_input = conquest_input({"1": "Bi", "2": "Mn", "3": "O"})
+test_input = conquest_input({1: "Bi", 2: "Mn", 3: "O"})
 test_coords_proc = conquest_coordinates_processor("./tests/test.dat", test_input)
 tree = PeriodicKDTree(atoms=test_coords_proc.Atoms, box=np.array([test_coords_proc.lattice_vectors[i][i] for i in range(3)]))
 nn = tree.knn(query=test_coords_proc.Atoms[0], k=5) # look for the 5 closest atoms

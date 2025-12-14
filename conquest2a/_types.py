@@ -2,10 +2,12 @@ import typing
 import numpy as np
 import numpy.typing as npt
 
-E = typing.TypeVar("E", bound=np.integer)
-INTEGER = int | np.integer
-FLOAT = float | np.floating
+INT = typing.TypeVar("INT", bound=np.integer)
+
+FLOATING = typing.TypeVar("FLOATING", bound=npt.floating)
+INTEGER = int | np.int64
+FLOAT = float | np.float64
 REAL_NUMBER = INTEGER | FLOAT
 NUMBER_ARRAY = npt.NDArray[np.number]
-REAL_ARRAY = npt.NDArray[np.floating | np.integer]
-INT_ARRAY = npt.NDArray[np.integer]
+REAL_ARRAY = npt.NDArray[np.float64 | np.int64]
+INT_ARRAY = npt.NDArray[np.int64]

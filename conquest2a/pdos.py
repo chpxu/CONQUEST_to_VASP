@@ -7,6 +7,7 @@ import re
 import os
 from conquest2a.conquest import block_processor
 
+
 class pdos_processor(block_processor):
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
         # self.dos_file = dos_file
@@ -18,6 +19,7 @@ class pdos_processor(block_processor):
         super().__init__()
         self.resolve_path()
         self.locate_pdos_files()
+
     def process_headers(self, line: str, num_spins: int) -> None:
         if "# Spin" in line:
             num_spins += 1
@@ -26,6 +28,7 @@ class pdos_processor(block_processor):
             self.fermi_level = float(result[0])
         if not line.startswith("# DOS shifted"):
             self.is_shifted_to_fermi = False
+
     def process_block(self, line: str) -> None:
         if line == "&":
             if self.current_block:

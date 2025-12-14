@@ -4,15 +4,14 @@ import numpy as np
 import numpy.typing as npt
 import re
 from conquest2a.conquest import block_processor
-import conquest2a._types as  c2at
+import conquest2a._types as c2at
+
 
 @dataclass
 class band:
     spin: int
     index: int  # band index
-    kpoint: c2at.INT_ARRAY = field(
-        default=np.empty((1, 3), dtype=np.integer)
-    )  # kpoint index.
+    kpoint: c2at.INT_ARRAY = field(default=np.empty((1, 3), dtype=np.integer))  # kpoint index.
     energies: c2at.REAL_ARRAY = field(
         default=np.empty((1, 3), dtype=np.float32)
     )  # energies at that kpoint for this band
@@ -28,6 +27,7 @@ class bst_processor(block_processor):
         self.is_shifted_to_fermi: bool = True
         self.block_counter: int = 0
         self.read_file(filename=self.bst_file)
+
     def process_headers(self, line: str, num_spins: int) -> None:
         if "# Spin" in line:
             num_spins += 1
@@ -39,6 +39,7 @@ class bst_processor(block_processor):
             self.bands.append(band(index=int(band_index[0]), spin=num_spins))
         if not line.startswith("# Bands shifted"):
             self.is_shifted_to_fermi = False
+
     def process_block(self, line: str) -> None:
         if line == "&":
             if self.current_block:

@@ -7,6 +7,7 @@ import heapq
 from typing import Sequence, Any
 import copy
 
+
 class KDNode:
     def __init__(self, index: c2at.INTEGER, axis: c2at.INTEGER) -> None:
         self.index = index
@@ -15,51 +16,57 @@ class KDNode:
 
 class KDBranch(KDNode):
     def __init__(
-        self, index: c2at.INTEGER, axis: c2at.INTEGER, left: KDBranch, right: KDBranch
+        self,
+        index: c2at.INTEGER,
+        axis: c2at.INTEGER,
+        left: KDBranch | KDNode,
+        right: KDBranch | KDNode,
     ) -> None:
         super().__init__(index=index, axis=axis)
         self.left = left
         self.right = right
 
 
+KD = KDBranch | KDNode | None
+
+
 class PeriodicKDTree:
     def __init__(self, atoms: list[Atom], box: c2at.REAL_ARRAY) -> None:
         self.atoms = atoms
-        self.points = np.array([atom.coords for atom in atoms]) # fractional
+        self.points = np.array([atom.coords for atom in atoms])  # fractional
         self.box = box
-        self.points[:,0] *= box[0]
-        self.points[:,1] *= box[1]
-        self.points[:,2] *= box[2]
+        self.points[:, 0] *= box[0]
+        self.points[:, 1] *= box[1]
+        self.points[:, 2] *= box[2]
         print(self.points)
         idx = np.arange(len(self.points))
         self.root = self._build_tree(idx, depth=0)
 
-    def _build_tree(self, idx: np.ndarray[tuple[int]], depth: c2at.INTEGER) -> KDBranch | KDNode | None:
+    def _build_tree(
+        self, idx: np.ndarray[tuple[int]], depth: c2at.INTEGER
+    ) -> KDBranch | KDNode | None:
         if len(idx) == 0:
             return None
         axis = depth % 3
         if len(idx) == 1:
             return KDNode(index=idx[0], axis=axis)
-
         sorted_idx = idx[np.argsort(self.points[idx, axis])]
         mid = len(sorted_idx) // 2
+        left_new_branch: KD = self._build_tree(sorted_idx[:mid], depth + 1)
+        right_new_branch: KD = self._build_tree(sorted_idx[(mid + 1) :], depth + 1)
+        if left_new_branch is not None and right_new_branch is not None:
+            return KDBranch(
+                index=sorted_idx[mid], axis=axis, left=left_new_branch, right=right_new_branch
+            )
+        return None
 
-        return KDBranch(
-            index=sorted_idx[mid],
-            axis=axis,
-            left=self._build_tree(sorted_idx[:mid], depth + 1),
-            right=self._build_tree(sorted_idx[(mid + 1):], depth + 1),
-        )
-
-    def squared_distance(
-        self, p: np.ndarray[tuple[int]], q: np.ndarray[tuple[int]]
-    ) -> c2at.FLOAT:
+    def squared_distance(self, p: c2at.REAL_ARRAY, q: c2at.REAL_ARRAY) -> c2at.REAL_NUMBER:
         d = p - q
         d -= np.rint(d / self.box) * self.box
-        return np.dot(d, d)
+        return np.float64(np.dot(d, d))
 
     def add_to_heap(
-        self, d_sq: c2at.FLOAT, idx: c2at.INTEGER, heap: list[Any], k: int | np.integer
+        self, d_sq: c2at.REAL_NUMBER, idx: c2at.INTEGER, heap: list[Any], k: int | np.integer
     ) -> None:
         if len(heap) < k:
             heapq.heappush(heap, (-d_sq, idx))
@@ -77,7 +84,6 @@ class PeriodicKDTree:
     ) -> None:
         if node is None or not isinstance(node, KDBranch):
             return
-        
 
         point = self.points[node.index]
         print("Visiting node:", node.index, "at point", point)
@@ -97,7 +103,7 @@ class PeriodicKDTree:
         plane_dist_sq = diff * diff
         if len(heap) < k or plane_dist_sq < -heap[0][0]:
             self.search(second, box, heap, k, query)
-        
+
     def knn(
         self, query: Atom, k: c2at.INTEGER
     ) -> Sequence[tuple[int | np.integer, float | np.floating]]:

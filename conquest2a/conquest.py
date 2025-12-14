@@ -3,12 +3,13 @@ import os
 from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
+from typing import Union
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
 from conquest2a._types import *
-from io import TextIOWrapper
 from typing import Any
 import re
 import numpy as np
+import numpy.typing as npt
 
 
 @dataclass
@@ -325,7 +326,7 @@ class block_processor:
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
         self.re_index = re.compile(r"\d+")
 
-    def process_headers(self, *args, **kwargs) -> Any:
+    def process_headers(self, line: str, num_spins: int) -> None:
         """This function can be overridden by subclasses to process header lines starting with #
         Bandstructure and DOS/pDOS files have slightly different headers
         """

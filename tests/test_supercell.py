@@ -3,7 +3,7 @@ from conquest2a.supercell import *
 from conquest2a.writers import *
 import pytest
 
-test_input = conquest_input({"1": "Bi", "2": "Mn", "3": "Mn", "4": "O"})
+test_input = conquest_input({1: "Bi", 2: "Mn", 3: "Mn", 4: "O"})
 test_coords_proc = conquest_coordinates_processor("tests/data/test.dat", test_input)
 
 

@@ -11,9 +11,9 @@ import conquest2a._types as c2at
 class band:
     spin: int
     index: int  # band index
-    kpoint: c2at.INT_ARRAY = field(default=np.empty((1, 3), dtype=np.integer))  # kpoint index.
+    kpoint: c2at.INT_ARRAY = field(default_factory=lambda: np.array([0, 0, 0]))  # kpoint index.
     energies: c2at.REAL_ARRAY = field(
-        default=np.empty((1, 3), dtype=np.float32)
+        default=np.empty((1, 3))
     )  # energies at that kpoint for this band
 
 
@@ -21,7 +21,7 @@ class bst_processor(block_processor):
     def __init__(self, bst_file: str | Path) -> None:
         super().__init__()
         self.bst_file = bst_file
-        self.blocks: list[np.ndarray] = []
+        self.blocks: list[c2at.REAL_ARRAY] = []
         self.bands: list[band] = []
         self.fermi_level: float = 0.0
         self.is_shifted_to_fermi: bool = True

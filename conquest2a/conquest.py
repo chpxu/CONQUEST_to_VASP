@@ -5,7 +5,7 @@ from pathlib import Path
 from collections.abc import Sequence
 from typing import Union
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
-from conquest2a._types import *
+import conquest2a._types as c2at
 from typing import Any
 import re
 import numpy as np
@@ -15,10 +15,10 @@ import numpy.typing as npt
 @dataclass
 class Atom:
     species: int
-    coords: REAL_ARRAY
+    coords: c2at.REAL_ARRAY
     can_move: Sequence[str]
     number: int
-    spins: REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
+    spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     label: str = ""
 
 
@@ -184,7 +184,7 @@ class conquest_coordinates:
     ) -> None:
         self.Atoms: list[Atom] = []
         self.conquest_input = conquest_input
-        self.lattice_vectors: list[REAL_ARRAY] = []
+        self.lattice_vectors: list[c2at.REAL_ARRAY] = []
         self.natoms: str
         self.element_map: dict[str, list[Atom]]
 
@@ -278,7 +278,7 @@ class atom_charge(processor_base):
         self.coordinates = coordinates
         self.atom_charge_path = atom_charge_path
         self.abs_atom_charge_path: str | Path
-        self.conquest_charge_data: list[REAL_ARRAY] = []
+        self.conquest_charge_data: list[c2at.REAL_ARRAY] = []
 
         try:
             self.resolve_path()
@@ -321,8 +321,8 @@ class block_processor:
     """
 
     def __init__(self) -> None:
-        self.blocks: list[npt.NDArray[np.number]] = []
-        self.current_block: list[npt.NDArray[np.number]] = []  # temp storage
+        self.blocks: list[c2at.REAL_ARRAY] = []
+        self.current_block: list[c2at.REAL_ARRAY] = []  # temp storage
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
         self.re_index = re.compile(r"\d+")
 

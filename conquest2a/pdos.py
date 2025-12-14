@@ -6,12 +6,13 @@ import numpy.typing as npt
 import re
 import os
 from conquest2a.conquest import block_processor
+import conquest2a._types as c2at
 
 
 class pdos_processor(block_processor):
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
         # self.dos_file = dos_file
-        self.blocks: list[np.ndarray] = []
+        self.blocks: list[c2at.REAL_ARRAY] = []
         # self.read_pdos_file()
         self.all_pdos_files: list[str] = []
         self.conquest_rundir = conquest_rundir
@@ -35,7 +36,7 @@ class pdos_processor(block_processor):
                 self.blocks.append(np.array(self.current_block, dtype=float))
                 self.current_block = []
         else:
-            self.current_block.append(np.array(line.split()).astype(np.float32))
+            self.current_block.append(np.array(line.split()).astype(np.float64))
 
     def resolve_path(self) -> Path:
         abs_run_path = Path(abspath(self.conquest_rundir))
@@ -75,12 +76,12 @@ class pdos_l_processor(pdos_processor):
         # ascending order of l
         # e.g., l = 0,  l =1,  l = 2, etc.
         # So dict will be of the form {"l": [array(spin1), array(spin2), ...],}
-        self.energy_values: dict[int, np.ndarray | list[float]] = {}
+        self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
         # self.l_map()
 
     def l_map(self) -> None:
         # From column 3, there are only l-contributions, and is sorted by ascending l values, and each row is just ech l-contribution at that energy
-        l_dict: dict[str, list[npt.NDArray[np.number]]] = {}
+        l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
@@ -104,14 +105,14 @@ class pdos_lm_processor(pdos_processor):
         # ascending order of l and m
         # e.g., l = 0,  l =1, m = -1, 0, 1, l = 2, m = -2, -1, 0, 1, 2, etc.
         # So dict will be of the form {"l,m": [array(spin1), array(spin2), ...],}
-        self.energy_values: dict[int, np.ndarray | list[float]] = {}
+        self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
         # self.lm_map()
 
     def lm_map(self) -> None:
         # for every l, (2l + 1) m values in interval [-l, l]
         # We sort self.blocks to a dictionary with keys denoted by "l,m" and values as the corresponding PDOS arrays
         # We also create a map of energies for each spin
-        lm_dict: dict[str, list[npt.NDArray[np.number]]] = {}
+        lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy

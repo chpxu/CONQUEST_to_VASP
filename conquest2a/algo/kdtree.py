@@ -38,13 +38,10 @@ class PeriodicKDTree:
         self.points[:, 0] *= box[0]
         self.points[:, 1] *= box[1]
         self.points[:, 2] *= box[2]
-        print(self.points)
         idx = np.arange(len(self.points))
         self.root = self._build_tree(idx, depth=0)
 
-    def _build_tree(
-        self, idx: np.ndarray[tuple[int]], depth: c2at.INTEGER
-    ) -> KDBranch | KDNode | None:
+    def _build_tree(self, idx: c2at.INT_ARRAY, depth: c2at.INTEGER) -> KDBranch | KDNode | None:
         if len(idx) == 0:
             return None
         axis = depth % 3
@@ -66,7 +63,7 @@ class PeriodicKDTree:
         return np.float64(np.dot(d, d))
 
     def add_to_heap(
-        self, d_sq: c2at.REAL_NUMBER, idx: c2at.INTEGER, heap: list[Any], k: int | np.integer
+        self, d_sq: c2at.REAL_NUMBER, idx: c2at.INTEGER, heap: list[Any], k: c2at.INTEGER
     ) -> None:
         if len(heap) < k:
             heapq.heappush(heap, (-d_sq, idx))
@@ -86,7 +83,6 @@ class PeriodicKDTree:
             return
 
         point = self.points[node.index]
-        print("Visiting node:", node.index, "at point", point)
         d_sq = self.squared_distance(query.coords, point)
         print(d_sq)
         self.add_to_heap(d_sq=d_sq, idx=node.index, heap=heap, k=k)
@@ -117,7 +113,6 @@ class PeriodicKDTree:
 
         self.search(node=self.root, box=self.box, heap=heap, k=k, query=query_cart)
         out = []
-        # out = [(idx, np.sqrt(d_sq)) for (d_sq, idx) in [(-h[0], h[1]) for h in heap]]
         for neg_d_sq, idx in heap:
             d = np.sqrt(-neg_d_sq)
             out.append((self.atoms[idx], d))

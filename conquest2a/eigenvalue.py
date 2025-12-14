@@ -1,0 +1,96 @@
+from dataclasses import dataclass, field
+from itertools import islice
+from multiprocessing import Value
+import numpy as np
+import conquest2a._types as c2at
+from conquest2a.conquest import processor_base
+from pathlib import Path
+import re
+
+
+@dataclass
+class k_point_blocks:
+    k_index: int
+    weight: c2at.FLOAT
+    eigenvalues: c2at.REAL_ARRAY = field(default_factory=lambda: np.zeros((1, 10)))
+    eigenvalues_with_fermi: c2at.REAL_ARRAY = field(default_factory=lambda: np.empty((1, 3)))
+    k_vector: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
+
+
+class eigenvalues_processor(processor_base):
+    def __init__(self, file: str | Path) -> None:
+        self.file = file
+        super().__init__(path=file)
+        self.resolve_path()
+        self.eig_blocks: list[k_point_blocks] = []
+        self.num_eigenvalues_per_block: int = 0
+        self.fermi_energies: c2at.REAL_ARRAY
+        self.open_file()
+        print(self.num_eigenvalues_per_block)
+
+    def open_file(self) -> None:
+        with open(self.abs_input_path, "r") as eigfile:
+            line1 = next(eigfile)
+            misc = re.findall(self.re_index, line1)
+            self.num_eigenvalues_per_block = int(misc[0])
+            line2 = next(eigfile)
+            self.fermi_energies = np.array(re.findall(self.re_float, line2), dtype=float)
+            next(eigfile)
+            while True:
+                block = list(islice(eigfile, 0, self.num_eigenvalues_per_block + 1))
+                if not block:
+                    break
+                header = block[0].strip().split()
+                eigvals = np.array([float(eig.split()[1]) for eig in block[1:]])
+                if len(header) == 5:
+                    self.eig_blocks.append(
+                        k_point_blocks(
+                            k_index=int(header[0]),
+                            k_vector=np.array(header[1:4], dtype=float),
+                            weight=float(header[-1]),
+                            eigenvalues=eigvals,
+                            eigenvalues_with_fermi=eigvals - self.fermi_energies[0],
+                        )
+                    )
+        eigfile.close()
+
+    # def return_k_index(self, k_index: int) -> k_point_eigenvalues:
+    #     for
+    def get_VBM_CBm_eigen(
+        self,
+    ) -> tuple[k_point_blocks, k_point_blocks, c2at.REAL_NUMBER, c2at.REAL_NUMBER]:
+        block_with_CBm = self.eig_blocks[0]
+        block_with_VBm = self.eig_blocks[0]
+        vbm: c2at.REAL_NUMBER = -np.inf
+        cbm: c2at.REAL_NUMBER = np.inf
+        for block in self.eig_blocks:
+            eigenvalues = block.eigenvalues_with_fermi
+            valence_eigenvalues = eigenvalues[eigenvalues <= 0.0]
+            conduction_eigenvalues = eigenvalues[eigenvalues > 0.0]
+            if len(valence_eigenvalues) <= 0:
+                raise ValueError(f"No valence eigenvalues found for kpoint {block.k_index}")
+            if len(conduction_eigenvalues) <= 0:
+                raise ValueError(f"No conduction eigenvalues found for kpoint {block.k_index}")
+            if len(valence_eigenvalues) > 0:
+                vmax = np.max(valence_eigenvalues)
+                if vmax > vbm:
+                    vbm = vmax
+                    block_with_VBm = block
+            if len(conduction_eigenvalues) > 0:
+                cmin = np.min(valence_eigenvalues)
+                if cmin > cbm:
+                    cbm = cmin
+                    block_with_CBm = block
+
+        return block_with_CBm, block_with_VBm, vbm, cbm
+
+    def get_bandgap(self) -> tuple[k_point_blocks, k_point_blocks, c2at.REAL_NUMBER]:
+        temp = self.get_VBM_CBm_eigen()
+        return temp[0], temp[1], temp[3] - temp[2]
+
+
+eigvproc = eigenvalues_processor(
+    "/home/chunix/Projects/CONQUEST_TO_VASP/tests/test_eigenvalues.dat"
+)
+
+eigvproc.get_bandgap()

@@ -8,6 +8,8 @@ from conquest2a._types import *
 from io import TextIOWrapper
 from typing import Any
 import re
+
+
 @dataclass
 class Atom:
     species: str
@@ -155,6 +157,8 @@ class processor_base:
         self.input_path = path
         self.abs_input_path: str | Path
         self.err_str = err_str
+        self.re_float = re.compile(r"[-+]?\d*\.\d+")
+        self.re_index = re.compile(r"\d+")
 
     def resolve_path(self) -> None:
         try:
@@ -250,7 +254,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
                         species=split_atom_data[3],
                         can_move=split_atom_data[4:],
                         coords=np.array(split_atom_data[:3]).astype(float),
-                        number=atom_number
+                        number=atom_number,
                     )
                 )
                 atom_number += 1
@@ -295,7 +299,7 @@ class atom_charge(processor_base):
             for line in conquest_charge_file:
                 total_up_down = line.split()
                 if total_up_down:
-    
+
                     self.conquest_charge_data.append(np.array(total_up_down).astype(float))
                 else:
                     continue
@@ -317,20 +321,23 @@ class block_processor:
     Sometimes these blocks are categorised by spins and have comments
     # at the start of the category
     """
+
     def __init__(self) -> None:
         self.blocks: list[npt.NDArray[np.number]] = []
-        self.current_block: list[npt.NDArray[np.number]] = [] # temp storage
+        self.current_block: list[npt.NDArray[np.number]] = []  # temp storage
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
         self.re_index = re.compile(r"\d+")
+
     def process_headers(self, *args, **kwargs) -> Any:
         """This function can be overridden by subclasses to process header lines starting with #
         Bandstructure and DOS/pDOS files have slightly different headers
         """
         pass
+
     def process_block(self, line: str) -> None:
-        """In CONQUEST, blocks are separated by & on its own newline
-        """
+        """In CONQUEST, blocks are separated by & on its own newline"""
         pass
+
     def read_file(self, filename: str | Path) -> None:
         with open(filename, "r", encoding="utf-8") as f:
             num_spins = 0

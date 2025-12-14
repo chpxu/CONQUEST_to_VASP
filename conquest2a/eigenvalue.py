@@ -13,8 +13,8 @@ import re
 class k_point_blocks:
     k_index: int
     weight: c2at.FLOAT
-    eigenvalues: c2at.REAL_ARRAY = field(default_factory=lambda: np.zeros((1, 10)))
-    eigenvalues_with_fermi: c2at.REAL_ARRAY = field(default_factory=lambda: np.empty((1, 3)))
+    eigenvalues: c2at.REAL_ARRAY = field(default_factory=lambda: np.zeros((10)))
+    eigenvalues_with_fermi: c2at.REAL_ARRAY = field(default_factory=lambda: np.zeros((10)))
     k_vector: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
 
 
@@ -81,8 +81,6 @@ class eigenvalues_processor(processor_base):
                 if cmin < cbm:
                     cbm = cmin
                     block_with_CBm = block
-        print(vbm)
-        print(cbm)
         return block_with_CBm, block_with_VBm, vbm, cbm
 
     def get_bandgap(self) -> tuple[k_point_blocks, k_point_blocks, c2at.REAL_NUMBER]:

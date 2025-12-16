@@ -1,7 +1,8 @@
 # 0.2.0
 
 ## Features
-- Refactored project structure to prepare for package release
+- Refactored project structure
+- Created `_types.py` and `constants.py`.
 - Split file writer classes into `src/writers.py`
 - Classes dealing with processing the Conquest coordinates file is in `src/conquest.py`
 - Classes making Conquest coordinates-compliant supercells are in `src/supercell.py` (NEW)
@@ -12,11 +13,19 @@
     - create an `xsf_writer` class in `src/writers.py` to write this data, including the spin
 - pDOS processing (NEW!)
     - Supports reading pDOS files for $l,m$ and $l$ decomposed situations
-    - Reads `Conquest_input` to search for the used coordinates file, and maps each file to its atom number.
+- Band structure processing (`band.py`)
+- $k$-nearest-neighbour searching via periodic KDTrees (`algo/kdtree.py`).
+- Extracting forces and stresses from static output files (`read/quantities.py`)
+
+
 ## Misc
+- All modules now are integrated with NumPy.
+- `Atoms` class now has attributes `spin` and `forces`, both of which are NumPy arrays
+
+## Development
 
 - Added flake8, pylint, mypy and black to the repo
-- Added some initial tests in `tests/`
+- Added some initial tests in `tests/` with pytest
 
 # 0.1.0 - Initial release
 

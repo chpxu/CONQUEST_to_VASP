@@ -20,7 +20,7 @@ If you are attempting to integrate this directly into your Nix devShell, you wil
 2. [Bandstructures](#bandstructures)
 3. [pDOS](#pdos)
 4. [kNN](#k-nearest-neighbours)
-
+5. [Quantities](#quantities)
 These steps assume you are already in the directory where `Conquest_input` and other relevant files sit. There is however, file path checking + absolute path resolution, for implementing when using in your own scripts, so relative paths _shouldn't_ be an issue.
 
 ### Initialising your input
@@ -32,6 +32,7 @@ from conquest2a.supercell import * # for supercell creation
 from conquest2a.writers import * # to write output files to disk
 from conquest2a.pdos import * # to process (p)DOS
 from conquest2a.band import * # to process BandStructure.dat
+from conquest2a.read.quantities import * # to process static output files without ASE
 from conquest2a.algo.kdtree import PeriodicKDTree # for nearest-neighbour searching
 ```
 Next, get the path to your Conquest coordinates file, and instantiate `(1)` as
@@ -130,6 +131,27 @@ Remark 2: Reading pdos files automatically, and storing all of their data at onc
 where again the numpy arrays are in ascending order of spins. These dicts can be accessed as `processor_instance.lm_dict` or `processor_instance.l_dict`.
 
 See `examples/plot_test_pdos.py` for an example of plotting the data obtained from a pDOS file.
+### Quantities
+
+As detailed on the [CONQUEST docs](https://conquest.readthedocs.io/en/latest/ase-conquest.html), you can manage it with [ASE](https://ase-lib.org/) indirectly by setting the flag `IO.WriteOutToASEFile True` in your `Conquest_input` file. Sometimes, you just forget to add flags when you need to, and then proceed to do numerous calculations without ASE, and thus `conquest2a/read/quantities.py` was created. 
+
+By pointing to a file from a static run, this module was fetch the free energy, Harris-Foulkes energy, DFT total energty, forces on each atom (and assign them to the right `Atom` instances), max force and total stresses from near the end of the file.
+
+First, load your species dictionary correctly, according to your coordinates file. Then,
+
+```py
+from conquest2a.conquest import *
+from conquest2a.read.quantities import *
+test_input = conquest_input({1: "Bi", 2: "Mn", 3: "O"})
+test_coords_proc = conquest_coordinates_processor("./tests/data/test.dat", test_input)
+output = read_static_file("tests/data/test_output.txt", test_coords_proc) # will do all the quantity fetching automatically
+
+output.DFT_energy
+output.harris_foulkes_energy
+#...
+```
+
+Forces can be accessed per atom.
 
 ### 0.1.0 and older
 Usage is simple and there are **no external library dependencies** (currently). Either use `main.py` from the Releases tab, or clone the repo and copy `main.py` to your desired location.

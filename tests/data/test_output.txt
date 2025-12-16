@@ -1,0 +1,281 @@
+    ________________________________________________________________________
+                                                                            
+                                    CONQUEST                                
+                                                                            
+                Concurrent Order N QUantum Electronic STructure             
+    ________________________________________________________________________
+                                                                            
+     Conquest lead developers:                                              
+      D.R.Bowler (UCL, NIMS), T.Miyazaki (NIMS), A.Nakata (NIMS),           
+      L. Truflandier (U. Bordeaux)                                          
+                                                                            
+     Developers:                                                            
+      M.Arita (NIMS), J.S.Baker (UCL), V.Brazdova (UCL), R.Choudhury (UCL), 
+      S.Y.Mujahed (UCL), J.T.Poulton (UCL), Z.Raza (NIMS), A.Sena (UCL),    
+      U.Terranova (UCL), L.Tong (UCL), A.Torralba (NIMS)                    
+                                                                            
+     Early development:                                                     
+      I.J.Bush (STFC), C.M.Goringe (Keele), E.H.Hernandez (Keele)           
+                                                                            
+     Original inspiration and project oversight:                            
+      M.J.Gillan (Keele, UCL)                                               
+    ________________________________________________________________________
+ num_plusUproj =           4
+
+    Simulation cell dimensions:    14.1965 a0 x    14.0306 a0 x    14.3049 a0
+
+      Atomic coordinates (a0)
+         Atom         X         Y         Z  Species
+            1    0.2008   13.7300    0.2590        2
+            2    7.2981    6.7321    7.4128        2
+            3    0.2284    6.6389    0.4745        5
+            4    0.2853    6.7034    7.6038        5
+            5    0.3129   13.6742    7.6759        3
+            6    7.4179    6.6626    0.5232        3
+            7    7.3273   13.6802    7.6296        5
+            8    7.3833   13.6550    0.4501        5
+            9   10.9511   10.2028    4.0590        4
+           10   10.8716   10.1236   11.1866        6
+           11   10.9368    3.1242    4.0794        6
+           12   10.8494    3.2153   11.1611        4
+           13    3.8357   10.1476   11.2389        4
+           14    3.7506   10.2119    4.0107        6
+           15    3.7710    3.0917    4.0271        4
+           16    3.8597    3.1930   11.1998        6
+           17   10.2056   13.5950   12.3931        1
+           18    3.1059    6.7401    5.2386        1
+           19    4.5801   13.5835    2.8020        1
+           20   11.6816    6.7453    9.9590        1
+           21    9.9404   13.7184    3.0939        1
+           22    2.8457    6.6191   10.2434        1
+           23    4.8483   13.7432   12.1066        1
+           24   11.9452    6.6043    4.9583        1
+           25    0.4317    2.0734   10.3911        1
+           26    7.5932    9.0880    3.2699        1
+           27    0.4849   11.2421   10.4128        1
+           28    7.5258    4.2287    3.2278        1
+           29    0.0413   11.1697    5.0501        1
+           30    7.2201    4.2219   12.1597        1
+           31    7.1381    9.1667   12.1913        1
+           32    0.1170    2.0836    5.0001        1
+           33   11.9717    3.9808    0.1902        1
+           34    4.8555   11.0364    7.4047        1
+           35   11.9344    9.2553    0.2525        1
+           36    4.8612    2.2831    7.3472        1
+           37    9.7750    2.3161    7.8792        1
+           38    2.6916    9.2885    0.6861        1
+           39    2.6670    3.9552    0.7318        1
+           40    9.7827   11.0143    7.8503        1
+
+         Monkhorst-Pack mesh:   3 x   3 x   3 gamma-centred
+
+    This calculation includes non-local pseudopotentials,
+    with a maximum core radius of      7.45031468
+
+    This job was run on  2025/12/15 at 11:43 -0000
+    Code was compiled on 2025/11/14 at 15:54 +0000
+    Version comment: Git Branch: f-DFT-plus-U; tag, hash: v1.4-49-gf3f1e881
+
+    Job title:                                                                                 
+    Job to be run: static calculation
+
+    Ground state search:
+      Support functions represented with PAO basis
+      1:1 PAO to SF mapping
+      Spin-polarised electrons; population difference free
+      Solving for the K matrix using diagonalisation 
+      Using Fermi-Dirac smearing
+
+    Integration grid size:     96 x   96 x   96
+
+    Integration grid spacing:  0.148 a0 x 0.146 a0 x 0.149 a0
+
+    Number of species:  6
+    --------------------------------------------------------
+    |   #  mass (au)  Charge (e)  SF Rad (a0)  NSF  Label  |
+    --------------------------------------------------------
+    |   1     16.000       6.000        5.066   13  O      |
+    |   2    208.980      15.000        7.600   18  Bi     |
+    |   3     54.940      15.000        7.450   19  MnA_U  |
+    |   4     54.940      15.000        7.450   19  MnB_U  |
+    |   5     54.940      15.000        7.450   19  MnA_D  |
+    |   6     54.940      15.000        7.450   19  MnB_D  |
+    --------------------------------------------------------
+          SCF tolerance:                 0.00000001
+          SCF iterations:               200
+
+    The calculation will be performed on     8 processes
+
+    Using the default matrix multiplication kernel
+          DFT+U calculation will be performed
+          DFT+U PK Matrix range  =  1.0000 a0
+
+    Number of DFT-U projectors:  4
+    ----------------------------------------
+    |   species   n  l  zeta  U-value (Ha)  
+    ----------------------------------------
+    | 3  MnA_U    3  2  2    0.184     |
+    | 4  MnB_U    3  2  2    0.184     |
+    | 5  MnA_D    3  2  2    0.184     |
+    | 6  MnB_D    3  2  2    0.184     |
+
+WARNING: AtomMove.InitialChargeDensity is changed to AtomicCharge, since AtomMove.ReuseDM is false
+
+    LibXC version:  7. 0. 0
+    Using the GGA functional Wu & Cohen
+    Using the GGA functional Perdew, Burke & Ernzerhof
+    set_atom_dens: In set_atomic_density, electrons (spin=1):     189.000000000000
+    set_atom_dens: In set_atomic_density, electrons (spin=2):     195.000000000000
+    PulayMixSC: Starting Pulay mixing, A_up =  0.500 A_dn =  0.500
+    PulayMixSC: Spin populations are to be relaxed.
+    PulayMixSC: with Kerker preconditioning, q0 =  0.100
+          Harris-Foulkes Energy            :     -2085.828692082476664 Ha
+          Free Energy (E-TS)               :     -2085.828692427889564 Ha
+    PulayMixSC: Pulay iteration     1 residual:              0.33174E-02
+          Harris-Foulkes Energy            :     -2084.063706177129006 Ha
+    PulayMixSC: Pulay iteration     2 residual:              0.21692E-02
+          Harris-Foulkes Energy            :     -2084.042153618787779 Ha
+    PulayMixSC: Pulay iteration     3 residual:              0.13835E-02
+          Harris-Foulkes Energy            :     -2084.137072081969109 Ha
+    PulayMixSC: Pulay iteration     4 residual:              0.47006E-03
+          Harris-Foulkes Energy            :     -2084.151893479017417 Ha
+    PulayMixSC: Pulay iteration     5 residual:              0.30970E-03
+          Harris-Foulkes Energy            :     -2084.161264786185257 Ha
+    PulayMixSC: Pulay iteration     6 residual:              0.19838E-03
+          Harris-Foulkes Energy            :     -2084.168027461547808 Ha
+    PulayMixSC: Pulay iteration     7 residual:              0.76344E-04
+          Harris-Foulkes Energy            :     -2084.168553416093346 Ha
+    PulayMixSC: Pulay iteration     8 residual:              0.51325E-04
+          Harris-Foulkes Energy            :     -2084.169018093492014 Ha
+    PulayMixSC: Pulay iteration     9 residual:              0.31055E-04
+          Harris-Foulkes Energy            :     -2084.169234009522370 Ha
+    PulayMixSC: Pulay iteration    10 residual:              0.16517E-04
+          Harris-Foulkes Energy            :     -2084.169289989306435 Ha
+    PulayMixSC: Pulay iteration    11 residual:              0.11501E-04
+          Harris-Foulkes Energy            :     -2084.169307448223208 Ha
+    PulayMixSC: Pulay iteration    12 residual:              0.50751E-05
+          Harris-Foulkes Energy            :     -2084.169313145284832 Ha
+    PulayMixSC: Pulay iteration    13 residual:              0.34923E-05
+          Harris-Foulkes Energy            :     -2084.169315067957996 Ha
+    PulayMixSC: Pulay iteration    14 residual:              0.25677E-05
+          Harris-Foulkes Energy            :     -2084.169316008784790 Ha
+    PulayMixSC: Pulay iteration    15 residual:              0.17041E-05
+          Harris-Foulkes Energy            :     -2084.169316493674160 Ha
+    PulayMixSC: Pulay iteration    16 residual:              0.78558E-06
+          Harris-Foulkes Energy            :     -2084.169316666269424 Ha
+    PulayMixSC: Pulay iteration    17 residual:              0.95082E-06
+          Harris-Foulkes Energy            :     -2084.169316788612377 Ha
+    PulayMixSC: Pulay iteration    18 residual:              0.41067E-06
+          Harris-Foulkes Energy            :     -2084.169316862008145 Ha
+    PulayMixSC: Pulay iteration    19 residual:              0.67322E-06
+          Harris-Foulkes Energy            :     -2084.169316898723082 Ha
+    PulayMixSC: Pulay iteration    20 residual:              0.42263E-06
+          Harris-Foulkes Energy            :     -2084.169316919939774 Ha
+    PulayMixSC: Pulay iteration    21 residual:              0.24136E-06
+          Harris-Foulkes Energy            :     -2084.169316938602151 Ha
+    PulayMixSC: Pulay iteration    22 residual:              0.23224E-06
+          Harris-Foulkes Energy            :     -2084.169316944921320 Ha
+    PulayMixSC: Pulay iteration    23 residual:              0.17670E-06
+          Harris-Foulkes Energy            :     -2084.169316949918993 Ha
+    PulayMixSC: Pulay iteration    24 residual:              0.99821E-07
+          Harris-Foulkes Energy            :     -2084.169316952344616 Ha
+    PulayMixSC: Pulay iteration    25 residual:              0.76786E-07
+          Harris-Foulkes Energy            :     -2084.169316953876660 Ha
+    PulayMixSC: Pulay iteration    26 residual:              0.44965E-07
+          Harris-Foulkes Energy            :     -2084.169316954740680 Ha
+    PulayMixSC: Pulay iteration    27 residual:              0.20090E-07
+          Harris-Foulkes Energy            :     -2084.169316955296836 Ha
+    PulayMixSC: Pulay iteration    28 residual:              0.75123E-07
+          Harris-Foulkes Energy            :     -2084.169316955589693 Ha
+    PulayMixSC: Pulay iteration    29 residual:              0.11470E-07
+          Harris-Foulkes Energy            :     -2084.169316955760678 Ha
+    PulayMixSC: Pulay iteration    30 residual:              0.24894E-07
+    PulayMixSC: Pulay iteration is reset !!  at  30 th iteration
+          Harris-Foulkes Energy            :     -2084.169316955858449 Ha
+    PulayMixSC: Pulay iteration    31 residual:              0.23754E-07
+          Harris-Foulkes Energy            :     -2084.169316955917111 Ha
+    PulayMixSC: Pulay iteration    32 residual:              0.20067E-07
+          Harris-Foulkes Energy            :     -2084.169316955952127 Ha
+    PulayMixSC: Pulay iteration    33 residual:              0.24113E-07
+          Harris-Foulkes Energy            :     -2084.169316955983504 Ha
+    PulayMixSC: Pulay iteration    34 residual:              0.47958E-07
+          Harris-Foulkes Energy            :     -2084.169316955988506 Ha
+    PulayMixSC: Pulay iteration    35 residual:              0.31277E-07
+          Harris-Foulkes Energy            :     -2084.169316955996237 Ha
+    PulayMixSC: Pulay iteration    36 residual:              0.31094E-07
+          Harris-Foulkes Energy            :     -2084.169316955995328 Ha
+    PulayMixSC: Pulay iteration    37 residual:              0.11739E-07
+          Harris-Foulkes Energy            :     -2084.169316955998511 Ha
+    PulayMixSC: Pulay iteration    38 residual:              0.12076E-07
+          Harris-Foulkes Energy            :     -2084.169316955996692 Ha
+    PulayMixSC: Pulay iteration    39 residual:              0.13210E-08
+    PulayMixSC: Reached SCF tolerance of  0.13210E-08 after     39 iterations
+      | Number of electrons (u/d)=       188.000046      196.000058
+      | Free Energy as E-TS      =     -2085.223537504489741 Ha
+      |* Harris-Foulkes energy   =     -2084.169316955996692 Ha
+      |* DFT total energy        =     -2084.169316937929580 Ha
+
+    force: Forces on atoms (Ha/a0)
+    force:  Atom   X              Y              Z
+    force:     1   0.0002782495   0.0000068383  -0.0000413062
+    force:     2   0.0003892557   0.0000356254   0.0002475975
+    force:     3   0.0002456270   0.0032882644   0.0000992548
+    force:     4   0.0004631965   0.0002391905   0.0000486928
+    force:     5  -0.0002253267  -0.0052140914   0.0004480502
+    force:     6  -0.0002399996   0.0059052979  -0.0000249075
+    force:     7   0.0006190749  -0.0038509176   0.0002667661
+    force:     8   0.0005425301  -0.0000230342  -0.0001306167
+    force:     9  -0.0024269098  -0.0026503353   0.0002617555
+    force:    10   0.0008344283   0.0014180231   0.0012363461
+    force:    11  -0.0005593227   0.0014285133  -0.0009584184
+    force:    12   0.0030234533  -0.0032474342   0.0017382554
+    force:    13  -0.0018293738   0.0018987797  -0.0008026215
+    force:    14   0.0019257737  -0.0017815550   0.0029107909
+    force:    15   0.0019550703   0.0025870048   0.0007211367
+    force:    16  -0.0016236235  -0.0019491747  -0.0000173495
+    force:    17   0.0048434013   0.0052873954  -0.0019508019
+    force:    18   0.0048297760  -0.0047175752  -0.0021673871
+    force:    19  -0.0042131498   0.0048345134  -0.0000314216
+    force:    20  -0.0041277988  -0.0043181319  -0.0000681891
+    force:    21   0.0033942474  -0.0006964169   0.0041862286
+    force:    22   0.0033903287   0.0013626507   0.0042037472
+    force:    23  -0.0036376354  -0.0011876185  -0.0054391860
+    force:    24  -0.0038521638   0.0013711763  -0.0056127457
+    force:    25  -0.0027183382   0.0073562823   0.0061594699
+    force:    26  -0.0027093304   0.0031307265   0.0027623846
+    force:    27  -0.0016373575  -0.0025366927   0.0025754870
+    force:    28  -0.0027998357  -0.0076078133   0.0061745941
+    force:    29   0.0034490759  -0.0033906998  -0.0014912369
+    force:    30   0.0007482836  -0.0070143418  -0.0048940907
+    force:    31   0.0030230807   0.0030950429  -0.0013967087
+    force:    32   0.0007943043   0.0070261837  -0.0051692252
+    force:    33  -0.0062138622  -0.0068683451   0.0071124396
+    force:    34  -0.0046063444  -0.0061083432   0.0029477578
+    force:    35  -0.0045553598   0.0056845165   0.0036727676
+    force:    36  -0.0066078026   0.0071598794   0.0066667544
+    force:    37   0.0059758664   0.0064097732  -0.0068567572
+    force:    38   0.0037843494   0.0055417180  -0.0041490191
+    force:    39   0.0058978524  -0.0064212022  -0.0069908079
+    force:    40   0.0036881604  -0.0055424044  -0.0048613335
+
+    force: Maximum force :        0.00760781(Ha/a0) on atom        28 in y direction
+    force: Force Residual:        0.00659033 Ha/a0
+    force: Total stress:            -0.49166034       -0.31377991        0.46505454 GPa
+    force: Average pressure:      0.11346190 GPa
+
+    get_E_and_F: Change in energy during last step of electronic optimisation:  0.18190E-11
+
+    BIBLIOGRAPHY: Please consider citing the following references in the conquest.bib file
+
+    CONQUEST:         Bowler2002pt, Miyazaki2004, Nakata2020
+    Basis:            Bowler2019
+    DM:               Bowler:2006xr
+    Pseudopotentials: Hamann2013, Bowler2019
+    XC references from LibXC:
+      J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 77, 3865 (1996)
+
+    Warnings written to file Conquest_warnings; please check
+
+    Max total mem use is           1541.575 MB
+
+    Total run time was:            1395.037 seconds

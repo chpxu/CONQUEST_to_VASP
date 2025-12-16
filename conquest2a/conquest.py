@@ -18,8 +18,9 @@ class Atom:
     coords: c2at.REAL_ARRAY
     can_move: Sequence[str]
     number: int
-    spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     label: str = ""
+    forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
+    spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
 
 
 class conquest_input:

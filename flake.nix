@@ -52,5 +52,13 @@
         ];
         packages = configuration.packages ++ [pkgs.bashInteractive];
       };
+      packages.default = pkgs."python${attrs.pythonVer}Packages".buildPythonPackage {
+        pname = "conquest2a";
+        version = "0.2.0";
+        pyproject = true;
+        src = ./.;
+        buildInputs = with pkgs."python${attrs.pythonVer}Packages"; [numpy hatchling];
+        enableParallelBuilding = true;
+      };
     });
 }

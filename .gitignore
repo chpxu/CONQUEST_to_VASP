@@ -6,3 +6,4 @@ venv
 .pytest*
 .mypy*
 dist
+result

@@ -7,3 +7,4 @@ venv
 .mypy*
 dist
 result
+_nix*

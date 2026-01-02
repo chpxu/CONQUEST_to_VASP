@@ -55,6 +55,7 @@ extend-exclude = '''
   ^/_*
   | .*_pb2.py
   | .nix*
+  | _nix*
   | tests/*
 )
 '''

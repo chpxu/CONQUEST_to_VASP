@@ -19,8 +19,8 @@ class KDBranch(KDNode):
         self,
         index: c2at.INTEGER,
         axis: c2at.INTEGER,
-        left: KDBranch | KDNode,
-        right: KDBranch | KDNode,
+        left: KDBranch | KDNode | None,
+        right: KDBranch | KDNode | None,
     ) -> None:
         super().__init__(index=index, axis=axis)
         self.left = left
@@ -39,9 +39,10 @@ class PeriodicKDTree:
         self.points[:, 1] *= box[1]
         self.points[:, 2] *= box[2]
         idx = np.arange(len(self.points))
+        self.idx = idx
         self.root = self._build_tree(idx, depth=0)
 
-    def _build_tree(self, idx: c2at.INT_ARRAY, depth: c2at.INTEGER) -> KDBranch | KDNode | None:
+    def _build_tree(self, idx: c2at.INT_ARRAY, depth: c2at.INTEGER) -> KD:
         if len(idx) == 0:
             return None
         axis = depth % 3
@@ -51,11 +52,10 @@ class PeriodicKDTree:
         mid = len(sorted_idx) // 2
         left_new_branch: KD = self._build_tree(sorted_idx[:mid], depth + 1)
         right_new_branch: KD = self._build_tree(sorted_idx[(mid + 1) :], depth + 1)
-        if left_new_branch is not None and right_new_branch is not None:
-            return KDBranch(
-                index=sorted_idx[mid], axis=axis, left=left_new_branch, right=right_new_branch
-            )
-        return None
+        # if left_new_branch is not None and right_new_branch is not None:
+        return KDBranch(
+            index=sorted_idx[mid], axis=axis, left=left_new_branch, right=right_new_branch
+        )
 
     def squared_distance(self, p: c2at.REAL_ARRAY, q: c2at.REAL_ARRAY) -> c2at.REAL_NUMBER:
         d = p - q
@@ -81,24 +81,25 @@ class PeriodicKDTree:
     ) -> None:
         if node is None or not isinstance(node, KDBranch):
             return
-
+        # not isinstance(node, KDBranch)
         point = self.points[node.index]
-        d_sq = self.squared_distance(query.coords, point)
-        print(d_sq)
-        self.add_to_heap(d_sq=d_sq, idx=node.index, heap=heap, k=k)
+        if not np.allclose(query.coords, point):
+            d_sq = self.squared_distance(query.coords, point)
+            # print(d_sq)
+            self.add_to_heap(d_sq=d_sq, idx=node.index, heap=heap, k=k)
 
-        axis = node.axis
-        diff = query.coords[axis] - point[axis]
-        # map onto canonical unit cell
-        diff -= np.round(diff / box[axis]) * box[axis]
-        if diff < 0:
-            first, second = node.left, node.right
-        else:
-            first, second = node.right, node.left
-        self.search(first, box, heap, k, query)
-        plane_dist_sq = diff * diff
-        if len(heap) < k or plane_dist_sq < -heap[0][0]:
-            self.search(second, box, heap, k, query)
+            axis = node.axis
+            diff = query.coords[axis] - point[axis]
+            # map onto canonical unit cell
+            diff -= np.round(diff / box[axis]) * box[axis]
+            if diff < 0:
+                first, second = node.left, node.right
+            else:
+                first, second = node.right, node.left
+            self.search(first, box, heap, k, query)
+            plane_dist_sq = diff * diff
+            if len(heap) < k or plane_dist_sq < -heap[0][0]:
+                self.search(second, box, heap, k, query)
 
     def knn(
         self, query: Atom, k: c2at.INTEGER

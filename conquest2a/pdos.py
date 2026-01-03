@@ -97,6 +97,8 @@ class pdos_l_processor(pdos_processor):
             for l in range(num_l):
                 if str(l) not in l_dict:
                     l_dict[str(l)] = []
+                if len(l_dict[str(l)]) > 0:
+                    l_dict[str(l)] = []
                 l_dict[str(l)].append(pdos_values[:, l])
         self.l_dict = l_dict
 
@@ -133,6 +135,8 @@ class pdos_lm_processor(pdos_processor):
                     lm_key = f"{l},{m}"
                     if lm_key not in lm_dict:
                         lm_dict[lm_key] = []
+                    if len(lm_dict[lm_key]) > 0:
+                        lm_dict[lm_key] = []
                     lm_dict[lm_key].append(pdos_values[:, i])
                     m_count += 1
                 else:
@@ -141,6 +145,8 @@ class pdos_lm_processor(pdos_processor):
                     m = -l + m_count
                     lm_key = f"{l},{m}"
                     if lm_key not in lm_dict:
+                        lm_dict[lm_key] = []
+                    if len(lm_dict[lm_key]) > 0:
                         lm_dict[lm_key] = []
                     lm_dict[lm_key].append(pdos_values[:, i])
                     m_count += 1

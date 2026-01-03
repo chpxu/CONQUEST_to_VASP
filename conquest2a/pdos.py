@@ -22,6 +22,11 @@ class pdos_processor(block_processor):
         self.resolve_path()
         self.locate_pdos_files()
 
+    def clear_pdos(
+        self, pdos: dict[str, list[c2at.REAL_ARRAY]]
+    ) -> dict[str, list[c2at.REAL_ARRAY]]:
+        return {key: [] for key in pdos}
+
     def process_headers(self, line: str, num_spins: int) -> None:
         if "# Spin" in line:
             num_spins += 1
@@ -76,6 +81,7 @@ class pdos_l_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
         self.num_spins: int = 0
         super().__init__(conquest_rundir=conquest_rundir, lm="l")
+        self.l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         # PDOS file is split into blocks separated by "&" lines
         # The first column of each block is the energy values
         # The second column is the total PDOS, i.e sum of all l, at that energy
@@ -89,6 +95,7 @@ class pdos_l_processor(pdos_processor):
     def l_map(self) -> None:
         # From column 3, there are only l-contributions, and is sorted by ascending l values, and each row is just ech l-contribution at that energy
         l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
+        self.l_dict = self.clear_pdos(self.l_dict)
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
@@ -96,8 +103,6 @@ class pdos_l_processor(pdos_processor):
             num_l = pdos_values.shape[1]
             for l in range(num_l):
                 if str(l) not in l_dict:
-                    l_dict[str(l)] = []
-                if len(l_dict[str(l)]) > 0:
                     l_dict[str(l)] = []
                 l_dict[str(l)].append(pdos_values[:, l])
         self.l_dict = l_dict
@@ -107,6 +112,7 @@ class pdos_lm_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
         self.num_spins: int = 0
         super().__init__(conquest_rundir=conquest_rundir, lm="lm")
+        self.lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         # PDOS file is split into blocks separated by "&" lines
         # The first column of each block is the energy values
         # The second column is the total PDOS, i.e sum of all l and m, at that energy
@@ -122,6 +128,7 @@ class pdos_lm_processor(pdos_processor):
         # We sort self.blocks to a dictionary with keys denoted by "l,m" and values as the corresponding PDOS arrays
         # We also create a map of energies for each spin
         lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
+        self.lm_dict = self.clear_pdos(self.lm_dict)
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
@@ -135,8 +142,6 @@ class pdos_lm_processor(pdos_processor):
                     lm_key = f"{l},{m}"
                     if lm_key not in lm_dict:
                         lm_dict[lm_key] = []
-                    if len(lm_dict[lm_key]) > 0:
-                        lm_dict[lm_key] = []
                     lm_dict[lm_key].append(pdos_values[:, i])
                     m_count += 1
                 else:
@@ -145,8 +150,6 @@ class pdos_lm_processor(pdos_processor):
                     m = -l + m_count
                     lm_key = f"{l},{m}"
                     if lm_key not in lm_dict:
-                        lm_dict[lm_key] = []
-                    if len(lm_dict[lm_key]) > 0:
                         lm_dict[lm_key] = []
                     lm_dict[lm_key].append(pdos_values[:, i])
                     m_count += 1

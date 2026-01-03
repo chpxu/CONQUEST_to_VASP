@@ -101,9 +101,7 @@ class PeriodicKDTree:
             if len(heap) < k or plane_dist_sq < -heap[0][0]:
                 self.search(second, box, heap, k, query)
 
-    def knn(
-        self, query: Atom, k: c2at.INTEGER
-    ) -> Sequence[tuple[int | np.integer, float | np.floating]]:
+    def knn(self, query: Atom, k: c2at.INTEGER) -> Sequence[tuple[Atom, c2at.REAL_NUMBER]]:
         heap: list[Any] = []
         if self.root is None:
             raise TypeError("Your root tree is None - unexpected!")

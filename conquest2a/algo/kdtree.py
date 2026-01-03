@@ -107,6 +107,10 @@ class PeriodicKDTree:
         heap: list[Any] = []
         if self.root is None:
             raise TypeError("Your root tree is None - unexpected!")
+        if k < 1:
+            raise ValueError(
+                "The number of nearest neighbours to search for cannot be less than 1."
+            )
         query_cart = copy.deepcopy(query)
         query_cart.coords[0] *= self.box[0]
         query_cart.coords[1] *= self.box[1]

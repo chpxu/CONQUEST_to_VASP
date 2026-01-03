@@ -338,6 +338,7 @@ class block_processor:
         pass
 
     def read_file(self, filename: str | Path) -> None:
+        self.blocks = []
         with open(filename, "r", encoding="utf-8") as f:
             num_spins = 0
             for line in f:

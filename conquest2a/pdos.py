@@ -95,7 +95,6 @@ class pdos_l_processor(pdos_processor):
     def l_map(self) -> None:
         # From column 3, there are only l-contributions, and is sorted by ascending l values, and each row is just ech l-contribution at that energy
         l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
-        self.l_dict = self.clear_pdos(self.l_dict)
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
@@ -128,7 +127,6 @@ class pdos_lm_processor(pdos_processor):
         # We sort self.blocks to a dictionary with keys denoted by "l,m" and values as the corresponding PDOS arrays
         # We also create a map of energies for each spin
         lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
-        self.lm_dict = self.clear_pdos(self.lm_dict)
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
@@ -136,21 +134,15 @@ class pdos_lm_processor(pdos_processor):
             num_lm = pdos_values.shape[1]
             l = 0
             m_count = 0
+            m = 0
             for i in range(num_lm):
-                if m_count < (2 * l + 1):
-                    m = -l + m_count
-                    lm_key = f"{l},{m}"
-                    if lm_key not in lm_dict:
-                        lm_dict[lm_key] = []
-                    lm_dict[lm_key].append(pdos_values[:, i])
-                    m_count += 1
-                else:
+                if m_count >= (2 * l + 1):
                     l += 1
                     m_count = 0
-                    m = -l + m_count
-                    lm_key = f"{l},{m}"
-                    if lm_key not in lm_dict:
-                        lm_dict[lm_key] = []
-                    lm_dict[lm_key].append(pdos_values[:, i])
-                    m_count += 1
+                m = -l + m_count
+                lm_key = f"{l},{m}"
+                if lm_key not in lm_dict:
+                    lm_dict[lm_key] = []
+                lm_dict[lm_key].append(pdos_values[:, i])
+                m_count += 1
         self.lm_dict = lm_dict

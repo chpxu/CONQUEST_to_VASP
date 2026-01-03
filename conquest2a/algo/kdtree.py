@@ -79,7 +79,7 @@ class PeriodicKDTree:
         k: c2at.INTEGER,
         query: Atom,
     ) -> None:
-        if node is None or not isinstance(node, KDBranch):
+        if node is None:
             return
         # not isinstance(node, KDBranch)
         point = self.points[node.index]
@@ -87,6 +87,8 @@ class PeriodicKDTree:
             d_sq = self.squared_distance(query.coords, point)
             # print(d_sq)
             self.add_to_heap(d_sq=d_sq, idx=node.index, heap=heap, k=k)
+            if not isinstance(node, KDBranch):
+                return
 
             axis = node.axis
             diff = query.coords[axis] - point[axis]

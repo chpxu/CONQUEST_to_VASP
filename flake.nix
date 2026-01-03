@@ -1,5 +1,5 @@
 {
-  description = "Opinionated Flake for Fortran/Python/C/C++/JS Development";
+  description = "CONQUEST2a";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs2505.url = "github:NixOS/nixpkgs/2b0d2b456e4e8452cf1c16d00118d145f31160f9"; # to use for older packages
@@ -52,7 +52,7 @@
         system,
         ...
       }: let
-        userConfig = import ./config.nix {inherit pkgs;};
+        userConfig = import ./config.nix {inherit pkgs config;};
       in {
         _module.args = {
           pkgsOlder = import nixpkgs2505 {

@@ -66,7 +66,7 @@ class pdos_processor(block_processor):
             res = re.match(pdos_rgx, filename)
             if res:
                 pdos_file_list.append(filename)
-        pdos_file_list = sorted(self.all_pdos_files)
+        pdos_file_list = sorted(pdos_file_list)
         for file in pdos_file_list:
             self.all_pdos_files.append(f"{abspath(self.conquest_rundir)}/{file}")
         return self.all_pdos_files

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Literal
 from os.path import abspath
+from conquest2a import conquest
 import numpy as np
 import numpy.typing as npt
 import re
@@ -48,6 +49,9 @@ class pdos_processor(block_processor):
             )
 
     def locate_pdos_files(self) -> list[str]:
+        if len(self.all_pdos_files) > 0:
+            # Reset pdos files array, i.e. if changing directory
+            self.all_pdos_files = []
         if self.lm == "t":
             self.all_pdos_files = ["DOS.dat"]
             return self.all_pdos_files
@@ -57,11 +61,14 @@ class pdos_processor(block_processor):
         for root, dirs, files in os.walk(abs_path, topdown=True):
             file_list = files
             break
+        pdos_file_list: list[str] = []
         for filename in file_list:
             res = re.match(pdos_rgx, filename)
             if res:
-                self.all_pdos_files.append(filename)
-        self.all_pdos_files = sorted(self.all_pdos_files)
+                pdos_file_list.append(filename)
+        pdos_file_list = sorted(self.all_pdos_files)
+        for file in pdos_file_list:
+            self.all_pdos_files.append(f"{abspath(self.conquest_rundir)}/{file}")
         return self.all_pdos_files
 
 

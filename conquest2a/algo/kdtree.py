@@ -4,7 +4,7 @@ import copy
 from typing import Sequence, Any
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import Atom,
+from conquest2a.conquest import Atom
 
 
 class kdnode:

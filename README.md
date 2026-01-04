@@ -6,6 +6,8 @@ A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool w
 - Create supercells (larger cells formed of repeats of a unit cell)
 - Process and sort (p)DOS files into something easy to use for plotting via matplotlib
 - Process and sort `BandStructure.dat` into something easy to use for plotting via matplotlib
+- Nearest-neighbour searching via periodic KDTree implementation
+- Calculation of dihedral and planar angles
 
 ## Installation From 0.2.0
 Usage is simple. In your `venv`, simply
@@ -33,7 +35,7 @@ from conquest2a.writers import * # to write output files to disk
 from conquest2a.pdos import * # to process (p)DOS
 from conquest2a.band import * # to process BandStructure.dat
 from conquest2a.read.quantities import * # to process static output files without ASE
-from conquest2a.algo.kdtree import PeriodicKDTree # for nearest-neighbour searching
+from conquest2a.algo.kdtree import periodic_kdtree # for nearest-neighbour searching
 ```
 Next, get the path to your Conquest coordinates file, and instantiate `(1)` as
 ```py
@@ -56,7 +58,7 @@ The algorithm used is a periodic KDTree, which automatically finds nearest neigh
 from conquest2a.algo.kdtree import PeriodicKDTree
 test_input = conquest_input({1: "Bi", 2: "Mn", 3: "O"})
 test_coords_proc = conquest_coordinates_processor("./tests/test.dat", test_input)
-tree = PeriodicKDTree(atoms=test_coords_proc.Atoms, box=np.array([test_coords_proc.lattice_vectors[i][i] for i in range(3)]))
+tree = periodic_kdtree(atoms=test_coords_proc.Atoms, box=np.array([test_coords_proc.lattice_vectors[i][i] for i in range(3)]))
 nn = tree.knn(query=test_coords_proc.Atoms[0], k=5) # look for the 5 closest atoms
 print(nn)
 ```
@@ -146,7 +148,7 @@ test_input = conquest_input({1: "Bi", 2: "Mn", 3: "O"})
 test_coords_proc = conquest_coordinates_processor("./tests/data/test.dat", test_input)
 output = read_static_file("tests/data/test_output.txt", test_coords_proc) # will do all the quantity fetching automatically
 
-output.DFT_energy
+output.dft_energy
 output.harris_foulkes_energy
 #...
 ```
@@ -184,4 +186,4 @@ Usage is simple and there are **no external library dependencies** (currently). 
 
 Edit `main.py` as necessary. Files may be refactored in the future. 
 
-Dependencies: tested and developed on Python 3.12. Expected to work on Python >= 3.8.
+Dependencies: tested and developed on Python 3.12. Expected to work on Python >= 3.10.

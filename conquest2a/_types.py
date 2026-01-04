@@ -5,9 +5,9 @@ from pathlib import Path
 
 INTEGER = int | np.int64
 FLOAT = float | np.float64
-REAL_NUMBER = INTEGER | FLOAT
+REAL_NUMBER = INTEGER | FLOAT | np.floating[typing.Any]
 NUMBER_ARRAY = npt.NDArray[np.number]
-REAL_ARRAY = npt.NDArray[np.float64 | np.int64]
+REAL_ARRAY = npt.NDArray[np.floating[typing.Any]]
 INT_ARRAY = npt.NDArray[np.int64]
 
 FILE_PATH = str | Path

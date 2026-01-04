@@ -1,11 +1,9 @@
 from pathlib import Path
 from typing import Literal
-from os.path import abspath
-from conquest2a import conquest
-import numpy as np
-import numpy.typing as npt
-import re
 import os
+import re
+from os.path import abspath
+import numpy as np
 from conquest2a.conquest import block_processor
 import conquest2a._types as c2at
 
@@ -14,11 +12,12 @@ class pdos_processor(block_processor):
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
         # self.dos_file = dos_file
         self.blocks: list[c2at.REAL_ARRAY] = []
-        # self.read_pdos_file()
         self.all_pdos_files: list[str] = []
         self.conquest_rundir = conquest_rundir
         self.lm = lm
         super().__init__()
+        self.fermi_level: float = 0.0
+        self.is_shifted_to_fermi: bool = True
         self.resolve_path()
         self.locate_pdos_files()
 
@@ -48,10 +47,7 @@ class pdos_processor(block_processor):
         abs_run_path = Path(abspath(self.conquest_rundir))
         if abs_run_path.exists():
             return abs_run_path
-        else:
-            raise FileNotFoundError(
-                f'Conquest directory specified: "{abs_run_path}", does not exist.'
-            )
+        raise FileNotFoundError(f'Conquest directory specified: "{abs_run_path}", does not exist.')
 
     def locate_pdos_files(self) -> list[str]:
         if len(self.all_pdos_files) > 0:
@@ -63,7 +59,7 @@ class pdos_processor(block_processor):
         abs_path = self.resolve_path()
         pdos_rgx = re.compile(rf"Atom[0-9]{{7}}DOS\_{self.lm}\.dat")
         file_list: list[str] = []
-        for root, dirs, files in os.walk(abs_path, topdown=True):
+        for _, _, files in os.walk(abs_path, topdown=True):
             file_list = files
             break
         pdos_file_list: list[str] = []

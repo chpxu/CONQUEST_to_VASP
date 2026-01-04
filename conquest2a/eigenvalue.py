@@ -1,12 +1,11 @@
 from dataclasses import dataclass, field
 from itertools import islice
-from multiprocessing import Value
+import re
+from pathlib import Path
 import numpy as np
 import conquest2a._types as c2at
 from conquest2a.conquest import processor_base
 from conquest2a.constants import HARTREE_TO_EV
-from pathlib import Path
-import re
 
 
 @dataclass
@@ -29,7 +28,7 @@ class eigenvalues_processor(processor_base):
         self.open_file()
 
     def open_file(self) -> None:
-        with open(self.abs_input_path, "r") as eigfile:
+        with open(self.abs_input_path, "r", encoding="utf-8") as eigfile:
             line1 = next(eigfile)
             misc = re.findall(self.re_index, line1)
             self.num_eigenvalues_per_block = int(misc[0])
@@ -54,13 +53,11 @@ class eigenvalues_processor(processor_base):
                     )
         eigfile.close()
 
-    # def return_k_index(self, k_index: int) -> k_point_eigenvalues:
-    #     for
-    def get_VBM_CBm_eigen(
+    def get_vbm_cbm_eigen(
         self,
     ) -> tuple[k_point_blocks, k_point_blocks, c2at.REAL_NUMBER, c2at.REAL_NUMBER]:
-        block_with_CBm = self.eig_blocks[0]
-        block_with_VBm = self.eig_blocks[0]
+        block_with_cbm = self.eig_blocks[0]
+        block_with_vbm = self.eig_blocks[0]
         vbm: c2at.REAL_NUMBER = -np.inf
         cbm: c2at.REAL_NUMBER = np.inf
         for block in self.eig_blocks:
@@ -75,14 +72,14 @@ class eigenvalues_processor(processor_base):
                 vmax = np.max(valence_eigenvalues)
                 if vmax > vbm:
                     vbm = vmax
-                    block_with_VBm = block
+                    block_with_vbm = block
             if len(conduction_eigenvalues) > 0:
                 cmin = np.min(conduction_eigenvalues)
                 if cmin < cbm:
                     cbm = cmin
-                    block_with_CBm = block
-        return block_with_CBm, block_with_VBm, vbm, cbm
+                    block_with_cbm = block
+        return block_with_cbm, block_with_vbm, vbm, cbm
 
     def get_bandgap(self) -> tuple[k_point_blocks, k_point_blocks, c2at.REAL_NUMBER]:
-        temp = self.get_VBM_CBm_eigen()
+        temp = self.get_vbm_cbm_eigen()
         return temp[0], temp[1], (temp[3] - temp[2]) * HARTREE_TO_EV

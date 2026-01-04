@@ -1,36 +1,35 @@
 from __future__ import annotations
-import numpy as np
-import numpy.typing as npt
-import conquest2a._types as c2at
-from conquest2a.conquest import *
 import heapq
-from typing import Sequence, Any
 import copy
+from typing import Sequence, Any
+import numpy as np
+import conquest2a._types as c2at
+from conquest2a.conquest import Atom,
 
 
-class KDNode:
+class kdnode:
     def __init__(self, index: c2at.INTEGER, axis: c2at.INTEGER) -> None:
         self.index = index
         self.axis = axis
 
 
-class KDBranch(KDNode):
+class kdbranch(kdnode):
     def __init__(
         self,
         index: c2at.INTEGER,
         axis: c2at.INTEGER,
-        left: KDBranch | KDNode | None,
-        right: KDBranch | KDNode | None,
+        left: kdbranch | kdnode | None,
+        right: kdbranch | kdnode | None,
     ) -> None:
         super().__init__(index=index, axis=axis)
         self.left = left
         self.right = right
 
 
-KD = KDBranch | KDNode | None
+KD = kdbranch | kdnode | None
 
 
-class PeriodicKDTree:
+class periodic_kdtree:
     def __init__(self, atoms: list[Atom], box: c2at.REAL_ARRAY) -> None:
         self.atoms = atoms
         self.points = np.array([atom.coords for atom in atoms])  # fractional
@@ -47,13 +46,13 @@ class PeriodicKDTree:
             return None
         axis = depth % 3
         if len(idx) == 1:
-            return KDNode(index=idx[0], axis=axis)
+            return kdnode(index=idx[0], axis=axis)
         sorted_idx = idx[np.argsort(self.points[idx, axis])]
         mid = len(sorted_idx) // 2
         left_new_branch: KD = self._build_tree(sorted_idx[:mid], depth + 1)
         right_new_branch: KD = self._build_tree(sorted_idx[(mid + 1) :], depth + 1)
         # if left_new_branch is not None and right_new_branch is not None:
-        return KDBranch(
+        return kdbranch(
             index=sorted_idx[mid], axis=axis, left=left_new_branch, right=right_new_branch
         )
 
@@ -73,7 +72,7 @@ class PeriodicKDTree:
 
     def search(
         self,
-        node: KDBranch | KDNode | None,
+        node: kdbranch | kdnode | None,
         box: c2at.REAL_ARRAY,
         heap: list[Any],
         k: c2at.INTEGER,
@@ -81,13 +80,11 @@ class PeriodicKDTree:
     ) -> None:
         if node is None:
             return
-        # not isinstance(node, KDBranch)
         point = self.points[node.index]
         if not np.allclose(query.coords, point):
             d_sq = self.squared_distance(query.coords, point)
-            # print(d_sq)
             self.add_to_heap(d_sq=d_sq, idx=node.index, heap=heap, k=k)
-            if not isinstance(node, KDBranch):
+            if not isinstance(node, kdbranch):
                 return
 
             axis = node.axis

@@ -1,10 +1,10 @@
 from io import TextIOWrapper
 from pathlib import Path
 from typing import IO, Any
+import numpy as np
 import conquest2a._types as c2at
 from conquest2a.conquest import conquest_coordinates_processor, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
-import numpy as np
 
 
 class file_writer:

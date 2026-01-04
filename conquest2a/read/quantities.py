@@ -9,12 +9,11 @@ I also attach the force components to each atom, denoted by their atom number.
 """
 
 import re
-import numpy as np
-from pathlib import Path
-import conquest2a._types as c2at
-from conquest2a.conquest import *
-from collections import deque
 from itertools import islice
+from collections import deque
+import numpy as np
+import conquest2a._types as c2at
+from conquest2a.conquest import conquest_input, conquest_coordinates_processor, Atom
 
 
 class read_static_output:
@@ -25,7 +24,7 @@ class read_static_output:
         self.conquest_processor = conquest_processor
         self.buffer: deque[str]
         self.harris_foulkes_energy: c2at.REAL_NUMBER = 0.0  # [Ha]
-        self.DFT_energy: c2at.REAL_NUMBER = 0.0  # [Ha]
+        self.dft_energy: c2at.REAL_NUMBER = 0.0  # [Ha]
         self.free_energy: c2at.REAL_NUMBER = 0.0  # [Ha]
         self.forces_buff: c2at.REAL_ARRAY = np.array([])  # [Ha/bohr]
         self.stresses: c2at.REAL_ARRAY = np.array([])  # [GPa]
@@ -39,7 +38,7 @@ class read_static_output:
         self.get_stresses()
 
     def read_last_n_lines(self) -> deque[str]:
-        with open(self.output_file, "r") as file:
+        with open(self.output_file, "r", encoding="utf-8") as file:
             # 25 comes from misc lines + a line for warnings
             # Then a block is printed for the forces for each atom
             # And also 2 extra kines for the force header
@@ -83,8 +82,8 @@ class read_static_output:
         dft = self._get_quantity_from_lines(
             "|* DFT total energy", "Did not find a DFT total energy line."
         )
-        self.DFT_energy = float(dft[0]) if isinstance(dft, list) else dft
-        return self.DFT_energy
+        self.dft_energy = float(dft[0]) if isinstance(dft, list) else dft
+        return self.dft_energy
 
     def read_assign_forces(self) -> None:
         header_index = 0

@@ -1,8 +1,7 @@
 from pathlib import Path
 from dataclasses import dataclass, field
-import numpy as np
-import numpy.typing as npt
 import re
+import numpy as np
 from conquest2a.conquest import block_processor
 import conquest2a._types as c2at
 
@@ -43,7 +42,6 @@ class bst_processor(block_processor):
     def process_block(self, line: str) -> None:
         if line == "&":
             if self.current_block:
-                # self.blocks.append(np.array(current_block, dtype=float))
                 arrayed_block = np.array(self.current_block, dtype=float)
                 self.bands[self.block_counter].kpoint = arrayed_block[:, 0]
                 self.bands[self.block_counter].energies = arrayed_block[:, 1]

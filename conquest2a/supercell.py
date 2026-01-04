@@ -1,7 +1,7 @@
 import copy
 from collections.abc import Sequence
-from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
 import numpy as np
+from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
 
 
 class supercell:

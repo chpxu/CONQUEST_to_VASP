@@ -1,7 +1,5 @@
 import numpy as np
-import numpy.typing as npt
-import re
-from conquest2a.conquest import *
+from conquest2a.conquest import conquest_coordinates_processor, Atom
 import conquest2a._types as c2at
 
 

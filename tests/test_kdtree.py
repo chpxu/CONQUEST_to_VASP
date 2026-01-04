@@ -6,7 +6,7 @@ import pytest
 conquest_map = conquest_input({1: "O", 2: "Bi", 3: "Mn", 4: "Mn", 5: "Mn", 6: "Mn"})
 path = "./tests/data/test_output_input_coords.in"
 coordsproc = conquest_coordinates_processor(path, conquest_map)
-tree = PeriodicKDTree(
+tree = periodic_kdtree(
     coordsproc.Atoms, box=np.array([coordsproc.lattice_vectors[i][i] for i in range(3)])
 )
 

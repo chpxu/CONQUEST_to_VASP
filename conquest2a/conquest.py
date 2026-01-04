@@ -1,15 +1,12 @@
 from dataclasses import dataclass, field
 import os
+import re
 from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Union
+import numpy as np
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
 import conquest2a._types as c2at
-from typing import Any
-import re
-import numpy as np
-import numpy.typing as npt
 
 
 @dataclass
@@ -326,6 +323,7 @@ class block_processor:
         self.current_block: list[c2at.REAL_ARRAY] = []  # temp storage
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
         self.re_index = re.compile(r"\d+")
+        self.num_spins: int
 
     def process_headers(self, line: str, num_spins: int) -> None:
         """This function can be overridden by subclasses to process header lines starting with #

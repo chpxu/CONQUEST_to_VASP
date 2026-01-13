@@ -1,0 +1,1 @@
+H,He,Ne,Ar,Kr,Xe,Rn,Og,Li,Na,K,Rb,Cs,Fr,Be,Mg,Ca,Sr,Ba,Ra,B,C,N,O,F,Al,Si,P,S,Cl,Ga,Ge,As,Se,Br,In,Sn,Sb,Te,I,Tl,Pb,Bi,Po,At,Nh,Fl,Mc,Lv,Ts,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Y,Zr,Nb,Mo,Tc,Ru,Rh,Pd,Ag,Cd,La,Ce,Pr,Nd,Pm,Sm,Eu,Gd,Tb,Dy,Ho,Er,Tm,Yb,Lu,La,Th,Pa,U,Np,Pu,Am,Cm,Bk,Cf,Es,Fm,Md,No,Lr,Rf,Db,Sg,Bh,Hs,Mt,Ds,Rg,Cn

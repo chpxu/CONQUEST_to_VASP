@@ -1,11 +1,13 @@
 from dataclasses import dataclass, field
 import os
 import re
+import importlib.resources
 from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
+from tarfile import LinkFallbackError
 import numpy as np
-from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
+from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME, LIBRARY
 import conquest2a._types as c2at
 
 
@@ -31,120 +33,15 @@ class conquest_input:
                 new Conquest species, however labels can be any alphanumeric string
                 Therefore we expect a dictionary to be passed in independently.
         """
+        self.element_file = "elements.txt"
         self.species_dict = species_dict
-        self.allowed_element_labels: list[str] = [
-            "H",
-            "He",
-            "Ne",
-            "Ar",
-            "Kr",
-            "Xe",
-            "Rn",
-            "Og",
-            "Li",
-            "Na",
-            "K",
-            "Rb",
-            "Cs",
-            "Fr",
-            "Be",
-            "Mg",
-            "Ca",
-            "Sr",
-            "Ba",
-            "Ra",
-            "B",
-            "C",
-            "N",
-            "O",
-            "F",
-            "Al",
-            "Si",
-            "P",
-            "S",
-            "Cl",
-            "Ga",
-            "Ge",
-            "As",
-            "Se",
-            "Br",
-            "In",
-            "Sn",
-            "Sb",
-            "Te",
-            "I",
-            "Tl",
-            "Pb",
-            "Bi",
-            "Po",
-            "At",
-            "Nh",
-            "Fl",
-            "Mc",
-            "Lv",
-            "Ts",
-            "Sc",
-            "Ti",
-            "V",
-            "Cr",
-            "Mn",
-            "Fe",
-            "Co",
-            "Ni",
-            "Cu",
-            "Zn",
-            "Y",
-            "Zr",
-            "Nb",
-            "Mo",
-            "Tc",
-            "Ru",
-            "Rh",
-            "Pd",
-            "Ag",
-            "Cd",
-            "La",
-            "Ce",
-            "Pr",
-            "Nd",
-            "Pm",
-            "Sm",
-            "Eu",
-            "Gd",
-            "Tb",
-            "Dy",
-            "Ho",
-            "Er",
-            "Tm",
-            "Yb",
-            "Lu",
-            "La",
-            "Th",
-            "Pa",
-            "U",
-            "Np",
-            "Pu",
-            "Am",
-            "Cm",
-            "Bk",
-            "Cf",
-            "Es",
-            "Fm",
-            "Md",
-            "No",
-            "Lr",
-            "Rf",
-            "Db",
-            "Sg",
-            "Bh",
-            "Hs",
-            "Mt",
-            "Ds",
-            "Rg",
-            "Cn",
-        ]
+        # elements_from_file = LIBRARY.joinpath(self.element_file)
+        elements_from_file = importlib.resources.read_text("conquest2a", self.element_file)
+        elements = elements_from_file.split(",")
+        self.allowed_element_labels: list[str] = elements
+        # elements_from_file.close()
         if not self.dict_contains_only_real_elements():
-            raise Exception("Provided species map contains fake chemical elements.")
+            raise ValueError("Provided species map contains fake chemical elements.")
         self.unique_elements = list(set(self.species_dict.values()))
 
     def dict_contains_only_real_elements(self) -> bool:

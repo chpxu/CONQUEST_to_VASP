@@ -12,7 +12,7 @@ class band:
     index: int  # band index
     kpoint: c2at.INT_ARRAY = field(default_factory=lambda: np.array([0, 0, 0]))  # kpoint index.
     energies: c2at.REAL_ARRAY = field(
-        default=np.empty((1, 3))
+        default_factory=lambda: np.empty((1, 3))
     )  # energies at that kpoint for this band
 
 
@@ -25,17 +25,23 @@ class bst_processor(block_processor):
         self.fermi_level: float = 0.0
         self.is_shifted_to_fermi: bool = True
         self.block_counter: int = 0
+        self.current_spin = 0
         self.read_file(filename=self.bst_file)
 
-    def process_headers(self, line: str, num_spins: int) -> None:
+    def process_headers(
+        self,
+        line: str,
+        num_spins: int,
+    ) -> None:
         if "# Spin" in line:
-            num_spins += 1
+            self.num_spins += 1
+            self.current_spin += 1
         if "# Original" in line:
             result = re.findall(self.re_float, line)
             self.fermi_level = float(result[0])
         if "# Band " in line:
             band_index = re.findall(self.re_index, line)
-            self.bands.append(band(index=int(band_index[0]), spin=num_spins))
+            self.bands.append(band(index=int(band_index[0]), spin=self.current_spin))
         if not line.startswith("# Bands shifted"):
             self.is_shifted_to_fermi = False
 

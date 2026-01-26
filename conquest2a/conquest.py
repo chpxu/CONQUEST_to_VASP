@@ -5,7 +5,6 @@ import importlib.resources
 from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
-from tarfile import LinkFallbackError
 import numpy as np
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME, LIBRARY
 import conquest2a._types as c2at
@@ -52,16 +51,16 @@ class conquest_input:
 class processor_base:
     def __init__(self, path: Path | str, err_str: str | None = None) -> None:
         self.input_path = path
-        self.abs_input_path: str | Path
+        self.abs_input_path: Path
         self.err_str = err_str
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
         self.re_index = re.compile(r"\d+")
 
     def resolve_path(self) -> None:
-        abs_coord_path = Path(abspath(self.input_path))
+        abs_coord_path: Path = Path(self.input_path)
         if not abs_coord_path.exists():
             raise FileNotFoundError(f"{abs_coord_path} not found.")
-        if not (abs_coord_path.is_file() and os.stat(abs_coord_path).st_size > 0):
+        if abs_coord_path.is_file() and os.stat(abs_coord_path).st_size <= 0:
             raise RuntimeError(f"{abs_coord_path} was an existing file, but has no file contents.")
         self.abs_input_path = abs_coord_path
 
@@ -111,13 +110,10 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
         processor_base.__init__(
             self, path=path, err_str="Error opening specified CONQUEST coordinates file."
         )
-        try:
-            self.resolve_path()
-            self.open_file()
-            self.assign_atom_labels()
-            self.index_to_atom_map()
-        except FileNotFoundError as e:
-            print(e)
+        self.resolve_path()
+        self.open_file()
+        self.assign_atom_labels()
+        self.index_to_atom_map()
         self.volume_bohr: float = (
             self.lattice_vectors[0][0] * self.lattice_vectors[1][1] + self.lattice_vectors[2][2]
         )

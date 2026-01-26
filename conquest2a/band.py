@@ -17,7 +17,7 @@ class band:
 
 
 class bst_processor(block_processor):
-    def __init__(self, bst_file: str | Path) -> None:
+    def __init__(self, bst_file: str) -> None:
         super().__init__()
         self.bst_file = bst_file
         self.blocks: list[c2at.REAL_ARRAY] = []

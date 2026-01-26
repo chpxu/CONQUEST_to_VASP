@@ -49,8 +49,8 @@ class conquest_input:
 
 
 class processor_base:
-    def __init__(self, path: Path | str, err_str: str | None = None) -> None:
-        self.input_path = path
+    def __init__(self, path: str, err_str: str | None = None) -> None:
+        self.input_path = path.strip()
         self.abs_input_path: Path
         self.err_str = err_str
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
@@ -105,7 +105,7 @@ class conquest_coordinates:
 
 
 class conquest_coordinates_processor(conquest_coordinates, processor_base):
-    def __init__(self, path: Path | str, conquest_input: conquest_input) -> None:
+    def __init__(self, path: str, conquest_input: conquest_input) -> None:
         conquest_coordinates.__init__(self, conquest_input=conquest_input)
         processor_base.__init__(
             self, path=path, err_str="Error opening specified CONQUEST coordinates file."
@@ -160,7 +160,7 @@ class atom_charge(processor_base):
     In particular, make use of the conquest_coordinates class to contain the list of Atoms
     """
 
-    def __init__(self, coordinates: conquest_coordinates, atom_charge_path: Path | str) -> None:
+    def __init__(self, coordinates: conquest_coordinates, atom_charge_path: str) -> None:
         processor_base.__init__(
             self,
             path=atom_charge_path,
@@ -168,7 +168,7 @@ class atom_charge(processor_base):
         )
         self.coordinates = coordinates
         self.atom_charge_path = atom_charge_path
-        self.abs_atom_charge_path: str | Path
+        self.abs_atom_charge_path: str
         self.conquest_charge_data: list[c2at.REAL_ARRAY] = []
 
         try:
@@ -228,7 +228,7 @@ class block_processor:
         """In CONQUEST, blocks are separated by & on its own newline"""
         pass
 
-    def read_file(self, filename: str | Path) -> None:
+    def read_file(self, filename: str) -> None:
         self.blocks = []
         with open(filename, "r", encoding="utf-8") as f:
             num_spins = 0

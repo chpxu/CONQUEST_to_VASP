@@ -18,7 +18,7 @@ class k_point_blocks:
 
 
 class eigenvalues_processor(processor_base):
-    def __init__(self, file: str | Path) -> None:
+    def __init__(self, file: str) -> None:
         self.file = file
         super().__init__(path=file)
         self.resolve_path()

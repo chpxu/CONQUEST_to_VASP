@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import islice
 import re
-from pathlib import Path
 import numpy as np
 import conquest2a._types as c2at
 from conquest2a.conquest import processor_base

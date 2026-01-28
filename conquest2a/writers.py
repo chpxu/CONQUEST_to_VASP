@@ -1,5 +1,4 @@
 from io import TextIOWrapper
-from pathlib import Path
 from typing import IO, Any
 import numpy as np
 import conquest2a._types as c2at
@@ -54,7 +53,7 @@ class conquest_writer(file_writer):
             f"{0.0:.{self.precision}f} {0.0:.{self.precision}f} {self.coords.lattice_vectors[2][2]:.{self.precision}f}\n"
         )
         self.file.write(self.coords.natoms)
-        for atom in self.coords.Atoms:
+        for atom in self.coords.atoms:
             self.file.write(
                 f"{atom.coords[0]:.{self.precision}f} {atom.coords[1]:.{self.precision}f} {atom.coords[2]:.{self.precision}f} {atom.species} {atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}"
             )
@@ -224,8 +223,8 @@ class xsf_writer_spins(file_writer):
             for header_line in header_data:
                 modified_xsf.write(header_line)
             for line in lines:
-                if line.strip() and atom_index < len(self.charges.coordinates.Atoms):
-                    atom = self.charges.coordinates.Atoms[atom_index]
+                if line.strip() and atom_index < len(self.charges.coordinates.atoms):
+                    atom = self.charges.coordinates.atoms[atom_index]
                     spin_info = f"{atom.spins[0]:.10f} {atom.spins[1]:.10f} {atom.spins[2]:.10f}"
                     modified_line = f"{line.strip()} {spin_info}\n"
                     modified_xsf.write(modified_line)

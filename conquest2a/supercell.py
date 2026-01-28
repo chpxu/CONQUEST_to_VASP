@@ -49,7 +49,7 @@ class supercell:
         ]
 
     def new_num_atoms(self) -> int:
-        natoms = len(self.supercell_coords.Atoms)
+        natoms = len(self.supercell_coords.atoms)
         self.supercell_coords.natoms = str(natoms)
         return natoms
 
@@ -107,10 +107,10 @@ class supercell:
         """
         # No repeats at all -> just return original crystal
         if self.repeats_x == 0 and self.repeats_y == 0 and self.repeats_z == 0:
-            self.supercell_coords.Atoms = copy.deepcopy(self.coords.Atoms)
+            self.supercell_coords.atoms = copy.deepcopy(self.coords.atoms)
             self.supercell_coords.natoms = self.coords.natoms
             return
-        for atom in self.coords.Atoms:
+        for atom in self.coords.atoms:
             for l in self.range(self.repeats_x):
                 for m in self.range(self.repeats_y):
                     for n in self.range(self.repeats_z):
@@ -125,6 +125,6 @@ class supercell:
                             ),
                             can_move=atom.can_move,
                             label=atom.label,
-                            number=len(self.supercell_coords.Atoms) + 1,
+                            number=len(self.supercell_coords.atoms) + 1,
                         )
-                        self.supercell_coords.Atoms.append(new_atom)
+                        self.supercell_coords.atoms.append(new_atom)

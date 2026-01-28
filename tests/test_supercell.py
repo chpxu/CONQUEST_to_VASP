@@ -35,8 +35,8 @@ def test_single_repeat_x() -> None:
     new_cell: supercell = supercell(repeats_x=1, repeats_y=0, repeats_z=0, coords=test_coords_proc)
     num_repeats = (new_cell.repeats_x + new_cell.repeats_y + new_cell.repeats_z) + 1
     assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords.natoms)
-    assert len(new_cell.supercell_coords.Atoms) == num_repeats * len(new_cell.coords.Atoms)
-    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.Atoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.92770000
         < new_cell.supercell_coords.lattice_vectors[0][0]
@@ -58,8 +58,8 @@ def test_single_repeat_y() -> None:
     new_cell: supercell = supercell(repeats_x=0, repeats_y=1, repeats_z=0, coords=test_coords_proc)
     num_repeats = (new_cell.repeats_x + new_cell.repeats_y + new_cell.repeats_z) + 1
     assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords.natoms)
-    assert len(new_cell.supercell_coords.Atoms) == num_repeats * len(new_cell.coords.Atoms)
-    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.Atoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.92770000
         < new_cell.supercell_coords.lattice_vectors[0][0]
@@ -81,8 +81,8 @@ def test_single_repeat_z() -> None:
     new_cell: supercell = supercell(repeats_x=0, repeats_y=0, repeats_z=1, coords=test_coords_proc)
     num_repeats = (new_cell.repeats_x + 1) * (new_cell.repeats_y + 1) * (new_cell.repeats_z + 1)
     assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords.natoms)
-    assert len(new_cell.supercell_coords.Atoms) == num_repeats * len(new_cell.coords.Atoms)
-    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.Atoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.92770000
         < new_cell.supercell_coords.lattice_vectors[0][0]
@@ -104,8 +104,8 @@ def test_single_repeat_all() -> None:
     new_cell: supercell = supercell(repeats_x=2, repeats_y=1, repeats_z=0, coords=test_coords_proc)
     num_repeats = (new_cell.repeats_x + 1) * (new_cell.repeats_y + 1) * (new_cell.repeats_z + 1)
     assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords.natoms)
-    assert len(new_cell.supercell_coords.Atoms) == num_repeats * len(new_cell.coords.Atoms)
-    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.Atoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.927799999
         < new_cell.supercell_coords.lattice_vectors[0][0]

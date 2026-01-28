@@ -14,13 +14,12 @@ import conquest2a._types as c2at
 class Atom:
     species: int
     coords: c2at.REAL_ARRAY
+    # cart_coords: c2at.REAL_ARRAY = field(init=False)
     can_move: Sequence[str]
     number: int
     label: str = ""
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
-
-
 class conquest_input:
     def __init__(self, species_dict: dict[int, str]) -> None:
         """Constructor for conquest_input
@@ -76,15 +75,14 @@ class conquest_coordinates:
         self,
         conquest_input: conquest_input,
     ) -> None:
-        self.Atoms: list[Atom] = []
+        self.atoms: list[Atom] = []
         self.conquest_input = conquest_input
-        self.lattice_vectors: list[c2at.REAL_ARRAY] = []
         self.natoms: str
         self.element_map: dict[str, list[Atom]]
 
     def assign_atom_labels(self) -> None:
         """Assign each Atom its label"""
-        for atom in self.Atoms:
+        for atom in self.atoms:
             atom.label = self.conquest_input.species_dict[atom.species]
 
     def index_to_atom_map(self) -> None:
@@ -94,7 +92,7 @@ class conquest_coordinates:
         ele_to_atom: dict[str, list[Atom]] = {}
         for element in self.conquest_input.unique_elements:
             # print(list(a for a in self.Atoms if a.label == element))
-            ele_to_atom[element] = list(a for a in self.Atoms if a.label == element)
+            ele_to_atom[element] = list(a for a in self.atoms if a.label == element)
         self.element_map = ele_to_atom
 
     def number_of_elements(self) -> dict[str, int]:
@@ -110,6 +108,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
         processor_base.__init__(
             self, path=path, err_str="Error opening specified CONQUEST coordinates file."
         )
+        self.lattice_vectors: c2at.REAL_ARRAY = np.array([])
         self.resolve_path()
         self.open_file()
         self.assign_atom_labels()
@@ -118,6 +117,11 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
             self.lattice_vectors[0][0] * self.lattice_vectors[1][1] + self.lattice_vectors[2][2]
         )
         self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
+        self.position_vectors: c2at.REAL_ARRAY = self.get_cartesian_positions()
+    
+    def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
+        atom_frac_pos = np.vstack([atom.coords for atom in self.atoms])    
+        return atom_frac_pos @ self.lattice_vectors.T
 
     def open_file(self) -> None:
         """
@@ -129,16 +133,18 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
         """
         with open(self.abs_input_path, "r", encoding="utf-8") as conquest_coord_file:
             conquest_lattice_data_str = [next(conquest_coord_file).strip() for _ in range(3)]
+            cell_lattice_vectors: list[c2at.REAL_ARRAY] = []
             for lattice_vect in conquest_lattice_data_str:
-                coords = lattice_vect.split()
-                self.lattice_vectors.append(np.array(coords).astype(float))
+                coords: c2at.REAL_ARRAY = np.fromstring(lattice_vect, sep=" ")
+                cell_lattice_vectors.append(coords)
+            self.lattice_vectors = np.vstack(cell_lattice_vectors)
             self.natoms = next(conquest_coord_file)
             atom_data = conquest_coord_file.readlines()
             atom_data_stripped = [atom for atom in atom_data if atom.strip()]
             atom_number = 1
             for atom in atom_data_stripped:
                 split_atom_data = atom.strip().split()
-                self.Atoms.append(
+                self.atoms.append(
                     Atom(
                         species=int(split_atom_data[3]),
                         can_move=split_atom_data[4:],
@@ -199,7 +205,7 @@ class atom_charge(processor_base):
         """
         Assign each Atom its spin values from the AtomCharge.dat file: up - down
         """
-        for i, atom in enumerate(self.coordinates.Atoms):
+        for i, atom in enumerate(self.coordinates.atoms):
             split_charge_data = self.conquest_charge_data[i]
             atom.spins = np.array([0.0, 0.0, split_charge_data[1] - split_charge_data[2]])
 

@@ -115,11 +115,11 @@ class read_static_output:
             # that conquest_processor.atoms is sorted by coordinate file order
             # which is preserved by CONQUEST after every run
             # so we simply assign index directly
-            self.conquest_processor.Atoms[atom_number - 1].forces = forces
+            self.conquest_processor.atoms[atom_number - 1].forces = forces
 
     def get_max_force_atom(self) -> Atom:
-        atom_with_max_force = self.conquest_processor.Atoms[0]
-        for atom in self.conquest_processor.Atoms[1:]:
+        atom_with_max_force = self.conquest_processor.atoms[0]
+        for atom in self.conquest_processor.atoms[1:]:
             if np.max(np.abs(atom.forces)) > np.max(np.abs(atom_with_max_force.forces)):
                 atom_with_max_force = atom
         index = np.argmax(np.abs(atom_with_max_force.forces))
@@ -149,6 +149,6 @@ if __name__ == "__main__":
     conq_proc = conquest_coordinates_processor("tests/data/test_output_input_coords.in", conq_input)
     output = read_static_output("tests/data/test_output.txt", conq_proc)
 
-    print(output.conquest_processor.Atoms)
+    print(output.conquest_processor.atoms)
     print(output.stresses)
     output.get_max_force_atom()

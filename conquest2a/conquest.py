@@ -117,7 +117,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
             self.lattice_vectors[0][0] * self.lattice_vectors[1][1] + self.lattice_vectors[2][2]
         )
         self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
-        self.position_vectors: c2at.REAL_ARRAY = self.get_cartesian_positions()
+        self.cart_position_vectors: c2at.REAL_ARRAY = self.get_cartesian_positions()
     
     def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
         atom_frac_pos = np.vstack([atom.coords for atom in self.atoms])    

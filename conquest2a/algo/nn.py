@@ -2,20 +2,19 @@ from collections.abc import Sequence
 from typing import Any
 from scipy.spatial import KDTree
 from conquest2a.conquest import conquest_coordinates_processor, Atom
+import conquest2a._types as c2at
 
 
 class nearest_neighbours:
     def __init__(
         self,
-        number_of_neighbours: int | Sequence[int],
         conquest_coordinates_processor: conquest_coordinates_processor,
-        atom: Atom
+        atom: Atom,
     ) -> None:
-        self.num_neighbours: int | Sequence[int] = number_of_neighbours
         self.coords_proc = conquest_coordinates_processor
         self.kdtree = self.build_kdtree()
-        self.distances, self.indices = self._knn(atom_query=atom)
-        self.result = self.get_result()
+        self.atom_to_query = atom
+
     def build_kdtree(self) -> KDTree:
         return KDTree(
             self.coords_proc.cart_position_vectors,
@@ -23,7 +22,9 @@ class nearest_neighbours:
             boxsize=[self.coords_proc.lattice_vectors[i][i] for i in range(0, 3)],
         )
 
-    def _knn(self, atom_query: Atom) -> tuple[Any, Any]:
+    def _knn(
+        self, atom_query: Atom, num_neighbours: int | Sequence[int]
+    ) -> tuple[c2at.REAL_ARRAY, c2at.INT_ARRAY]:
         """Perform the KDTree query on number_of_neighbours around the specific Atom.
 
         Args:
@@ -33,21 +34,23 @@ class nearest_neighbours:
         """
         atom_query_cart_coords = atom_query.coords @ self.coords_proc.lattice_vectors.T
         distances, indices = self.kdtree.query(
-            x=atom_query_cart_coords, k=self.num_neighbours, p=2.0, workers=-1
-        ) # type: ignore
+            x=atom_query_cart_coords, k=num_neighbours, p=2, workers=-1
+        )  # type: ignore
         return distances, indices
-    def get_result(self) -> tuple[Any, Any]:
+
+    def get_result(self, num_neighbours: int | Sequence[int]) -> list[tuple[float, Atom]]:
+        distances, indices = self._knn(atom_query=self.atom_to_query, num_neighbours=num_neighbours)
         # since k is int | Sequence[int], result is either squeezed or unsqueezed
         # Will handles these separately for the purposes of finding the Atom,
         # But should return the same results if the same parameters are entered
-        if isinstance(self.num_neighbours, int) and self.num_neighbours == 1:
+        if isinstance(num_neighbours, int) and num_neighbours == 1:
             # Single atom, 1 neighbour -> single float and single index
-            return self.distances, self.coords_proc.atoms[self.indices]
+            return [(distances, self.coords_proc.atoms[indices])]
         # if isinstance(self.num_neighbours, int):
         # Here, k > 1, or k is a list of ints. Then expect lists
         # Since we are querying for one atom only, do not need to handle lists of lists
         all_atoms: list[Any] = []
-        for pair in zip(self.distances, self.indices):
+        for pair in zip(distances, indices):
             assoc_atom = (pair[0], self.coords_proc.atoms[pair[1]])
             all_atoms.append(assoc_atom)
-        return tuple(all_atoms)
+        return all_atoms

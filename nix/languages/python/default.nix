@@ -85,7 +85,7 @@ in {
       devshells.python = {extraModulesPath, ...}: let
         python = pkgs."python${cfg.version}";
         pythonPackages = pkgs."python${cfg.version}Packages";
-        finalPythonPackages = (import ./packages.nix {inherit config pythonPackages lib;}).packages;
+        finalPythonPackages = (import ./packages.nix {inherit config pythonPackages lib;}).packages ++ [(self'.packages.default)];
         evaluateUV = import ./uv.nix {
           inherit
             pkgs

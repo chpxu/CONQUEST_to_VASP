@@ -1,5 +1,5 @@
 from io import TextIOWrapper
-from typing import IO, Any
+from typing import IO, Any, Literal
 import numpy as np
 import conquest2a._types as c2at
 from conquest2a.conquest import conquest_coordinates_processor, conquest_coordinates, atom_charge
@@ -176,6 +176,15 @@ class xsf_writer(file_writer):
         self.write()
         self.close_file(file=self.file)
 
+    def fractional_to_cartesian(self, vector: c2at.REAL_ARRAY) -> c2at.REAL_ARRAY:
+        return np.array(
+            [
+                vector[0] * self.data.lattice_vectors[0][0],
+                vector[1] * self.data.lattice_vectors[1][1],
+                vector[2] * self.data.lattice_vectors[2][2],
+            ]
+        )
+
     def write(self) -> None:
         with self.file as file:
             file.write("CRYSTAL\n")
@@ -185,11 +194,12 @@ class xsf_writer(file_writer):
                 file.write("\n")
             file.write("PRIMCOORD\n")
             natom_line = f"{" ".join(self.data.natoms.split())} 1\n"
-            print(self.data.natoms)
             file.write(natom_line)
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
-                    file.write(rf' {atoms} {" ".join(str(x * self.B2A) for x in atom.coords)}')
+                    file.write(
+                        rf' {atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords))}'
+                    )
                     file.write("\n")
 
 

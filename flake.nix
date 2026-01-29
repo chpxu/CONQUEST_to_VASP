@@ -137,7 +137,7 @@
           version = "0.2.0";
           pyproject = true;
           src = ./.;
-          buildInputs = with pkgs."python${config.languages.python.version}Packages"; [numpy hatchling];
+          buildInputs = with pkgs."python${config.languages.python.version}Packages"; [numpy scipy hatchling];
           enableParallelBuilding = true;
         };
         formatter = pkgs.nixfmt-rfc-style;

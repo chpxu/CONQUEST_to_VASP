@@ -1,8 +1,8 @@
 from io import TextIOWrapper
-from typing import IO, Any, Literal
+from typing import IO, Any
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import conquest_coordinates_processor, conquest_coordinates, atom_charge
+from conquest2a.conquest import conquest_coordinates_processor, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
 
 
@@ -31,7 +31,7 @@ class conquest_writer(file_writer):
     def __init__(
         self,
         dest: str,
-        coords: conquest_coordinates,
+        coords: conquest_coordinates_processor,
         encoding: str = "utf-8",
         precision: int = 15,
     ):
@@ -131,7 +131,10 @@ class xyz_writer(file_writer):
         )
 
     def write(self) -> None:
-        """XYZ format expects cells in Cartesian coordinates. Since CONQUEST only deals with orthorhombic unit cells, we can just multiply the non-zero coordinates of the lattice vectors with the fractional coordinates"""
+        """XYZ format expects cells in Cartesian coordinates.
+        Since CONQUEST only deals with orthorhombic unit cells,
+        we can just multiply the non-zero coordinates of the lattice vectors
+        with the fractional coordinates"""
         # ele_string, num_string = self.create_atoms_str()
         with self.file as file:
             file.write(f"{self.data.natoms}")

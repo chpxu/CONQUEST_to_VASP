@@ -14,7 +14,7 @@ Usage is simple. In your `venv`, simply
 ```
 pip3 install conquest2a numpy
 ```
-If you are attempting to integrate this directly into your Nix devShell, you will have to manually build the package with `buildPythonPackage`. Support for this as a standalone package will come soon.
+If you are attempting to integrate this directly into your Nix devShell, you will have to manually build the package with `buildPythonPackage`. Support for this as a standalone package will come soon. The [devflake](https://github.com/chpxu/development-flake) in this repo automatically builds and adds it to the devshell environment.
 
 ## Usage
 

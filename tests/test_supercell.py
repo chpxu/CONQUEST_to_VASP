@@ -11,9 +11,6 @@ def test_integer_params() -> None:
     single_cell: supercell = supercell(
         repeats_x=1, repeats_y=1, repeats_z=1, coords=test_coords_proc
     )
-    assert single_cell.repeats_x is not int
-    assert single_cell.repeats_y is not int
-    assert single_cell.repeats_z is not int
     assert single_cell.coords is not None
 
 

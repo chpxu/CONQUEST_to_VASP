@@ -2,7 +2,6 @@ from collections.abc import Sequence
 from typing import Any
 from scipy.spatial import KDTree
 from conquest2a.conquest import conquest_coordinates_processor, Atom
-import conquest2a._types as c2at
 
 
 class nearest_neighbours:
@@ -22,9 +21,7 @@ class nearest_neighbours:
             boxsize=[self.coords_proc.lattice_vectors[i][i] for i in range(0, 3)],
         )
 
-    def _knn(
-        self, atom_query: Atom, num_neighbours: int | Sequence[int]
-    ) -> tuple[c2at.REAL_ARRAY, c2at.INT_ARRAY]:
+    def _knn(self, atom_query: Atom, num_neighbours: int | Sequence[int]) -> tuple[Any, Any]:
         """Perform the KDTree query on number_of_neighbours around the specific Atom.
 
         Args:
@@ -34,7 +31,7 @@ class nearest_neighbours:
         """
         atom_query_cart_coords = atom_query.coords @ self.coords_proc.lattice_vectors.T
         distances, indices = self.kdtree.query(
-            x=atom_query_cart_coords, k=num_neighbours, p=2, workers=-1
+            x=atom_query_cart_coords, k=num_neighbours, p=2, workers=-1  # type: ignore
         )  # type: ignore
         return distances, indices
 

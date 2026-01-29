@@ -13,7 +13,8 @@ class supercell:
             Nx (int): Number of repeats along "a" lattice vector
             Ny (int): Number of repeats along "b" lattice vector
             Nz (int): Number of repeats along "c" lattice vector
-            coords (CONQUEST_COORDINATES): CONQUEST_COORDINATES instance for the cell to be supercell'd
+            coords (conquest_coordinates_processor): conquest_coordinates_processor instance
+            for the cell to be supercell'd
         """
         if repeats_x < 0 or repeats_y < 0 or repeats_z < 0:
             raise ValueError("One of, or multiple of, Nx Ny, Nz was not at least 0.")
@@ -29,9 +30,8 @@ class supercell:
         self.repeats_z = repeats_z
         self.coords = coords
         # Create new CONQUEST_COORDINATES
-        self.supercell_coords: conquest_coordinates = conquest_coordinates(
-            self.coords.conquest_input
-        )
+        supercell_coords_instance = conquest_coordinates(self.coords.conquest_input)
+        self.supercell_coords: conquest_coordinates = supercell_coords_instance
         self.scale_lattice_vectors()
         self.create_supercell()
         self.supercell_coords.natoms = str(self.new_num_atoms())
@@ -42,11 +42,23 @@ class supercell:
         """
         CONQUEST deals with orthorhombic cells only
         """
-        self.supercell_coords.lattice_vectors = [
-            np.array([self.coords.lattice_vectors[0][0] * (self.repeats_x + 1), 0, 0]),
-            np.array([0, self.coords.lattice_vectors[1][1] * (self.repeats_y + 1), 0]),
-            np.array([0, 0, self.coords.lattice_vectors[2][2] * (self.repeats_z + 1)]),
-        ]
+        # self.supercell_coords.lattice_vectors = np.vstack(
+        #     [
+        #         np.array([self.coords.lattice_vectors[0][0] * (self.repeats_x + 1), 0, 0]),
+        #         np.array([0, self.coords.lattice_vectors[1][1] * (self.repeats_y + 1), 0]),
+        #         np.array([0, 0, self.coords.lattice_vectors[2][2] * (self.repeats_z + 1)]),
+        #     ]
+        # )
+        repeat_matrix = np.array(
+            [
+                [(self.repeats_x + 1), 0, 0],
+                [0, (self.repeats_y + 1), 0],
+                [0, 0, (self.repeats_z + 1)],
+            ]
+        )
+        self.supercell_coords.lattice_vectors = np.matmul(
+            self.coords.lattice_vectors, repeat_matrix
+        )
 
     def new_num_atoms(self) -> int:
         natoms = len(self.supercell_coords.atoms)
@@ -100,7 +112,8 @@ class supercell:
         i.e. duplicate 3 in the "a" direction, twice in the other 2 directions.
         We first rescale the lattice parameters, then we rescale the fractional coordinates
 
-        (0,0,0) is trivial, but B gets rescaled to (1/2 * 1/3, 1/2 * 1/2, 1/2 * 1/2) = (1/6, 1/4, 1/4)
+        (0,0,0) is trivial, but B gets rescaled to (1/2 * 1/3, 1/2 * 1/2, 1/2 * 1/2)
+        = (1/6, 1/4, 1/4)
 
         However, the original (0,0,0) now has duplicates in x,y,z,
         namely the new atoms at (0,0,0) + {(1/3, 0, 0), (0, 1/2, 0), (0,0,1/2), ...}

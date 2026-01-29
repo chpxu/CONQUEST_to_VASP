@@ -68,7 +68,7 @@ def test_nearest_neighbour2() -> None:
     assert np.round(nn_atom.coords[2], decimals=8) == 0.35303287
     assert nn_atom.label == "O"
     assert nn_atom.number == 29
-
+    # Now check the next nearest neighbo
     nn_atom2 = nn2[2][1]
     assert nn2[2][0] == 3.6250800070122247  # Bohr
     assert np.round(nn_atom2.coords[0], decimals=8) == 0.53486027

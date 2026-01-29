@@ -2,11 +2,10 @@ from dataclasses import dataclass, field
 import os
 import re
 import importlib.resources
-from os.path import abspath
 from pathlib import Path
 from collections.abc import Sequence
 import numpy as np
-from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME, LIBRARY
+from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
 import conquest2a._types as c2at
 
 
@@ -20,6 +19,8 @@ class Atom:
     label: str = ""
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
+
+
 class conquest_input:
     def __init__(self, species_dict: dict[int, str]) -> None:
         """Constructor for conquest_input
@@ -79,6 +80,7 @@ class conquest_coordinates:
         self.conquest_input = conquest_input
         self.natoms: str
         self.element_map: dict[str, list[Atom]]
+        self.lattice_vectors: c2at.REAL_ARRAY = np.array([])
 
     def assign_atom_labels(self) -> None:
         """Assign each Atom its label"""
@@ -108,7 +110,6 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
         processor_base.__init__(
             self, path=path, err_str="Error opening specified CONQUEST coordinates file."
         )
-        self.lattice_vectors: c2at.REAL_ARRAY = np.array([])
         self.resolve_path()
         self.open_file()
         self.assign_atom_labels()
@@ -118,9 +119,9 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
         )
         self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
         self.cart_position_vectors: c2at.REAL_ARRAY = self.get_cartesian_positions()
-    
+
     def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
-        atom_frac_pos = np.vstack([atom.coords for atom in self.atoms])    
+        atom_frac_pos = np.vstack([atom.coords for atom in self.atoms])
         return atom_frac_pos @ self.lattice_vectors.T
 
     def open_file(self) -> None:

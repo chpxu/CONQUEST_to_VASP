@@ -196,7 +196,7 @@ class xsf_writer(file_writer):
                 file.write(rf' {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}')
                 file.write("\n")
             file.write("PRIMCOORD\n")
-            natom_line = f"{" ".join(self.data.natoms.split())} 1\n"
+            natom_line = f'{" ".join(self.data.natoms.split())} 1\n'
             file.write(natom_line)
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:

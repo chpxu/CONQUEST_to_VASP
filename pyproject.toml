@@ -5,7 +5,7 @@ authors = [{ name = "Chung", email = "dev.chpxu@outlook.com" }]
 description = "A Python utility that deals with some pre- and post-processing functions for the linear scaling DFT program, CONQUEST."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["numpy>=2.0.0"]
+dependencies = ["numpy>=2.0.0", "scipy>=1.10.0"]
 [project.urls]
 Homepage = "https://github.com/chpxu/CONQUEST_TO_VASP"
 Issues = "https://github.com/chpxu/CONQUEST_TO_VASP/issues"
@@ -65,7 +65,7 @@ requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-sources = ["src"]
+packages = ["conquest2a"]
 
 [tool.hatch.build.targets.wheel]
-sources = ["src"]
+packages = ["conquest2a"]

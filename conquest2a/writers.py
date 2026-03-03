@@ -2,7 +2,7 @@ from io import TextIOWrapper
 from typing import IO, Any
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import conquest_coordinates_processor, atom_charge
+from conquest2a.conquest import conquest_coordinates_processor,conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
 
 
@@ -31,7 +31,7 @@ class conquest_writer(file_writer):
     def __init__(
         self,
         dest: str,
-        coords: conquest_coordinates_processor,
+        coords: conquest_coordinates,
         encoding: str = "utf-8",
         precision: int = 15,
     ):
@@ -43,19 +43,20 @@ class conquest_writer(file_writer):
         self.close_file(file=self.file)
 
     def write(self) -> None:
+        prec = self.precision
         self.file.write(
-            f"{self.coords.lattice_vectors[0][0]:.{self.precision}f} {0.0:.{self.precision}f} {0.0:.{self.precision}f}\n"
+            f"{self.coords.lattice_vectors[0][0]:.{prec}f} {0.0:.{prec}f} {0.0:.{prec}f}\n"
         )
         self.file.write(
-            f"{0.0:.{self.precision}f} {self.coords.lattice_vectors[1][1]:.{self.precision}f} {0.0:.{self.precision}f}\n"
+            f"{0.0:.{prec}f} {self.coords.lattice_vectors[1][1]:.{prec}f} {0.0:.{prec}f}\n"
         )
         self.file.write(
-            f"{0.0:.{self.precision}f} {0.0:.{self.precision}f} {self.coords.lattice_vectors[2][2]:.{self.precision}f}\n"
+            f"{0.0:.{prec}f} {0.0:.{prec}f} {self.coords.lattice_vectors[2][2]:.{prec}f}\n"
         )
         self.file.write(self.coords.natoms)
         for atom in self.coords.atoms:
             self.file.write(
-                f"{atom.coords[0]:.{self.precision}f} {atom.coords[1]:.{self.precision}f} {atom.coords[2]:.{self.precision}f} {atom.species} {atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}"
+                f"{atom.coords[0]:.{prec}f} {atom.coords[1]:.{prec}f} {atom.coords[2]:.{prec}f} {atom.species} {atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}"
             )
             self.file.write("\n")
 
@@ -64,7 +65,7 @@ class vasp_writer(file_writer):
     def __init__(
         self,
         dest: str,
-        data: conquest_coordinates_processor,
+        data: conquest_coordinates,
         encoding: str = "utf-8",
         is_angstrom: bool = False,
     ) -> None:
@@ -102,7 +103,7 @@ class xyz_writer(file_writer):
     def __init__(
         self,
         dest: str,
-        data: conquest_coordinates_processor,
+        data: conquest_coordinates,
         encoding: str = "utf-8",
         comment_line: str = "comment line",
     ) -> None:
@@ -151,7 +152,7 @@ class extxyz_writer(xyz_writer):
     def __init__(
         self,
         dest: str,
-        data: conquest_coordinates_processor,
+        data: conquest_coordinates,
         encoding: str = "utf-8",
         time: float = 0.0,
     ) -> None:
@@ -171,7 +172,7 @@ class xsf_writer(file_writer):
     def __init__(
         self,
         dest: str,
-        data: conquest_coordinates_processor,
+        data: conquest_coordinates,
         encoding: str = "utf-8",
     ) -> None:
         super().__init__(dest=dest, encoding=encoding)

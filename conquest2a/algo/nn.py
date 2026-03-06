@@ -42,12 +42,12 @@ class nearest_neighbours:
         # But should return the same results if the same parameters are entered
         if isinstance(num_neighbours, int) and num_neighbours == 1:
             # Single atom, 1 neighbour -> single float and single index
-            return [(distances, self.coords_proc.atoms[indices])]
+            return [(distances, self.coords_proc.coords.atoms[indices])]
         # if isinstance(self.num_neighbours, int):
         # Here, k > 1, or k is a list of ints. Then expect lists
         # Since we are querying for one atom only, do not need to handle lists of lists
         all_atoms: list[Any] = []
         for pair in zip(distances, indices):
-            assoc_atom = (pair[0], self.coords_proc.atoms[pair[1]])
+            assoc_atom = (pair[0], self.coords_proc.coords.atoms[pair[1]])
             all_atoms.append(assoc_atom)
         return all_atoms

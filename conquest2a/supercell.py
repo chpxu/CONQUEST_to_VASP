@@ -6,7 +6,11 @@ from conquest2a.conquest import conquest_coordinates, conquest_coordinates_proce
 
 class supercell:
     def __init__(
-        self, repeats_x: int, repeats_y: int, repeats_z: int, coords: conquest_coordinates_processor
+        self,
+        repeats_x: int,
+        repeats_y: int,
+        repeats_z: int,
+        coords_proc: conquest_coordinates_processor,
     ) -> None:
         """
         Args:
@@ -28,9 +32,9 @@ class supercell:
         self.repeats_x = repeats_x
         self.repeats_y = repeats_y
         self.repeats_z = repeats_z
-        self.coords = coords
+        self.coords_proc = coords_proc
         # Create new CONQUEST_COORDINATES
-        supercell_coords_instance = conquest_coordinates(self.coords.conquest_input)
+        supercell_coords_instance = conquest_coordinates(self.coords_proc.coords.conquest_input)
         self.supercell_coords: conquest_coordinates = supercell_coords_instance
         self.scale_lattice_vectors()
         self.create_supercell()
@@ -57,7 +61,7 @@ class supercell:
             ]
         )
         self.supercell_coords.lattice_vectors = np.matmul(
-            self.coords.lattice_vectors, repeat_matrix
+            self.coords_proc.coords.lattice_vectors, repeat_matrix
         )
 
     def new_num_atoms(self) -> int:
@@ -120,10 +124,10 @@ class supercell:
         """
         # No repeats at all -> just return original crystal
         if self.repeats_x == 0 and self.repeats_y == 0 and self.repeats_z == 0:
-            self.supercell_coords.atoms = copy.deepcopy(self.coords.atoms)
-            self.supercell_coords.natoms = self.coords.natoms
+            self.supercell_coords.atoms = copy.deepcopy(self.coords_proc.coords.atoms)
+            self.supercell_coords.natoms = self.coords_proc.coords.natoms
             return
-        for atom in self.coords.atoms:
+        for atom in self.coords_proc.coords.atoms:
             for l in self.range(self.repeats_x):
                 for m in self.range(self.repeats_y):
                     for n in self.range(self.repeats_z):

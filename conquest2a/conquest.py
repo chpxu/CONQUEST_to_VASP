@@ -104,24 +104,25 @@ class conquest_coordinates:
         return num_eles
 
 
-class conquest_coordinates_processor(conquest_coordinates, processor_base):
+class conquest_coordinates_processor(processor_base):
     def __init__(self, path: str, conquest_input: conquest_input) -> None:
-        conquest_coordinates.__init__(self, conquest_input=conquest_input)
         processor_base.__init__(
             self, path=path, err_str="Error opening specified CONQUEST coordinates file."
         )
+        self.coords = conquest_coordinates(conquest_input=conquest_input)
         self.resolve_path()
         self.open_file()
-        self.assign_atom_labels()
-        self.index_to_atom_map()
+        self.coords.assign_atom_labels()
+        self.coords.index_to_atom_map()
         self.volume_bohr: float = (
-            self.lattice_vectors[0][0] * self.lattice_vectors[1][1] + self.lattice_vectors[2][2]
+            self.coords.lattice_vectors[0][0] * self.coords.lattice_vectors[1][1]
+            + self.coords.lattice_vectors[2][2]
         )
         self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
         self.cart_position_vectors: c2at.REAL_ARRAY = self.get_cartesian_positions()
 
     def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
-        atom_frac_pos = np.vstack([atom.coords for atom in self.atoms])
+        atom_frac_pos = np.vstack([atom.coords for atom in self.coords.atoms])
         return atom_frac_pos @ self.lattice_vectors.T
 
     def open_file(self) -> None:
@@ -145,7 +146,7 @@ class conquest_coordinates_processor(conquest_coordinates, processor_base):
             atom_number = 1
             for atom in atom_data_stripped:
                 split_atom_data = atom.strip().split()
-                self.atoms.append(
+                self.coords.atoms.append(
                     Atom(
                         species=int(split_atom_data[3]),
                         can_move=split_atom_data[4:],

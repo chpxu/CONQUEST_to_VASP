@@ -5,12 +5,9 @@ Run in root of repo:
     python3 examples/plot_test_band.py
 """
 
-import matplotlib.pyplot as plt
-import numpy as np
 from pathlib import Path
-from conquest2a.pdos import pdos_l_processor
+import matplotlib.pyplot as plt
 from conquest2a.band import bst_processor
-# Example usage of pdos_l_processor and bst_processor to plot PDOS and band structure
 # Adjust the paths below to point to your actual files
 data_dir = Path(__file__).parent.parent.resolve() / "tests"
 bst_file = data_dir / "test_BandStructure.dat"

@@ -137,10 +137,9 @@
           version = "0.2.0";
           pyproject = true;
           src = ./.;
-          buildInputs = with pkgs."python${config.languages.python.version}Packages"; [numpy scipy hatchling];
+          buildInputs = with pkgs."python${config.languages.python.version}Packages"; [numpy scipy hatchling ase matplotlib];
           enableParallelBuilding = true;
         };
-        formatter = pkgs.nixfmt-rfc-style;
         pre-commit.settings.hooks = {
           nixfmt.enable = true;
           nixfmt-rfc-style.enable = true;
@@ -150,7 +149,7 @@
           };
           treefmt = {
             enable = true;
-            package = self'.formatter;
+            package = pkgs.treefmt;
           };
         };
         treefmt = {

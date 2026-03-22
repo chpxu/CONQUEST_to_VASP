@@ -6,3 +6,30 @@ BOHR_TO_ANGSTROM_VOLUME = (BOHR_TO_ANGSTROM) ** 3
 EV_TO_HARTREE = 0.0367493
 HARTREE_TO_EV = 1 / EV_TO_HARTREE
 LIBRARY = importlib.resources.files("conquest2a")
+
+
+# Some custom MPL params to use with SciencePlots
+MPLGENERIC = {
+    # Muted grey gridlines
+    "axes.axisbelow": True,
+    "savefig.dpi": 600,
+    "savefig.bbox": "tight",
+    "figure.figsize": (3.375 * 2, 2.8),
+    # Flat / frameless legend
+    "legend.frameon": True,
+    "legend.framealpha": 0.5,
+    "legend.edgecolor": "black",
+    "legend.fancybox": False,
+    "legend.loc": "best",
+    "legend.handlelength": 1.5,
+    "legend.handletextpad": 0.5,
+    "legend.columnspacing": 1.0,
+}
+
+MPLGRID = {
+    "axes.grid": True,
+    "grid.color": "#CCCCCC",
+    "grid.linewidth": 0.5,
+    "grid.linestyle": "--",
+    "grid.alpha": 0.7,
+}

@@ -189,7 +189,7 @@ class chden:
         Return a Cartesian point lying on the plane  ha + kb + lc = offset.
 
         `offset` is a dimensionless fractional intercept (0-1 spans one
-        interplanar period).  Pick the simplest fractional coordinate
+        interplanar period). Pick the simplest fractional coordinate
         satisfying the plane equation, then convert to angstrom.
         """
         n = self.hkl / (self.hkl @ self.hkl)  # normal direction in fractional space
@@ -308,7 +308,6 @@ class chden_plot:
         from mpl_toolkits.axes_grid1 import make_axes_locatable as mal
 
         self.mal = mal
-
         mpl.rcParams.update(MPLGENERIC)
 
     def miller_str(self, idx: int) -> str:
@@ -328,23 +327,24 @@ class chden_plot:
         t2: np.ndarray,
         v1: np.ndarray,
         v2: np.ndarray,
-        output: str | None = None,
         atom_data: Any = None,  # (t1s, t2s, symbols) tuple or None
         cmap: str = "inferno",
         log_scale: bool = False,
         vmin: REAL_NUMBER | None = 0.0,
         vmax: REAL_NUMBER | None = None,
         interpolation: str = "lanczos",
+        output: str | None = None,
     ) -> None:
         L1 = t1[-1] - t1[0]
         L2 = t2[-1] - t2[0]
-
+        transpose_label = False
         # Rotate so the longer axis is always horizontal
         if L2 > L1:
             density = density.T
             t1, t2 = t2, t1
             L1, L2 = L2, L1
             v1, v2 = v2, v1
+            transpose_label = True
 
         fig_w = 5.0
         fig_h = fig_w * (L2 / L1) + 0.5
@@ -359,8 +359,8 @@ class chden_plot:
             cmap=cmap,
             aspect="equal",
             interpolation=interpolation,
-            vmin=float(vmin) if vmin is not None else None,
-            vmax=float(vmax) if vmax is not None else None,
+            vmin=float(vmin) if vmin is not None else 0.0,
+            vmax=float(vmax) if vmax is not None else np.max(plot_data),
         )
         ax.tick_params(direction="out", which="both")
         cax = divider.append_axes("right", size="5%", pad=0.1)
@@ -378,6 +378,8 @@ class chden_plot:
             t1s, t2s, syms = atom_data
             for t1a, t2a, sym in zip(t1s, t2s, syms):
                 color = _ELEMENT_COLOURS.get(sym, "#00ff80")
+                if transpose_label:
+                    t2a, t1a = t1a, t2a
                 ax.scatter(
                     t1a, t2a, s=160, color=color, edgecolors="white", linewidths=0.8, zorder=5
                 )
@@ -397,16 +399,18 @@ class chden_plot:
         ax.set_ylabel(f"{self.vec_str(v2)}" + r"$[\mathrm{\AA}]$", fontsize=8)
 
         fig.tight_layout()
-        if output is None:
+        if output is None or output == "":
             # Create generic but useful filename
-            filename = f"{self.chden.hkl[0]}{self.chden.hkl[1]}{self.chden.hkl[2]}_{self.chden.offset:.3f}.{self.format}"
-            self.plt.savefig(filename)
+            filename = f"{self.chden.hkl[0]}{self.chden.hkl[1]}{self.chden.hkl[2]}_{self.chden.offset:.3f}" 
+            filename += f"{self.chden.mode if self.chden.mode is not None else ""}"
+            extension = f".{self.format}"
+            self.plt.savefig(f"{filename}{extension}")
             print(f"Saved: {filename}")
         else:
             self.plt.savefig(output)
             print(f"Saved: {output}")
 
-    def run(self, thickness: float = 0.5) -> None:
+    def run(self, filename: str | None, vmin: REAL_NUMBER | None = 0.0, vmax: REAL_NUMBER | None = None, thickness: float = 0.5, log_scale: bool=False, cmap: str = "inferno", interpolation: str = "lanczos") -> None:
         """
         Runs the full sequence of steps including plotting
         """
@@ -416,12 +420,13 @@ class chden_plot:
             _, _, n_hat = self.chden.inplane_basis()
             atom_data = self.chden.project_atoms(v1, v2, n_hat, origin, thickness=thickness)
             print(f"  Atoms within {thickness} (ang) of plane: {len(atom_data[0])}")
-        self.plot_slice(density, t1, t2, v1, v2, atom_data)
+        self.plot_slice(density, t1, t2, v1, v2, atom_data, output=filename, vmax=vmax, vmin=vmin, log_scale=log_scale, cmap=cmap, interpolation=interpolation)
 
 
 def main() -> None:
-    example_chden = chden(np.array([0, 0, 1]), 0.5, ch1="tests/data/chden_up.cube")
-    chden_plot(example_chden, False).run()
+    example_chden = chden(np.array([1, 0, 0]), 0.0, ch1="tests/data/chden_up.cube", ch2="tests/data/chden_dn.cube", mode="sum")
+    filename = None
+    chden_plot(example_chden, False).run(filename, vmax=0.1)
 
 
 if __name__ == "__main__":

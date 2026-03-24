@@ -7,6 +7,14 @@ from ase.io.cube import read_cube
 from scipy.ndimage import map_coordinates
 from conquest2a._types import INT_ARRAY, REAL_ARRAY, REAL_NUMBER
 from conquest2a.constants import MPLGENERIC
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+import scienceplots
+from mpl_toolkits.axes_grid1 import make_axes_locatable as mal
+
+mpl.rcParams.update(MPLGENERIC)
+plt.style.use(["science", "no-latex"])
 
 _ELEMENT_COLOURS = {
     # Alkali metals
@@ -287,28 +295,6 @@ class chden_plot:
         self.chden = chden_instance
         self.show_atoms = show_atoms
         self.format = format
-        # Check for matplotlib and SciencePlots
-        import importlib.util
-
-        mpl_spec = importlib.util.find_spec("matplotlib")
-        mpl_found = mpl_spec is not None
-        sp_spec = importlib.util.find_spec("scienceplots")
-        sp_found = sp_spec is not None
-        if mpl_found:
-            import matplotlib.pyplot as plt
-
-            self.plt = plt
-        else:
-            raise ImportError("matplotlib could not be found")
-        if sp_found and mpl_found:
-            import scienceplots
-
-            self.plt.style.use(["science", "no-latex"])
-        import matplotlib as mpl
-        from mpl_toolkits.axes_grid1 import make_axes_locatable as mal
-
-        self.mal = mal
-        mpl.rcParams.update(MPLGENERIC)
 
     def miller_str(self, idx: int) -> str:
         if idx >= 0:
@@ -328,10 +314,10 @@ class chden_plot:
         v1: np.ndarray,
         v2: np.ndarray,
         atom_data: Any = None,  # (t1s, t2s, symbols) tuple or None
-        cmap: str = "inferno",
+        cmap: str = "viridis",
         log_scale: bool = False,
-        vmin: REAL_NUMBER | None = 0.0,
-        vmax: REAL_NUMBER | None = None,
+        vmin: float | None = 0.0,
+        vmax: float | None = None,
         interpolation: str = "lanczos",
         output: str | None = None,
     ) -> None:
@@ -348,30 +334,34 @@ class chden_plot:
 
         fig_w = 5.0
         fig_h = fig_w * (L2 / L1) + 0.5
-        fig, ax = self.plt.subplots(figsize=(fig_w, fig_h))
-        divider = self.mal(ax)
-        plot_data = np.log1p(np.clip(density, 0, None)) if log_scale else density
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+        divider = mal(ax)
         extent = (t1[0], t1[-1], t2[0], t2[-1])
-        im = ax.imshow(
-            plot_data.T,
-            origin="lower",
-            extent=extent,
-            cmap=cmap,
-            aspect="equal",
-            interpolation=interpolation,
-            vmin=float(vmin) if vmin is not None else 0.0,
-            vmax=float(vmax) if vmax is not None else np.max(plot_data),
-        )
+        # Initialise im instance
+        im = None
+        vmin = float(vmin) if vmin is not None else 0.0
+        vmax = float(vmax) if vmax is not None else np.max(density)
+        imshow_args = {
+            "origin": "lower",
+            "extent": extent,
+            "cmap": cmap,
+            "aspect": "equal",
+            "interpolation": interpolation,
+        }
+        # vmax, vmin and Norm interact separately
+        if log_scale:
+            imshow_args["norm"] = colors.LogNorm()
+        else:
+            imshow_args["vmax"] = vmax
+            imshow_args["vmin"] = vmin
+        im = ax.imshow(density.T, **imshow_args)  # type: ignore
         ax.tick_params(direction="out", which="both")
         cax = divider.append_axes("right", size="5%", pad=0.1)
         cbar = fig.colorbar(im, cax=cax, fraction=0.04, pad=0.1)
+        # CONQUEST outputs cube file in e/Bohr^3 by default
         cbar.set_label(
-            (
-                r"$\log\,(1+\rho)$   [$\mathrm{eV} a_0^{-3}$]"
-                if log_scale
-                else r"$\rho$  [$\mathrm{eV} a_0^{-3}$]"
-            ),
-            fontsize=12,
+            (r"$\log_{10}\rho$ " if log_scale else r"$\rho$  [$e a_0^{-3}$]"),
+            fontsize=10,
         )
 
         if atom_data is not None:
@@ -401,16 +391,27 @@ class chden_plot:
         fig.tight_layout()
         if output is None or output == "":
             # Create generic but useful filename
-            filename = f"{self.chden.hkl[0]}{self.chden.hkl[1]}{self.chden.hkl[2]}_{self.chden.offset:.3f}" 
+            filename = (
+                f"{self.chden.hkl[0]}{self.chden.hkl[1]}{self.chden.hkl[2]}_{self.chden.offset:.3f}"
+            )
             filename += f"{self.chden.mode if self.chden.mode is not None else ""}"
             extension = f".{self.format}"
-            self.plt.savefig(f"{filename}{extension}")
+            plt.savefig(f"{filename}{extension}")
             print(f"Saved: {filename}")
         else:
-            self.plt.savefig(output)
+            plt.savefig(output)
             print(f"Saved: {output}")
 
-    def run(self, filename: str | None, vmin: REAL_NUMBER | None = 0.0, vmax: REAL_NUMBER | None = None, thickness: float = 0.5, log_scale: bool=False, cmap: str = "inferno", interpolation: str = "lanczos") -> None:
+    def run(
+        self,
+        filename: str | None,
+        vmin: REAL_NUMBER | None = 0.0,
+        vmax: REAL_NUMBER | None = None,
+        thickness: float = 0.5,
+        log_scale: bool = False,
+        cmap: str = "viridis",
+        interpolation: str = "lanczos",
+    ) -> None:
         """
         Runs the full sequence of steps including plotting
         """
@@ -420,13 +421,32 @@ class chden_plot:
             _, _, n_hat = self.chden.inplane_basis()
             atom_data = self.chden.project_atoms(v1, v2, n_hat, origin, thickness=thickness)
             print(f"  Atoms within {thickness} (ang) of plane: {len(atom_data[0])}")
-        self.plot_slice(density, t1, t2, v1, v2, atom_data, output=filename, vmax=vmax, vmin=vmin, log_scale=log_scale, cmap=cmap, interpolation=interpolation)
+        self.plot_slice(
+            density,
+            t1,
+            t2,
+            v1,
+            v2,
+            atom_data,
+            output=filename,
+            vmax=vmax,
+            vmin=vmin,
+            log_scale=log_scale,
+            cmap=cmap,
+            interpolation=interpolation,
+        )
 
 
 def main() -> None:
-    example_chden = chden(np.array([1, 0, 0]), 0.0, ch1="tests/data/chden_up.cube", ch2="tests/data/chden_dn.cube", mode="sum")
+    example_chden = chden(
+        np.array([1, 0, 0]),
+        0.0,
+        ch1="tests/data/chden_up.cube",
+        ch2="tests/data/chden_dn.cube",
+        mode="sum",
+    )
     filename = None
-    chden_plot(example_chden, False).run(filename, vmax=0.1)
+    chden_plot(example_chden, False).run(filename, log_scale=True)
 
 
 if __name__ == "__main__":

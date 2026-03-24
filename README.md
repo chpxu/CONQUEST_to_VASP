@@ -6,13 +6,14 @@ A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool w
 - Create supercells (larger cells formed of repeats of a unit cell)
 - Process and sort (p)DOS files into something easy to use for plotting via matplotlib
 - Process and sort `BandStructure.dat` into something easy to use for plotting via matplotlib
-- Nearest-neighbour searching via periodic KDTree implementation
+- Nearest-neighbour searching
 - Calculation of dihedral and planar angles
+- Charge density post-processing
 
 ## Installation From 0.2.0
 Usage is simple. In your `venv`, simply
 ```
-pip3 install conquest2a numpy
+pip3 install numpy scipy ase matplotlib scienceplots conquest2a
 ```
 If you are attempting to integrate this directly into your Nix devShell, you will have to manually build the package with `buildPythonPackage`. Support for this as a standalone package will come soon. The [devflake](https://github.com/chpxu/development-flake) in this repo automatically builds and adds it to the devshell environment.
 
@@ -23,6 +24,7 @@ If you are attempting to integrate this directly into your Nix devShell, you wil
 3. [pDOS](#pdos)
 4. [kNN](#k-nearest-neighbours)
 5. [Quantities](#quantities)
+6. [Charge density](#charge-density)
 
 These steps assume you are already in the directory where `Conquest_input` and other relevant files sit. There is however, file path checking + absolute path resolution, for implementing when using in your own scripts, so relative paths _shouldn't_ be an issue.
 
@@ -35,8 +37,9 @@ from conquest2a.supercell import * # for supercell creation
 from conquest2a.writers import * # to write output files to disk
 from conquest2a.pdos import * # to process (p)DOS
 from conquest2a.band import * # to process BandStructure.dat
+from conquest2a.chden import * # to process cube files from CONQUEST
 from conquest2a.read.quantities import * # to process static output files without ASE
-from conquest2a.algo.kdtree import periodic_kdtree # for nearest-neighbour searching
+from conquest2a.algo.nn import nearest_neighbours # for nearest-neighbour searching
 ```
 Next, get the path to your Conquest coordinates file, and instantiate `(1)` as
 ```py
@@ -115,7 +118,7 @@ atom1 = lmpdos.blocks # NOTE: this is a SHALLOW COPY. If you do another read, th
 # atom1 = copy.deepcopy(lmpdos.blocks) # you may prefer to do this instead, if you need to read and store all the pdos output separately
 ```
 
-Remark 1: in CONQUEST, you can choose to output pdos only for specific atoms, but nonetheless `self.all_pdos_files` will be in ascending order of atom index.
+Remark 1: in CONQUEST, you can choose to output pdos only for specific atoms, but nonetheless `self.all_pdos_files` will be in ascending order of atom number.
 
 Remark 2: Reading pdos files automatically, and storing all of their data at once, is not implemented.
 
@@ -153,6 +156,50 @@ output.harris_foulkes_energy
 ```
 
 Forces can be accessed per atom.
+
+### Charge density analysis
+If you have a non-spin-polarised calculation, you will get a single `chden.cube` file by default from CONQUEST. If you do have a spin-polarised calculation, you will get both `chden_up.cube` and `chden_dn.cube` files if you haven't changed the string prefix in the input. These files contain volumetric data to allow you to perform charge density analysis. By adding the data, you will get the _total charge density_. By subtracting the spin down data from spin up, you will get spin density differences. Both calculations are supported in this package.
+
+To use the class, simply
+```py
+from conquest2a.chden import chden, chden_plot
+example_chden = chden(
+    np.array([1, 0, 0]),
+    0.0,
+    ch1="tests/data/chden_up.cube",
+    ch2="tests/data/chden_dn.cube",
+    mode="sum",
+)
+filename = None
+chden_plot(example_chden, False).run(filename, log_scale=True)
+```
+The `chden` class reads in the data using ASE, performs the slicing and analysis of the charge density. The class `chden_plot` is a class which provides publication-ready plots using `matplotlib` and `scienceplots`.
+#### Explanation of arguments
+```py
+chden(direction: np.ndarray, offset: float, ch1: str, ch2: str | None, mode: "sum" | "diff" | None)
+```
+- `direction`: length-3 NumPy array specifying the plane
+- `offset`: fractional distance $[0,1]$ this plane is from the origin - the distance is measured from the **centre** of the plane
+- `ch1`: path to a cube file. If you only have one chden file, use this parameter
+- `ch2`: path to another cube file
+- `mode`: set to `sum` or `diff` if you supply two chden files for sum or difference respectively. Will error out if this not `None` and you supply only one file.
+
+```py
+chden_plot(chden: chden, show_atoms: bool = False).run(
+    filename: str,
+    origin = "lower",
+    cmap = "viridis",
+    aspect = "equal",
+    interpolation: str  = "lanczos",
+    log_scale: bool = False,
+    vmin: float,
+    vmax: float
+)
+```
+- `show_atoms` will provide overlays on top of atomic positions with the element - useful for comparison with VESTA/other visualisations
+- `log_scale` will apply `colors.LogNorm()` to get a logarithmic colour bar - useful for revealing details.
+- `aspect` controls the aspect ratio. It defauls to `equals` to get square pixels
+- `origin` sets the origin of the _plot_ in _matplotlib_ to the lower left (it does NOT affect the actual data)
 
 ### 0.1.0 and older
 Usage is simple and there are **no external library dependencies** (currently). Either use `main.py` from the Releases tab, or clone the repo and copy `main.py` to your desired location.

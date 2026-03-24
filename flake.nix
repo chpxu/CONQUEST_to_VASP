@@ -66,7 +66,7 @@
           version = "0.2.0";
           pyproject = true;
           src = ./.;
-          buildInputs = with pkgs."python${config.languages.python.version}Packages"; [numpy scipy hatchling ase matplotlib];
+          buildInputs = with pkgs."python${config.languages.python.version}Packages"; [numpy scipy hatchling ase matplotlib scienceplots];
           enableParallelBuilding = true;
         };
         pre-commit.settings.hooks = {

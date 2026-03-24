@@ -4,14 +4,15 @@ from pathlib import Path
 from typing import Any, Literal
 import numpy as np
 from ase.io.cube import read_cube
+from ase.units import Bohr
 from scipy.ndimage import map_coordinates
 from conquest2a._types import INT_ARRAY, REAL_ARRAY, REAL_NUMBER
 from conquest2a.constants import MPLGENERIC
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-import scienceplots
 from mpl_toolkits.axes_grid1 import make_axes_locatable as mal
+import scienceplots
 
 mpl.rcParams.update(MPLGENERIC)
 plt.style.use(["science", "no-latex"])
@@ -132,7 +133,7 @@ class chden:
         self.data = self.dens1[0]
         self.dens2 = None
         self.atoms = self.dens1[1]
-        self.cell = self.atoms.get_cell()  # ASE cell information
+        self.cell = self.atoms.get_cell() / Bohr  # ASE cell information
         if self.mode is not None and ch2 is None:
             raise ArgumentError("Cannot have sum/diff mode if a second file is not provided!")
         if ch2 is not None:
@@ -198,7 +199,7 @@ class chden:
 
         `offset` is a dimensionless fractional intercept (0-1 spans one
         interplanar period). Pick the simplest fractional coordinate
-        satisfying the plane equation, then convert to angstrom.
+        satisfying the plane equation.
         """
         n = self.hkl / (self.hkl @ self.hkl)  # normal direction in fractional space
         centre = np.array([0.5, 0.5, 0.5])
@@ -385,8 +386,8 @@ class chden_plot:
                     fontweight="bold",
                 )
 
-        ax.set_xlabel(f"{self.vec_str(v1)}" + r"$[\mathrm{\AA}]$", fontsize=8)
-        ax.set_ylabel(f"{self.vec_str(v2)}" + r"$[\mathrm{\AA}]$", fontsize=8)
+        ax.set_xlabel(f"{self.vec_str(v1)}" + r"$[a_0]$", fontsize=8)
+        ax.set_ylabel(f"{self.vec_str(v2)}" + r"$[a_0]$", fontsize=8)
 
         fig.tight_layout()
         if output is None or output == "":

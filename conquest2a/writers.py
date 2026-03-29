@@ -33,7 +33,7 @@ class conquest_writer(file_writer):
         dest: str,
         coords: conquest_coordinates,
         encoding: str = "utf-8",
-        precision: int = 15,
+        precision: int = 10,
     ):
         super().__init__(dest=dest, encoding=encoding)
         self.coords = coords
@@ -148,9 +148,7 @@ class xyz_writer(file_writer):
                 for atom in self.data.element_map[atoms]:
                     cart_coord = self.fractional_to_cartesian(atom.coords)
                     cart_coord *= BOHR_TO_ANGSTROM
-                    file.write(
-                        rf'{atoms} {" ".join(str(x) for x in cart_coord)}'
-                    )
+                    file.write(rf'{atoms} {" ".join(str(x) for x in cart_coord)}')
                     file.write("\n")
 
 

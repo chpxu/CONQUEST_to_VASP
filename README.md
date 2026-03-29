@@ -9,7 +9,7 @@ A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool w
 - Nearest-neighbour searching
 - Calculation of dihedral and planar angles
 - Charge density post-processing
-
+- VESTA to CONQUEST coordinates
 ## Installation From 0.2.0
 Usage is simple. In your `venv`, simply
 ```
@@ -25,7 +25,7 @@ If you are attempting to integrate this directly into your Nix devShell, you wil
 4. [kNN](#k-nearest-neighbours)
 5. [Quantities](#quantities)
 6. [Charge density](#charge-density)
-
+7. [VESTA conversion](#vesta)
 These steps assume you are already in the directory where `Conquest_input` and other relevant files sit. There is however, file path checking + absolute path resolution, for implementing when using in your own scripts, so relative paths _shouldn't_ be an issue.
 
 ### Initialising your input
@@ -200,6 +200,27 @@ chden_plot(chden: chden, show_atoms: bool = False).run(
 - `log_scale` will apply `colors.LogNorm()` to get a logarithmic colour bar - useful for revealing details.
 - `aspect` controls the aspect ratio. It defauls to `equals` to get square pixels
 - `origin` sets the origin of the _plot_ in _matplotlib_ to the lower left (it does NOT affect the actual data)
+
+
+### VESTA
+
+VESTA is a very useful tool to set spin patterns using `Edit > Vectors`. CONQUEST2a now supports reading VESTA files with vector informationn to produce CONQUEST coordinate files. As always, the output should be checked before using it to start any simulation.
+
+Usage:
+```py
+from conquest2a.read.vesta import vesta_to_conquest
+from conquest2a.conquest import conquest_input
+species = {1: "O", 2: "Bi", 3: "Co", 4: "Co", 5: "Mn", 6: "Mn"}
+conqin = conquest_input(species_dict=species)
+
+vesta_to_conquest(
+        "tests/data/test_vesta_to_conquest.vesta",
+        "tests/data/test_vesta_to_conquest.coords",
+        conqin,
+    )
+```
+In CONQUEST, to treat species with different spin (i.e. up/down, collinear spin only), the species entries must be duplicated inside the dictionary `species`. This library treats vectors $(0, 0, 1)$ as spin "up" and $(0, 0, -1)$ as spin "down" when inputting from VESTA. Additionally, it will set the lowest index corresponding to a species as spin up, and then spin down, so `5: "Mn", 6: "Mn"` will make species 5 be spin up and species 6 to be spin down, so make sure you check your `Conquest_input` correctly!
+
 
 ### 0.1.0 and older
 Usage is simple and there are **no external library dependencies** (currently). Either use `main.py` from the Releases tab, or clone the repo and copy `main.py` to your desired location.

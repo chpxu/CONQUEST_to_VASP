@@ -56,8 +56,12 @@ class processor_base:
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
         self.re_index = re.compile(r"\d+")
 
-    def resolve_path(self) -> None:
-        abs_coord_path: Path = Path(self.input_path)
+    def resolve_path(self, filename: str | None = None) -> None:
+        abs_coord_path: Path = Path("")
+        if filename is None:
+            abs_coord_path: Path = Path(self.input_path)
+        else:
+            abs_coord_path = Path(filename)
         if not abs_coord_path.exists():
             raise FileNotFoundError(f"{abs_coord_path} not found.")
         if abs_coord_path.is_file() and os.stat(abs_coord_path).st_size <= 0:

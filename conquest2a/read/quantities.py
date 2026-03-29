@@ -28,6 +28,7 @@ class read_static_output:
     ) -> None:
         self.output_file = output_file
         self.conquest_processor = conquest_processor
+
         self.buffer: deque[str]
         self.harris_foulkes_energy: c2at.REAL_NUMBER = 0.0  # [Ha]
         self.dft_energy: c2at.REAL_NUMBER = 0.0  # [Ha]

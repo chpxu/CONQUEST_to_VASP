@@ -1,10 +1,11 @@
 import importlib.resources
+from ase.units import Bohr, Hartree
 
-BOHR_TO_ANGSTROM = 0.529177249
+BOHR_TO_ANGSTROM = Bohr
 ANGSTROM_TO_BOHR = 1 / BOHR_TO_ANGSTROM
 BOHR_TO_ANGSTROM_VOLUME = (BOHR_TO_ANGSTROM) ** 3
-EV_TO_HARTREE = 0.0367493
-HARTREE_TO_EV = 1 / EV_TO_HARTREE
+HARTREE_TO_EV = Hartree
+EV_TO_HARTREE = 1 / HARTREE_TO_EV
 LIBRARY = importlib.resources.files("conquest2a")
 
 

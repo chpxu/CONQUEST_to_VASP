@@ -1,18 +1,17 @@
 from ctypes import ArgumentError
-import os
-from pathlib import Path
 from typing import Any, Literal
 import numpy as np
 from ase.io.cube import read_cube
 from ase.units import Bohr
 from scipy.ndimage import map_coordinates
-from conquest2a._types import INT_ARRAY, REAL_ARRAY, REAL_NUMBER
-from conquest2a.constants import MPLGENERIC
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
+from matplotlib import colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable as mal
+import matplotlib.pyplot as plt
 import scienceplots
+from conquest2a._types import INT_ARRAY, REAL_ARRAY
+from conquest2a.conquest import processor_base
+from conquest2a.constants import MPLGENERIC
 
 mpl.rcParams.update(MPLGENERIC)
 plt.style.use(["science", "no-latex"])
@@ -105,7 +104,7 @@ _ELEMENT_COLOURS = {
 }
 
 
-class chden:
+class chden(processor_base):
     def __init__(
         self,
         hkl: INT_ARRAY,
@@ -129,6 +128,7 @@ class chden:
         self.hkl = hkl
         self.offset = offset
         self.mode = mode
+        super().__init__(path=ch1)
         self.dens1 = self.load_cube(ch1)
         self.data = self.dens1[0]
         self.dens2 = None
@@ -146,18 +146,10 @@ class chden:
         if hkl[0] == 0 and hkl[1] == 0 and hkl[2] == 0:
             raise ValueError("Miller indices (h k l) cannot all be zero.")
 
-    def resolve_path(self, filename: str) -> None:
-        abs_coord_path: Path = Path(filename)
-        if not abs_coord_path.exists():
-            raise FileNotFoundError(f"{abs_coord_path} not found.")
-        if abs_coord_path.is_file() and os.stat(abs_coord_path).st_size <= 0:
-            raise RuntimeError(f"{abs_coord_path} was an existing file, but has no file contents.")
-        self.abs_input_path = abs_coord_path
-
     def load_cube(self, filename: str) -> Any:
         self.resolve_path(filename=filename)
-        with open(filename, "r") as fh:
-            cube = read_cube(fh)
+        with open(filename, "r", encoding="utf-8") as fh:
+            cube = read_cube(fh)  # type: ignore
         fh.close()
         return cube["data"], cube["atoms"]
 
@@ -207,9 +199,9 @@ class chden:
         return frac @ self.cell
 
     def inplane_range(self, v1: np.ndarray, v2: np.ndarray) -> tuple[float, float]:
-        L1 = sum(abs(self.cell[i] @ v1) for i in range(3))
-        L2 = sum(abs(self.cell[i] @ v2) for i in range(3))
-        return L1, L2
+        length_1 = sum(abs(self.cell[i] @ v1) for i in range(3))
+        length_2 = sum(abs(self.cell[i] @ v2) for i in range(3))
+        return length_1, length_2
 
     def extract_slice(
         self,
@@ -237,23 +229,19 @@ class chden:
         t1, t2: 1-D coordinate axes (Å, symmetric about 0)
         origin: Cartesian slice origin (Å)
         """
-        Nx, Ny, Nz = self.data.shape
-        cell_inv = np.linalg.inv(self.cell)
-
         v1, v2, _ = self.inplane_basis()
         origin = self.plane_origin()
 
-        L1, L2 = self.inplane_range(v1, v2)
-        t1 = np.linspace(-L1 / 2, L1 / 2, n_points)
-        t2 = np.linspace(-L2 / 2, L2 / 2, n_points)
-        T1, T2 = np.meshgrid(t1, t2, indexing="ij")
-        pts_cart = origin + T1[..., None] * v1 + T2[..., None] * v2
-        pts_frac = (pts_cart @ cell_inv) % 1.0
-        vox = pts_frac * np.array([Nx, Ny, Nz])
-        pad = interp_order + 1
-        data_padded = np.pad(self.data, pad, mode="wrap")
+        length_1, length_2 = self.inplane_range(v1, v2)
+        t1 = np.linspace(-length_1 / 2, length_2 / 2, n_points)
+        t2 = np.linspace(-length_1 / 2, length_2 / 2, n_points)
+        grid_1, grid_2 = np.meshgrid(t1, t2, indexing="ij")
+        pts_cart = origin + grid_1[..., None] * v1 + grid_2[..., None] * v2
+        pts_frac = (pts_cart @ np.linalg.inv(self.cell)) % 1.0
+        vox = pts_frac * self.data.shape
+        data_padded = np.pad(self.data, interp_order + 1, mode="wrap")
 
-        coords = vox.reshape(-1, 3).T + pad
+        coords = vox.reshape(-1, 3).T + interp_order + 1
         density = map_coordinates(data_padded, coords, order=interp_order, mode="nearest").reshape(
             n_points, n_points
         )
@@ -291,17 +279,16 @@ class chden_plot:
     """
 
     def __init__(
-        self, chden_instance: chden, show_atoms: bool = False, format: str = "png"
+        self, chden_instance: chden, show_atoms: bool = False, extension: str = "png"
     ) -> None:
         self.chden = chden_instance
         self.show_atoms = show_atoms
-        self.format = format
+        self.extension = extension
 
     def miller_str(self, idx: int) -> str:
         if idx >= 0:
             return str(idx)
-        else:
-            return rf"$\overline{{{abs(idx):.2}}}$"
+        return rf"$\overline{{{abs(idx):.2}}}$"
 
     def vec_str(self, v: REAL_ARRAY) -> str:
         parts = [self.miller_str(x) for x in v]
@@ -322,27 +309,25 @@ class chden_plot:
         interpolation: str = "lanczos",
         output: str | None = None,
     ) -> None:
-        L1 = t1[-1] - t1[0]
-        L2 = t2[-1] - t2[0]
+        l1 = t1[-1] - t1[0]
+        l2 = t2[-1] - t2[0]
         transpose_label = False
         # Rotate so the longer axis is always horizontal
-        if L2 > L1:
+        if l2 > l1:
             density = density.T
             t1, t2 = t2, t1
-            L1, L2 = L2, L1
+            l1, l2 = l2, l1
             v1, v2 = v2, v1
             transpose_label = True
 
         fig_w = 5.0
-        fig_h = fig_w * (L2 / L1) + 0.5
+        fig_h = fig_w * (l2 / l1) + 0.5
         fig, ax = plt.subplots(figsize=(fig_w, fig_h))
         divider = mal(ax)
         extent = (t1[0], t1[-1], t2[0], t2[-1])
-        # Initialise im instance
-        im = None
         vmin = float(vmin) if vmin is not None else 0.0
         vmax = float(vmax) if vmax is not None else np.max(density)
-        imshow_args = {
+        imshow_args: dict[str, Any] = {
             "origin": "lower",
             "extent": extent,
             "cmap": cmap,
@@ -395,9 +380,9 @@ class chden_plot:
             filename = (
                 f"{self.chden.hkl[0]}{self.chden.hkl[1]}{self.chden.hkl[2]}_{self.chden.offset:.3f}"
             )
-            filename += f"{self.chden.mode if self.chden.mode is not None else ""}"
-            extension = f".{self.format}"
-            plt.savefig(f"{filename}{extension}")
+            mode_string = self.chden.mode if self.chden.mode is not None else ""
+            filename += f"_{mode_string}"
+            plt.savefig(f"{filename}{self.extension}")
             print(f"Saved: {filename}")
         else:
             plt.savefig(output)
@@ -406,8 +391,8 @@ class chden_plot:
     def run(
         self,
         filename: str | None,
-        vmin: REAL_NUMBER | None = 0.0,
-        vmax: REAL_NUMBER | None = None,
+        vmin: float | None = 0.0,
+        vmax: float | None = None,
         thickness: float = 0.5,
         log_scale: bool = False,
         cmap: str = "viridis",

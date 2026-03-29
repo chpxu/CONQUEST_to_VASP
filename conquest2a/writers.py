@@ -13,8 +13,8 @@ class file_writer:
         self.mode = mode
         self.dest_path = dest.strip()
         self.encoding = encoding
+        self.is_ang = is_angstrom
         self.file = self.open_file()
-        self.B2A = BOHR_TO_ANGSTROM if not is_angstrom else 1.0
 
     def open_file(self) -> TextIOWrapper | IO[Any]:
         file = open(self.dest_path, mode=self.mode, encoding=self.encoding)
@@ -209,7 +209,7 @@ class xsf_writer(file_writer):
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
                     file.write(
-                        rf' {atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) 
+                        rf' {atoms} {" ".join(str(x * BOHR_TO_ANGSTROM)
                                               for x in self.fractional_to_cartesian(atom.coords))}'
                     )
                     file.write("\n")

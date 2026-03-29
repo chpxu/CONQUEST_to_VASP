@@ -59,7 +59,7 @@ class processor_base:
     def resolve_path(self, filename: str | None = None) -> None:
         abs_coord_path: Path = Path("")
         if filename is None:
-            abs_coord_path: Path = Path(self.input_path)
+            abs_coord_path = Path(self.input_path)
         else:
             abs_coord_path = Path(filename)
         if not abs_coord_path.exists():
@@ -228,9 +228,9 @@ class block_processor:
         self.current_block: list[c2at.REAL_ARRAY] = []  # temp storage
         self.re_float = re.compile(r"[-+]?\d*\.\d+")
         self.re_index = re.compile(r"\d+")
-        self.num_spins: int
+        self.num_spins: int = 0
 
-    def process_headers(self, line: str, num_spins: int) -> None:
+    def process_headers(self, line: str) -> None:
         """This function can be overridden by subclasses to process header lines starting with #
         Bandstructure and DOS/pDOS files have slightly different headers
         """
@@ -243,13 +243,11 @@ class block_processor:
     def read_file(self, filename: str) -> None:
         self.blocks = []
         with open(filename, "r", encoding="utf-8") as f:
-            num_spins = 0
             for line in f:
                 stripped_line = line.strip()
                 if not stripped_line:
                     continue
                 if line.startswith("#"):
-                    self.process_headers(line=stripped_line, num_spins=num_spins)
+                    self.process_headers(line=stripped_line)
                 else:
                     self.process_block(stripped_line)
-            self.num_spins = num_spins

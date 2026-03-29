@@ -10,7 +10,7 @@ class angles:
     def find_unit_normal_of_three_points(self, atoms: tuple[Atom, Atom, Atom]) -> c2at.REAL_ARRAY:
         d01 = atoms[0].coords - atoms[1].coords
         d02 = atoms[2].coords - atoms[1].coords
-        normal_vector: c2at.REAL_ARRAY = np.cross(d01, d02)
+        normal_vector: c2at.REAL_ARRAY = np.cross(d01, d02).astype(np.float64)
         # Coefficients of x ,y, z normalised
         normal_unit_vector: c2at.REAL_ARRAY = normal_vector / np.linalg.norm(normal_vector)
         return normal_unit_vector

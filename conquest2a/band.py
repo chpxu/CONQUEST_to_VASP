@@ -30,7 +30,6 @@ class bst_processor(block_processor):
     def process_headers(
         self,
         line: str,
-        num_spins: int,
     ) -> None:
         if "# Spin" in line:
             self.num_spins += 1
@@ -53,4 +52,4 @@ class bst_processor(block_processor):
                 self.block_counter += 1
                 self.current_block = []
         else:
-            self.current_block.append(np.array(line.split()).astype(np.float32))
+            self.current_block.append(np.array(line.split()).astype(np.float64))

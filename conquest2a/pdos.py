@@ -18,6 +18,7 @@ class pdos_processor(block_processor):
         super().__init__()
         self.fermi_level: float = 0.0
         self.is_shifted_to_fermi: bool = True
+        self.num_spins: int = 0
         self.resolve_path()
         self.locate_pdos_files()
 
@@ -26,9 +27,9 @@ class pdos_processor(block_processor):
     ) -> dict[str, list[c2at.REAL_ARRAY]]:
         return {key: [] for key in pdos}
 
-    def process_headers(self, line: str, num_spins: int) -> None:
+    def process_headers(self, line: str) -> None:
         if "# Spin" in line:
-            num_spins += 1
+            self.num_spins += 1
         if "# Original" in line:
             result = re.findall(self.re_float, line)
             self.fermi_level = float(result[0])
@@ -75,7 +76,6 @@ class pdos_processor(block_processor):
 
 class pdos_l_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
-        self.num_spins: int = 0
         super().__init__(conquest_rundir=conquest_rundir, lm="l")
         self.l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         # PDOS file is split into blocks separated by "&" lines
@@ -105,7 +105,6 @@ class pdos_l_processor(pdos_processor):
 
 class pdos_lm_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
-        self.num_spins: int = 0
         super().__init__(conquest_rundir=conquest_rundir, lm="lm")
         self.lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         # PDOS file is split into blocks separated by "&" lines

@@ -1,4 +1,5 @@
 from ctypes import ArgumentError
+from tkinter.tix import REAL
 from typing import Any, Literal
 import numpy as np
 from ase.io.cube import read_cube
@@ -155,7 +156,7 @@ class chden(processor_base):
 
     def inplane_basis(
         self,
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[REAL_ARRAY, REAL_ARRAY, REAL_ARRAY]:
         """
         Return two orthonormal Cartesian vectors (v1, v2) spanning the (hkl) plane
         and the unit plane-normal n_hat.
@@ -198,7 +199,7 @@ class chden(processor_base):
         frac = centre - (centre @ self.hkl) * n + self.offset * n
         return frac @ self.cell
 
-    def inplane_range(self, v1: np.ndarray, v2: np.ndarray) -> tuple[float, float]:
+    def inplane_range(self, v1: REAL_ARRAY, v2: REAL_ARRAY) -> tuple[float, float]:
         length_1 = sum(abs(self.cell[i] @ v1) for i in range(3))
         length_2 = sum(abs(self.cell[i] @ v2) for i in range(3))
         return length_1, length_2
@@ -250,10 +251,10 @@ class chden(processor_base):
 
     def project_atoms(
         self,
-        v1: np.ndarray,
-        v2: np.ndarray,
-        n_hat: np.ndarray,
-        origin: np.ndarray,
+        v1: REAL_ARRAY,
+        v2: REAL_ARRAY,
+        n_hat: REAL_ARRAY,
+        origin: REAL_ARRAY,
         thickness: float = 0.5,
     ) -> Any:
         """
@@ -296,11 +297,11 @@ class chden_plot:
 
     def plot_slice(
         self,
-        density: np.ndarray,
-        t1: np.ndarray,
-        t2: np.ndarray,
-        v1: np.ndarray,
-        v2: np.ndarray,
+        density: REAL_ARRAY,
+        t1: REAL_ARRAY,
+        t2: REAL_ARRAY,
+        v1: REAL_ARRAY,
+        v2: REAL_ARRAY,
         atom_data: Any = None,  # (t1s, t2s, symbols) tuple or None
         cmap: str = "viridis",
         log_scale: bool = False,

@@ -18,7 +18,7 @@ class nearest_neighbours:
         return KDTree(
             self.coords_proc.cart_position_vectors,
             copy_data=True,
-            boxsize=[self.coords_proc.lattice_vectors[i][i] for i in range(0, 3)],
+            boxsize=[self.coords_proc.coords.lattice_vectors[i][i] for i in range(0, 3)],
         )
 
     def _knn(self, atom_query: Atom, num_neighbours: int | Sequence[int]) -> tuple[Any, Any]:
@@ -29,7 +29,7 @@ class nearest_neighbours:
         Returns:
             list[Atom]: The list of nearest-neighbour Atoms
         """
-        atom_query_cart_coords = atom_query.coords @ self.coords_proc.lattice_vectors.T
+        atom_query_cart_coords = atom_query.coords @ self.coords_proc.coords.lattice_vectors.T
         distances, indices = self.kdtree.query(
             x=atom_query_cart_coords, k=num_neighbours, p=2, workers=-1  # type: ignore
         )  # type: ignore

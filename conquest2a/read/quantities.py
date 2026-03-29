@@ -50,7 +50,7 @@ class read_static_output:
             # Then a block is printed for the forces for each atom
             # And also 2 extra kines for the force header
             # New line +  3 lines for Harris-Foulkes+DFT+Ground state energies
-            lines = deque(file, maxlen=25 + int(self.conquest_processor.natoms) + 5)
+            lines = deque(file, maxlen=25 + int(self.conquest_processor.coords.natoms) + 5)
             self.buffer = lines
             for line in lines:
                 line = line.strip()
@@ -102,7 +102,7 @@ class read_static_output:
             islice(
                 self.buffer,
                 header_index + 1,
-                header_index + int(self.conquest_processor.natoms) + 1,
+                header_index + int(self.conquest_processor.coords.natoms) + 1,
             )
         )
         formatted_temp: list[str] = []

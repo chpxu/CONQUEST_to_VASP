@@ -36,8 +36,8 @@ class conquest_input:
         self.species_dict = species_dict
         # elements_from_file = LIBRARY.joinpath(self.element_file)
         elements_from_file = importlib.resources.read_text("conquest2a", self.element_file)
-        elements = elements_from_file.split(",")
-        self.allowed_element_labels: list[str] = elements
+        self.elements = [e.strip() for e in elements_from_file.split(",")]
+        self.allowed_element_labels: list[str] = self.elements
         # elements_from_file.close()
         if not self.dict_contains_only_real_elements():
             raise ValueError("Provided species map contains fake chemical elements.")

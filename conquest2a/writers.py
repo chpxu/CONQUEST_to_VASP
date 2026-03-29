@@ -208,10 +208,10 @@ class xsf_writer(file_writer):
             file.write(natom_line)
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
-                    file.write(
-                        rf' {atoms} {" ".join(str(x * BOHR_TO_ANGSTROM)
-                                              for x in self.fractional_to_cartesian(atom.coords))}'
+                    pos_string = " ".join(
+                        str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords)
                     )
+                    file.write(rf" {atoms} {pos_string}")
                     file.write("\n")
 
 

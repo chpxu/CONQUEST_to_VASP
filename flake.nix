@@ -9,119 +9,126 @@
     git-hooks-nix.url = "github:cachix/git-hooks.nix/b68b780b69702a090c8bb1b973bab13756cc7a27";
     treefmt-nix.url = "github:numtide/treefmt-nix";
   };
-  outputs = {
-    self,
-    nixpkgs,
-    nixpkgs2505,
-    flake-parts,
-    devshell,
-    import-tree,
-    treefmt-nix,
-    git-hooks-nix,
-    ...
-  } @ inputs: let
-    import-tree = inputs.import-tree;
-    getLanguageDefaultNix = (import-tree.match ".*/default\\.nix") ./nix/languages;
-    getEditorDefaultNix = (import-tree.match ".*/default\\.nix") ./nix/editors;
-    imports = builtins.concatLists [
-      [
-        inputs.flake-parts.flakeModules.easyOverlay
-        inputs.devshell.flakeModule
-        inputs.treefmt-nix.flakeModule
-        inputs.git-hooks-nix.flakeModule
-      ]
-      getLanguageDefaultNix.imports
-      getEditorDefaultNix.imports
-    ];
-  in
-    flake-parts.lib.mkFlake
+  outputs =
     {
-      inherit inputs;
-    }
-    {
-      imports = imports;
-      systems = [
-        "x86_64-linux"
-        "x86_64-darwin"
+      nixpkgs2505,
+      flake-parts,
+      ...
+    }@inputs:
+    let
+      inherit (inputs) import-tree;
+      getLanguageDefaultNix = (import-tree.match ".*/default\\.nix") ./nix/languages;
+      getEditorDefaultNix = (import-tree.match ".*/default\\.nix") ./nix/editors;
+      imports = builtins.concatLists [
+        [
+          inputs.flake-parts.flakeModules.easyOverlay
+          inputs.devshell.flakeModule
+          inputs.treefmt-nix.flakeModule
+          inputs.git-hooks-nix.flakeModule
+        ]
+        getLanguageDefaultNix.imports
+        getEditorDefaultNix.imports
       ];
-      perSystem = {
-        config,
-        self',
-        inputs',
-        pkgs,
-        system,
-        ...
-      }: let
-        userConfig = import ./config.nix {inherit pkgs config;};
-      in {
-        _module.args = {
-          pkgsOlder = import nixpkgs2505 {
-            inherit system inputs';
-          };
-          helper = import ./nix/helpers;
-        };
-        imports = [userConfig]; # settings from config.nix defined by user
-        packages.default = pkgs."python${config.languages.python.version}Packages".buildPythonPackage {
-          pname = "conquest2a";
-          version = "0.2.0";
-          pyproject = true;
-          src = ./.;
-          buildInputs = with pkgs."python${config.languages.python.version}Packages"; [numpy scipy hatchling ase matplotlib scienceplots];
-          enableParallelBuilding = true;
-        };
-        pre-commit.settings.hooks = {
-          nixfmt.enable = true;
-          nixfmt-rfc-style.enable = true;
-          flake-checker = {
-            enable = true;
-            after = ["nixfmt-rfc-style"];
-          };
-          treefmt = {
-            enable = true;
-            package = pkgs.treefmt;
-          };
-        };
-        treefmt = {
-          projectRootFile = "flake.nix";
-          programs = {
-            deadnix.enable = true;
-            statix.enable = true;
-            nixfmt.enable = true;
-            black.enable = true;
-          };
-
-          settings = {
-            global.excludes = [
-              ".direnv/*"
-            ];
-
-            formatter = {
-              deadnix.priority = 1;
-              statix.priority = 2;
-              nixfmt = {
-                priority = 3;
-                strict = true;
-                indent = 2;
+    in
+    flake-parts.lib.mkFlake
+      {
+        inherit inputs;
+      }
+      {
+        inherit imports;
+        systems = [
+          "x86_64-linux"
+        ];
+        perSystem =
+          {
+            config,
+            inputs',
+            pkgs,
+            system,
+            ...
+          }:
+          let
+            userConfig = import ./config.nix { inherit pkgs config; };
+          in
+          {
+            _module.args = {
+              pkgsOlder = import nixpkgs2505 {
+                inherit system inputs';
               };
-              black = {
-                priority = 4;
+              helper = import ./nix/helpers;
+            };
+            imports = [ userConfig ]; # settings from config.nix defined by user
+            packages.default = pkgs."python${config.languages.python.version}Packages".buildPythonPackage {
+              pname = "conquest2a";
+              version = "0.2.0";
+              pyproject = true;
+              src = ./.;
+              buildInputs = with pkgs."python${config.languages.python.version}Packages"; [
+                numpy
+                scipy
+                hatchling
+                ase
+                matplotlib
+                scienceplots
+              ];
+              enableParallelBuilding = true;
+            };
+            pre-commit.settings.hooks = {
+              nixfmt.enable = true;
+              nixfmt-rfc-style.enable = true;
+              flake-checker = {
+                enable = true;
+                after = [ "nixfmt-rfc-style" ];
               };
+              mypy.enable = true;
+              flake8.enable = true;
+              pylint.enable = true;
+              treefmt = {
+                enable = true;
+                package = pkgs.treefmt;
+              };
+            };
+            treefmt = {
+              projectRootFile = "flake.nix";
+              programs = {
+                deadnix.enable = true;
+                statix.enable = true;
+                nixfmt.enable = true;
+                black.enable = true;
+              };
+
+              settings = {
+                global.excludes = [
+                  ".direnv/*"
+                ];
+
+                formatter = {
+                  deadnix.priority = 1;
+                  statix.priority = 2;
+                  nixfmt = {
+                    priority = 3;
+                    strict = true;
+                    indent = 2;
+                  };
+                  black = {
+                    priority = 4;
+                  };
+                };
+              };
+            };
+          };
+        flake = {
+          templates = {
+            default = {
+              description = ''
+                Opinionated flake
+              '';
+              path = ./.;
+              welcomeText = ''
+                Welcome to devflake. Edit flake.nix to get started. See the README.md for more information.
+              '';
             };
           };
         };
       };
-      flake = {
-        templates = {
-          default = {
-            description = ''
-              Opinionated flake
-            '';
-            path = ./.;
-            welcomeText = ''
-              Welcome to devflake. Edit flake.nix to get started. See the README.md for more information.
-            '';
-          };
-        };
-      };
-    };
 }

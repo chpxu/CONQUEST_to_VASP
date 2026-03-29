@@ -127,7 +127,7 @@ class conquest_coordinates_processor(processor_base):
 
     def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
         atom_frac_pos = np.vstack([atom.coords for atom in self.coords.atoms])
-        return atom_frac_pos @ self.lattice_vectors.T
+        return atom_frac_pos @ self.coords.lattice_vectors.T
 
     def open_file(self) -> None:
         """
@@ -143,8 +143,8 @@ class conquest_coordinates_processor(processor_base):
             for lattice_vect in conquest_lattice_data_str:
                 coords: c2at.REAL_ARRAY = np.fromstring(lattice_vect, sep=" ")
                 cell_lattice_vectors.append(coords)
-            self.lattice_vectors = np.vstack(cell_lattice_vectors)
-            self.natoms = next(conquest_coord_file)
+            self.coords.lattice_vectors = np.vstack(cell_lattice_vectors)
+            self.coords.natoms = next(conquest_coord_file)
             atom_data = conquest_coord_file.readlines()
             atom_data_stripped = [atom for atom in atom_data if atom.strip()]
             atom_number = 1

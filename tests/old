@@ -7,7 +7,7 @@ conquest_map = conquest_input({1: "O", 2: "Bi", 3: "Mn", 4: "Mn", 5: "Mn", 6: "M
 path = "./tests/data/test_output_input_coords.in"
 coordsproc = conquest_coordinates_processor(path, conquest_map)
 nn = nearest_neighbours(
-    coordsproc, coordsproc.atoms[8]
+    coordsproc, coordsproc.coords.atoms[8]
 )  # Corresponds to B site Mn -> should return O atoms as nn
 
 

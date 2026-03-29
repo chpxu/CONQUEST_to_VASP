@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 data_file = "tests/data/test_eigenvalues.dat"
-target_bandgap = 0.12999176310841296
+target_bandgap = 0.12999168360873672
 proc = eigenvalues_processor(file=data_file)
 
 

@@ -180,7 +180,7 @@ class atom_charge(processor_base):
         )
         self.coordinates = coordinates
         self.atom_charge_path = atom_charge_path
-        self.abs_atom_charge_path: str
+        self.abs_atom_charge_path: Path = Path(self.atom_charge_path)
         self.conquest_charge_data: list[c2at.REAL_ARRAY] = []
 
         try:
@@ -200,7 +200,6 @@ class atom_charge(processor_base):
             for line in conquest_charge_file:
                 total_up_down = line.split()
                 if total_up_down:
-
                     self.conquest_charge_data.append(np.array(total_up_down).astype(float))
                 else:
                     continue

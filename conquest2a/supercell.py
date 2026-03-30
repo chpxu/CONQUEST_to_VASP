@@ -143,5 +143,14 @@ class supercell:
                             can_move=atom.can_move,
                             label=atom.label,
                             number=len(self.supercell_coords.atoms) + 1,
+                            spins=atom.spins,
+                            forces=atom.forces
+                            cart_coords = np.array(
+                                [
+                                    (atom.cart_coords[0] + l) / (self.repeats_x + 1),
+                                    (atom.cart_coords[1] + m) / (self.repeats_y + 1),
+                                    (atom.cart_coords[2] + n) / (self.repeats_z + 1),
+                                ]
+                            ),
                         )
                         self.supercell_coords.atoms.append(new_atom)

@@ -106,6 +106,7 @@ class conquest_coordinates:
         cart_coords = atom_frac_pos @ self.lattice_vectors.T
         for atom, cart_coord in zip(self.atoms, cart_coords):
             atom.cart_coords = cart_coord
+        self.cart_position_vectors = cart_coords
         return cart_coords
     
     def assign_atom_labels(self) -> None:
@@ -138,6 +139,7 @@ class conquest_coordinates_processor(processor_base):
         self.coords = conquest_coordinates(conquest_input=conquest_input)
         self.resolve_path()
         self.open_file()
+        self.coords.get_cartesian_positions()
         self.coords.assign_atom_labels()
         self.coords.index_to_atom_map()
         self.volume_bohr: float = (

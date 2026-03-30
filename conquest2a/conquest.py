@@ -13,10 +13,10 @@ import conquest2a._types as c2at
 class Atom:
     species: int
     coords: c2at.REAL_ARRAY
-    # cart_coords: c2at.REAL_ARRAY = field(init=False)
     can_move: Sequence[str]
     number: int
     label: str = ""
+    cart_coords: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
 
@@ -86,6 +86,15 @@ class conquest_coordinates:
         self.element_map: dict[str, list[Atom]]
         self.lattice_vectors: c2at.REAL_ARRAY = np.array([])
 
+        self.cart_position_vectors: c2at.REAL_ARRAY = np.array([])
+
+    def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
+        atom_frac_pos = np.vstack([atom.coords for atom in self.atoms])
+        cart_coords = atom_frac_pos @ self.lattice_vectors.T
+        for i, cart_coord in enumerate(cart_coords):
+            self.atoms[i]["cart_coords"] = cart_coord
+        return cart_coords
+    
     def assign_atom_labels(self) -> None:
         """Assign each Atom its label"""
         for atom in self.atoms:
@@ -123,11 +132,8 @@ class conquest_coordinates_processor(processor_base):
             + self.coords.lattice_vectors[2][2]
         )
         self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
-        self.cart_position_vectors: c2at.REAL_ARRAY = self.get_cartesian_positions()
 
-    def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
-        atom_frac_pos = np.vstack([atom.coords for atom in self.coords.atoms])
-        return atom_frac_pos @ self.coords.lattice_vectors.T
+    
 
     def open_file(self) -> None:
         """
@@ -160,7 +166,7 @@ class conquest_coordinates_processor(processor_base):
                 )
                 atom_number += 1
         conquest_coord_file.close()
-
+        self.coords.get_cartesian_positions()
 
 class atom_charge(processor_base):
     """

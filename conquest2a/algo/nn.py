@@ -16,7 +16,7 @@ class nearest_neighbours:
 
     def build_kdtree(self) -> KDTree:
         return KDTree(
-            self.coords_proc.cart_position_vectors,
+            self.coords_proc.coords.cart_position_vectors,
             copy_data=True,
             boxsize=[self.coords_proc.coords.lattice_vectors[i][i] for i in range(0, 3)],
         )

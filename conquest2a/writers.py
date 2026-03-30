@@ -1,8 +1,8 @@
 from io import TextIOWrapper
-from typing import IO, Any
+from typing import IO, Any, Literal
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import conquest_coordinates, atom_charge
+from conquest2a.conquest import Atom, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
 
 
@@ -126,14 +126,6 @@ class xyz_writer(file_writer):
         num_string = " ".join(str(x) for x in num_ele.values())
         return ele_string, num_string
 
-    def fractional_to_cartesian(self, vector: c2at.REAL_ARRAY) -> c2at.REAL_ARRAY:
-        return np.array(
-            [
-                vector[0] * self.data.lattice_vectors[0][0],
-                vector[1] * self.data.lattice_vectors[1][1],
-                vector[2] * self.data.lattice_vectors[2][2],
-            ]
-        )
 
     def write(self) -> None:
         """XYZ format expects cells in Cartesian coordinates.
@@ -146,9 +138,7 @@ class xyz_writer(file_writer):
             file.write(f"{self.create_comment_line()}\n")
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
-                    cart_coord = self.fractional_to_cartesian(atom.coords)
-                    cart_coord *= BOHR_TO_ANGSTROM
-                    file.write(rf'{atoms} {" ".join(str(x) for x in cart_coord)}')
+                    file.write(rf'{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords)}')
                     file.write("\n")
 
 
@@ -180,21 +170,21 @@ class xsf_writer(file_writer):
         self,
         dest: str,
         data: conquest_coordinates,
+        write_extra: Literal["spin", "force"] = "spin",
         encoding: str = "utf-8",
     ) -> None:
         super().__init__(dest=dest, encoding=encoding)
         self.data = data
+        self.write_extra = write_extra
         self.write()
         self.close_file(file=self.file)
 
-    def fractional_to_cartesian(self, vector: c2at.REAL_ARRAY) -> c2at.REAL_ARRAY:
-        return np.array(
-            [
-                vector[0] * self.data.lattice_vectors[0][0],
-                vector[1] * self.data.lattice_vectors[1][1],
-                vector[2] * self.data.lattice_vectors[2][2],
-            ]
-        )
+    def _format_extra(self, atom: Atom) -> str:
+        if self.write_extra == "spin":
+            return " ".join(str(x) for x in atom.spins)
+        elif self.write_extra == "force":
+            return " ".join(str(x) for x in atom.forces)
+        return ""
 
     def write(self) -> None:
         with self.file as file:
@@ -206,13 +196,15 @@ class xsf_writer(file_writer):
             file.write("PRIMCOORD\n")
             natom_line = f'{" ".join(self.data.natoms.split())} 1\n'
             file.write(natom_line)
-            for atoms in self.data.element_map:
-                for atom in self.data.element_map[atoms]:
+            for element, atoms in self.data.element_map.items():
+                for atom in atoms:
                     pos_string = " ".join(
-                        str(x * BOHR_TO_ANGSTROM) for x in self.fractional_to_cartesian(atom.coords)
+                        str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords
                     )
-                    file.write(rf" {atoms} {pos_string}")
-                    file.write("\n")
+                    extra = self._format_extra(atom)
+                    file.write(f" {element} {pos_string} {extra}\n")
+                    
+
 
 
 class xsf_writer_spins(file_writer):

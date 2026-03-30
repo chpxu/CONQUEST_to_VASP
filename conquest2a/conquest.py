@@ -20,6 +20,19 @@ class Atom:
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     
+    def __str__(self) -> str:
+        def fmt_array(arr: c2at.REAL_ARRAY) -> str:
+            return f"({", ".join(f"{x:.5f}" for x in arr)})"
+
+        return (
+            f"Atom {self.number} ({self.label})\n"
+            f"  Species Index : {self.species}\n"
+            f"  Frac coords   : {fmt_array(self.coords)}\n"
+            f"  Cart coords   : {fmt_array(self.cart_coords)}\n"
+            f"  Can move      : {', '.join(self.can_move)}\n"
+            f"  Force         : {fmt_array(self.forces)}\n"
+            f"  Spin          : {fmt_array(self.spins)}\n"
+        )
 
 class conquest_input:
     def __init__(self, species_dict: dict[int, str]) -> None:

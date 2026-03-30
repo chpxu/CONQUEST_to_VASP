@@ -16,10 +16,10 @@ class Atom:
     can_move: Sequence[str]
     number: int
     label: str = ""
-    cart_coords: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
+    cart_coords: c2at.REAL_ARRAY = field(init=False)
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
-
+    
 
 class conquest_input:
     def __init__(self, species_dict: dict[int, str]) -> None:
@@ -91,8 +91,8 @@ class conquest_coordinates:
     def get_cartesian_positions(self) -> c2at.REAL_ARRAY:
         atom_frac_pos = np.vstack([atom.coords for atom in self.atoms])
         cart_coords = atom_frac_pos @ self.lattice_vectors.T
-        for i, cart_coord in enumerate(cart_coords):
-            self.atoms[i]["cart_coords"] = cart_coord
+        for atom, cart_coord in zip(self.atoms, cart_coords):
+            atom.cart_coords = cart_coord
         return cart_coords
     
     def assign_atom_labels(self) -> None:

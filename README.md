@@ -10,6 +10,7 @@ A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool w
 - Calculation of dihedral and planar angles
 - Charge density post-processing
 - VESTA to CONQUEST coordinates
+
 ## Installation From 0.2.0
 Usage is simple. In your `venv`, simply
 ```
@@ -26,6 +27,7 @@ If you are attempting to integrate this directly into your Nix devShell, you wil
 5. [Quantities](#quantities)
 6. [Charge density](#charge-density)
 7. [VESTA conversion](#vesta)
+
 These steps assume you are already in the directory where `Conquest_input` and other relevant files sit. There is however, file path checking + absolute path resolution, for implementing when using in your own scripts, so relative paths _shouldn't_ be an issue.
 
 ### Initialising your input
@@ -251,6 +253,4 @@ Usage is simple and there are **no external library dependencies** (currently). 
 
 ## CONTRIBUTING
 
-Edit `main.py` as necessary. Files may be refactored in the future. 
-
-Dependencies: tested and developed on Python 3.12. Expected to work on Python >= 3.10.
+Thank you for wanting to contribute. I am happy to see open issues or PRs on desired features, particularly pertaining to plotting and post-processing.

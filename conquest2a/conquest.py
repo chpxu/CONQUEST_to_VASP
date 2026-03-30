@@ -22,7 +22,8 @@ class Atom:
     
     def __str__(self) -> str:
         def fmt_array(arr: c2at.REAL_ARRAY) -> str:
-            return f"({", ".join(f"{x:.5f}" for x in arr)})"
+            out_str = lambda x :  f"{x:.5f}"
+            return f"({', '.join(out_str(x) for x in arr)})"
 
         return (
             f"Atom {self.number} ({self.label})\n"

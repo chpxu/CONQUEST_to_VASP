@@ -59,9 +59,9 @@ class processor_base:
     def resolve_path(self, filename: str | None = None) -> None:
         abs_coord_path: Path = Path("")
         if filename is None:
-            abs_coord_path = Path(self.input_path)
+            abs_coord_path = Path(os.path.abspath(self.input_path))
         else:
-            abs_coord_path = Path(filename)
+            abs_coord_path = Path(os.path.abspath(filename))
         if not abs_coord_path.exists():
             raise FileNotFoundError(f"{abs_coord_path} not found.")
         if abs_coord_path.is_file() and os.stat(abs_coord_path).st_size <= 0:
@@ -180,7 +180,7 @@ class atom_charge(processor_base):
         )
         self.coordinates = coordinates
         self.atom_charge_path = atom_charge_path
-        self.abs_atom_charge_path: Path = Path(self.atom_charge_path)
+        self.abs_atom_charge_path: Path = Path(os.path.abspath(self.atom_charge_path))
         self.conquest_charge_data: list[c2at.REAL_ARRAY] = []
 
         try:

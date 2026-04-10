@@ -2,9 +2,9 @@ import importlib.resources
 from ase.units import Bohr, Hartree
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import scienceplots 
+import scienceplots
 
-plt.style.use(['science', "no-latex"])
+plt.style.use(["science", "no-latex"])
 
 BOHR_TO_ANGSTROM = Bohr
 ANGSTROM_TO_BOHR = 1 / BOHR_TO_ANGSTROM

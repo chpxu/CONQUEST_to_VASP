@@ -126,7 +126,6 @@ class xyz_writer(file_writer):
         num_string = " ".join(str(x) for x in num_ele.values())
         return ele_string, num_string
 
-
     def write(self) -> None:
         """XYZ format expects cells in Cartesian coordinates.
         Since CONQUEST only deals with orthorhombic unit cells,
@@ -138,7 +137,9 @@ class xyz_writer(file_writer):
             file.write(f"{self.create_comment_line()}\n")
             for atoms in self.data.element_map:
                 for atom in self.data.element_map[atoms]:
-                    file.write(rf'{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords)}')
+                    file.write(
+                        rf'{atoms} {" ".join(str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords)}'
+                    )
                     file.write("\n")
 
 
@@ -198,13 +199,9 @@ class xsf_writer(file_writer):
             file.write(natom_line)
             for element, atoms in self.data.element_map.items():
                 for atom in atoms:
-                    pos_string = " ".join(
-                        str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords
-                    )
+                    pos_string = " ".join(str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords)
                     extra = self._format_extra(atom)
                     file.write(f" {element} {pos_string} {extra}\n")
-                    
-
 
 
 class xsf_writer_spins(file_writer):

@@ -11,32 +11,36 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import scienceplots # pip3 install SciencePlots 
+
 # Load SciencePlots configuration
+
 plt.style.use(['science', "no-latex"])
 # Override some of their settings because I don't like their grid params
 # I also want a solid legend
-mpl.rcParams.update({
-    # Muted grey gridlines
-    "axes.grid":            True,
-    "grid.color":           "#CCCCCC",
-    "grid.linewidth":       0.5,
-    "grid.linestyle":       "--",
-    "grid.alpha":           0.7,
-    "axes.axisbelow":       True,   # grid behind data
+mpl.rcParams.update(
+    {
+        # Muted grey gridlines
+        "axes.grid":            True,
+        "grid.color":           "#CCCCCC",
+        "grid.linewidth":       0.5,
+        "grid.linestyle":       "--",
+        "grid.alpha":           0.7,
+        "axes.axisbelow":       True,   # grid behind data
 
-    # Flat / frameless legend
-    "legend.frameon":       True,
-    "legend.framealpha": 0.5,
-    "legend.edgecolor": "black",
-    "legend.fancybox": False,
-    "legend.loc":           "best",
-    "legend.handlelength":  1.5,
-    "legend.handletextpad": 0.5,
-    "legend.columnspacing": 1.0,
-    "savefig.dpi":          600,
-    "savefig.bbox":         "tight",
-    "figure.figsize":       (3.5, 2.8)
-})
+        # Flat / frameless legend
+        "legend.frameon":       True,
+        "legend.framealpha": 0.5,
+        "legend.edgecolor": "black",
+        "legend.fancybox": False,
+        "legend.loc":           "best",
+        "legend.handlelength":  1.5,
+        "legend.handletextpad": 0.5,
+        "legend.columnspacing": 1.0,
+        "savefig.dpi":          600,
+        "savefig.bbox":         "tight",
+        "figure.figsize":       (3.5, 2.8)
+    }
+)
 
 # Some labels for colouring
 color_dict = {

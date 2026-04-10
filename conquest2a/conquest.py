@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Callable
 import os
 import re
 import importlib.resources
@@ -19,10 +20,10 @@ class Atom:
     cart_coords: c2at.REAL_ARRAY = field(init=False)
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
-    
+
     def __str__(self) -> str:
         def fmt_array(arr: c2at.REAL_ARRAY) -> str:
-            out_str = lambda x :  f"{x:.5f}"
+            out_str: Callable[[c2at.REAL_NUMBER], str] = lambda x: f"{x:.5f}"
             return f"({', '.join(out_str(x) for x in arr)})"
 
         return (
@@ -34,6 +35,7 @@ class Atom:
             f"  Force         : {fmt_array(self.forces)}\n"
             f"  Spin          : {fmt_array(self.spins)}\n"
         )
+
 
 class conquest_input:
     def __init__(self, species_dict: dict[int, str]) -> None:
@@ -109,7 +111,7 @@ class conquest_coordinates:
             atom.cart_coords = cart_coord
         self.cart_position_vectors = cart_coords
         return cart_coords
-    
+
     def assign_atom_labels(self) -> None:
         """Assign each Atom its label"""
         for atom in self.atoms:
@@ -149,8 +151,6 @@ class conquest_coordinates_processor(processor_base):
         )
         self.volume_ang = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
 
-    
-
     def open_file(self) -> None:
         """
         CONQUEST coords file split into 3 main chunks:
@@ -183,6 +183,7 @@ class conquest_coordinates_processor(processor_base):
                 atom_number += 1
         conquest_coord_file.close()
         self.coords.get_cartesian_positions()
+
 
 class atom_charge(processor_base):
     """

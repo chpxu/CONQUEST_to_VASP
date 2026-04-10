@@ -63,7 +63,7 @@ class pdos_processor(block_processor):
         pdos_file_list: list[str] = []
         # The search is done because a directory can contain both lm, l resolved pDOS files
         for filename in file_list:
-            match = re.search(rf"([0-9]{{7}})", filename)
+            match = re.search(f"([0-9]{{7}})", filename)
             if match:
                 self.pdos_atoms.append(int(match.group(1)))
             res = re.match(self.filename_regex, filename)
@@ -76,15 +76,14 @@ class pdos_processor(block_processor):
 
     def get_pdos(self, atom: int) -> None:
         if atom not in self.pdos_atoms:
-            raise ValueError(f"Chosen atom for pdos was not in the atom list")
+            raise ValueError("Chosen atom for pdos was not in the atom list")
         id = f"{atom:07d}"
-        chosen_file = ""
         # self.all_pdos_files will be absolute oaths, use searchc
         for filename in self.all_pdos_files:
             match = re.search(rf"Atom{id}DOS_{self.lm}\.dat", filename)
             if match:
-                chosen_file = filename
-        self.read_file(chosen_file)
+                self.read_file(filename)
+                return
 
     def plot_pdos(self, *args, **kwargs) -> None:  # type: ignore
         if self.lm == "t":

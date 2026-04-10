@@ -3,6 +3,9 @@
 ## Features
 - Introduced basic plotting into `pdos` module
 
+## Other
+- dev: fix `black` excluding `conquest2a` directory
+
 # 0.2.0
 
 ## Features

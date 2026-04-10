@@ -144,8 +144,7 @@ class supercell:
                             label=atom.label,
                             number=len(self.supercell_coords.atoms) + 1,
                             spins=atom.spins,
-                            forces=atom.forces
+                            forces=atom.forces,
                         )
                         self.supercell_coords.atoms.append(new_atom)
         self.supercell_coords.get_cartesian_positions()
-

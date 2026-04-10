@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import Literal
+from typing import Literal, override
 import os
 import re
 from os.path import abspath
 import numpy as np
 from conquest2a.conquest import block_processor
 import conquest2a._types as c2at
-
+import matplotlib.pyplot as plt
 
 class pdos_processor(block_processor):
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
@@ -39,7 +39,7 @@ class pdos_processor(block_processor):
     def process_block(self, line: str) -> None:
         if line == "&":
             if self.current_block:
-                self.blocks.append(np.array(self.current_block, dtype=float))
+                self.blocks.append(np.array(self.current_block, dtype=np.float64))
                 self.current_block = []
         else:
             self.current_block.append(np.array(line.split()).astype(np.float64))
@@ -72,7 +72,22 @@ class pdos_processor(block_processor):
         for file in pdos_file_list:
             self.all_pdos_files.append(f"{abspath(self.conquest_rundir)}/{file}")
         return self.all_pdos_files
-
+    def plot_pdos(self, *args, **kwargs) -> None:
+        if self.lm == "t":
+            self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
+            tdos: c2at.REAL_ARRAY
+            ldos: c2at.REAL_ARRAY
+            fig = plt.figure(figsize=())
+            for idx, block in enumerate(self.blocks):
+                energy = block[:, 0]
+                self.energy_values[idx + 1] = energy
+                tdos = block[:, 1]
+                ldos = block[:, 2]
+                plt.plot(energy, tdos)
+                plt.savefig("DOS.png")
+                plt.clf()
+                plt.plot(energy, ldos)
+                plt.savefig("LDOS.png")
 
 class pdos_l_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
@@ -101,6 +116,9 @@ class pdos_l_processor(pdos_processor):
                     l_dict[str(l)] = []
                 l_dict[str(l)].append(pdos_values[:, l])
         self.l_dict = l_dict
+    def plot_pdos(self) -> None:
+        
+        super().plot_pdos()
 
 
 class pdos_lm_processor(pdos_processor):
@@ -141,3 +159,30 @@ class pdos_lm_processor(pdos_processor):
                 lm_dict[lm_key].append(pdos_values[:, i])
                 m_count += 1
         self.lm_dict = lm_dict
+    @override
+    def plot_pdos(self, orbitals: list[str]) -> None:
+        self.orbital_dict = {
+            "0,0": "blue",
+            "1,0": "magenta",
+            "1,-1": "cyan",
+            "1,0": "cyan",
+            "1,1": "cyan",
+            "2,-2": "red",
+            "2,-1": "cyan",
+            "2,0": "pink",
+            "2,1": "blue",
+            "2,2": "black",
+        }
+
+        self.label_dict = {
+            "0,0": r"$s$",
+            "1,0": r"$p_z$",
+            "1,-1":r"$p_y$",
+            "1,1": r"$p_x$",
+            "2,-2": r"$d_{xy}$",
+            "2,-1": r"$d_{yz}$",
+            "2,0": r"$d_{z^2}$",
+            "2,1": r"$d_{xz}$",
+            "2,2": r"$d_{x^2 - y^2}$",
+        }
+        super().plot_pdos()

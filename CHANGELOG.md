@@ -2,6 +2,7 @@
 
 ## Features
 - Introduced basic plotting into `pdos` module
+- Introduce Sphinx documentation
 
 ## Other
 - dev: fix `black` excluding `conquest2a` directory

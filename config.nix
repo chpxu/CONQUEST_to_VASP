@@ -19,6 +19,7 @@
         ase
         matplotlib
         scienceplots
+        sphinx
       ];
     };
   };

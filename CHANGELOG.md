@@ -1,3 +1,8 @@
+# 0.3.0
+
+## Features
+- Introduced basic plotting into `pdos` module
+
 # 0.2.0
 
 ## Features

@@ -10,3 +10,4 @@ result
 _nix*
 generate*
 *.png
+_build

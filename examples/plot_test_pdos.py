@@ -10,35 +10,34 @@ from conquest2a.pdos import pdos_lm_processor
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import scienceplots # pip3 install SciencePlots 
+import scienceplots  # pip3 install SciencePlots
 
 # Load SciencePlots configuration
 
-plt.style.use(['science', "no-latex"])
+plt.style.use(["science", "no-latex"])
 # Override some of their settings because I don't like their grid params
 # I also want a solid legend
 mpl.rcParams.update(
     {
         # Muted grey gridlines
-        "axes.grid":            True,
-        "grid.color":           "#CCCCCC",
-        "grid.linewidth":       0.5,
-        "grid.linestyle":       "--",
-        "grid.alpha":           0.7,
-        "axes.axisbelow":       True,   # grid behind data
-
+        "axes.grid": True,
+        "grid.color": "#CCCCCC",
+        "grid.linewidth": 0.5,
+        "grid.linestyle": "--",
+        "grid.alpha": 0.7,
+        "axes.axisbelow": True,  # grid behind data
         # Flat / frameless legend
-        "legend.frameon":       True,
+        "legend.frameon": True,
         "legend.framealpha": 0.5,
         "legend.edgecolor": "black",
         "legend.fancybox": False,
-        "legend.loc":           "best",
-        "legend.handlelength":  1.5,
+        "legend.loc": "best",
+        "legend.handlelength": 1.5,
         "legend.handletextpad": 0.5,
         "legend.columnspacing": 1.0,
-        "savefig.dpi":          600,
-        "savefig.bbox":         "tight",
-        "figure.figsize":       (3.5, 2.8)
+        "savefig.dpi": 600,
+        "savefig.bbox": "tight",
+        "figure.figsize": (3.5, 2.8),
     }
 )
 
@@ -84,6 +83,15 @@ label_dict = {
 data_dir = Path(__file__).parent.parent.resolve() / "tests"
 pdos_lm_processor_instance = pdos_lm_processor(conquest_rundir=data_dir)
 pdos_lm_processor_instance.lm_map()
-plt.plot(pdos_lm_processor_instance.energy_values[1], pdos_lm_processor_instance.lm_dict["0,0"][0], label = "l = 0,m = 0, spin1")
-plt.plot(pdos_lm_processor_instance.energy_values[1], pdos_lm_processor_instance.lm_dict["0,0"][1], label = "l = 0,m = 0, spin2", color = "red")
+plt.plot(
+    pdos_lm_processor_instance.energy_values[1],
+    pdos_lm_processor_instance.lm_dict["0,0"][0],
+    label="l = 0,m = 0, spin1",
+)
+plt.plot(
+    pdos_lm_processor_instance.energy_values[1],
+    pdos_lm_processor_instance.lm_dict["0,0"][1],
+    label="l = 0,m = 0, spin2",
+    color="red",
+)
 plt.savefig(data_dir / "test_pdos.png", dpi=600, bbox_inches="tight")

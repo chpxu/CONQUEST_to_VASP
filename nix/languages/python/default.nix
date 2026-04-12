@@ -111,6 +111,7 @@ in
               (lib.mkIf cfg.uv.enable evaluateUV.packages)
               [ (lib.mkIf (!cfg.uv.enable) (python.withPackages (_: finalPythonPackages))) ]
               [ self'.packages.default ]
+              [ pkgs.gnumake ]
             ];
             env = cfg.env ++ evaluateUV.env;
           };

@@ -341,7 +341,7 @@ class chden_plot:
         else:
             imshow_args["vmax"] = vmax
             imshow_args["vmin"] = vmin
-        im = ax.imshow(density.T, **imshow_args)  # type: ignore
+        im = ax.imshow(density.T, **imshow_args)
         ax.tick_params(direction="out", which="both")
         cax = divider.append_axes("right", size="5%", pad=0.1)
         cbar = fig.colorbar(im, cax=cax, fraction=0.04, pad=0.1)

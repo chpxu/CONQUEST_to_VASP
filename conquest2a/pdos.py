@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, override
+from typing import Literal
 import os
 import re
 from os.path import abspath
@@ -143,13 +143,11 @@ class pdos_l_processor(pdos_processor):
                 l_dict[str(l)].append(pdos_values[:, l])
         self.l_dict = l_dict
 
-    @override
     def get_pdos(self, atom: int) -> None:
         self.l_dict = {}
         super().get_pdos(atom)
         self.l_map()
 
-    @override
     def plot_pdos(
         self,
         atomno: int,
@@ -266,13 +264,11 @@ class pdos_lm_processor(pdos_processor):
                 m_count += 1
         self.lm_dict = lm_dict
 
-    @override
     def get_pdos(self, atom: int) -> None:
         self.lm_dict = {}
         super().get_pdos(atom)
         self.lm_map()
 
-    @override
     def plot_pdos(
         self,
         atomnos: list[int],

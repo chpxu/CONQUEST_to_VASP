@@ -20,6 +20,7 @@
         matplotlib
         scienceplots
         sphinx
+        sphinx-rtd-theme
       ];
     };
   };

@@ -21,7 +21,7 @@ class nearest_neighbours:
             boxsize=[self.coords_proc.coords.lattice_vectors[i][i] for i in range(0, 3)],
         )
 
-    def _knn(self, atom_query: Atom, num_neighbours: int | Sequence[int]) -> tuple[Any, Any]:
+    def _knn(self, atom_query: Atom, num_neighbours: int) -> tuple[Any, Any]:
         """Perform the KDTree query on number_of_neighbours around the specific Atom.
 
         Args:
@@ -31,11 +31,11 @@ class nearest_neighbours:
         """
         atom_query_cart_coords = atom_query.coords @ self.coords_proc.coords.lattice_vectors.T
         distances, indices = self.kdtree.query(
-            x=atom_query_cart_coords, k=num_neighbours, p=2, workers=-1  # type: ignore
-        )  # type: ignore
+            x=atom_query_cart_coords, k=num_neighbours, p=2, workers=-1
+        )
         return distances, indices
 
-    def get_result(self, num_neighbours: int | Sequence[int]) -> list[tuple[float, Atom]]:
+    def get_result(self, num_neighbours: int) -> list[tuple[float, Atom]]:
         distances, indices = self._knn(atom_query=self.atom_to_query, num_neighbours=num_neighbours)
         # since k is int | Sequence[int], result is either squeezed or unsqueezed
         # Will handles these separately for the purposes of finding the Atom,

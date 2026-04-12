@@ -1,0 +1,6 @@
+
+Supercells
+==========
+
+.. automodule:: supercell
+  :members:

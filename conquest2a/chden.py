@@ -106,6 +106,29 @@ _ELEMENT_COLOURS = {
 
 
 class chden(processor_base):
+    """process charge density data
+
+    CONQUEST supplies up to two chden .cube files:
+        - chden_up/dn.cube for a spin polarised calculation
+        - a single cube file, e.g. chden.cube for unpolarised calculations
+
+    This class uses ASE's .cube file processor to get atoms and data.
+    It combines chden up and dn if both arguments are supplied, to make a total charge density
+    It also does up - dn to see the spin difference, if both arguments are supplied
+
+    :param hkl: The :math:`hkl` slice of the crystal to plot charge densities in.
+    :type hkl: :ref:`INT ARRAY <types>`
+    :param offset: The :math:`hkl` direction defines a family of planes. Use ``offset`` to select which one (i.e. where in the unit cell).
+    :type offset: ``float``
+    :param ch1: Path to a charge density (``.cube``) file.
+    :type ch1: ``str``
+    :param ch2: Path to another charge density (``.cube``) file, defaults to ``None``.
+    :type ch2: ``str | None``, optional
+    :param mode: If two charge densities are supplied, whether to sum the data or find the difference, defaults to ``None``
+    :type mode: ``Literal["sum", "diff"] | None``, optional
+    :raises ArgumentError: Cannot provide a mode if only one file is specified.
+    :raises ValueError: If all Miller indices are 0: cannot slice through the origin
+    """
     def __init__(
         self,
         hkl: INT_ARRAY,
@@ -114,18 +137,6 @@ class chden(processor_base):
         ch2: str | None = None,
         mode: Literal["sum", "diff"] | None = None,
     ) -> None:
-        """Initialise charge density data
-
-        CONQUEST supplies up to two chden .cube files:
-            - chden_up/dn.cube for a spin polarised calculation
-            - a single cube file, e.g. chden.cube
-        This class uses ASE's .cube file processor to get atoms and data.
-        It combines chden up and dn if both arguments are supplied, to make a total charge density
-        It also does up - dn to see the spin difference, if both arguments are supplied
-        Args:
-            chup (str): Path to a CONQUEST chden file
-            chdn (str): Path to another CONQUEST chden file
-        """
         self.hkl = hkl
         self.offset = offset
         self.mode = mode

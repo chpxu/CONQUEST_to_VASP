@@ -2,7 +2,7 @@
 
 ## Features
 - Introduced basic plotting into `pdos` module
-- Introduce Sphinx documentation
+- Introduce Sphinx documentation at https://chpxu.github.io/CONQUEST_TO_VASP
 
 ## Other
 - dev: fix `black` excluding `conquest2a` directory

@@ -5,7 +5,10 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import sys
+from pathlib import Path
 
+sys.path.insert(0, str(Path('..', 'conquest2a').resolve()))
 project = "CONQUEST2a"
 copyright = "2026, chpxu"
 author = "chpxu"
@@ -14,7 +17,7 @@ release = "0.3.0"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [ 'sphinx.ext.autodoc', 'sphinx.ext.mathjax']
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
@@ -25,3 +28,4 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
+

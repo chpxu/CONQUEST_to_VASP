@@ -1,10 +1,20 @@
 import copy
-from collections.abc import Sequence
 import numpy as np
 from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
 
-
 class supercell:
+    """Class to produce supercells. CONQUEST deals with orthorhombic cells only. The resulting supercell will therefore be orthorhombic.
+
+        :param repeats_x: Number of repeats along the :math:`a` lattice vector
+        :type repeats_x: ``int``
+        :param repeats_y: Number of repeats along the :math:`b` lattice vector
+        :type repeats_y: ``int``
+        :param repeats_z: Number of repeats along the :math:`c` lattice vector
+        :type repeats_z: ``int``
+        :param coords_proc: The :class:`conquest_coordinates_processor` to use.
+        :type coords_proc: conquest_coordinates_processor
+        :raises ValueError: If any of the ``repeats_*`` is not a positive integer
+    """
     def __init__(
         self,
         repeats_x: int,
@@ -12,22 +22,9 @@ class supercell:
         repeats_z: int,
         coords_proc: conquest_coordinates_processor,
     ) -> None:
-        """
-        Args:
-            Nx (int): Number of repeats along "a" lattice vector
-            Ny (int): Number of repeats along "b" lattice vector
-            Nz (int): Number of repeats along "c" lattice vector
-            coords (conquest_coordinates_processor): conquest_coordinates_processor instance
-            for the cell to be supercell'd
-        """
+       
         if repeats_x < 0 or repeats_y < 0 or repeats_z < 0:
-            raise ValueError("One of, or multiple of, Nx Ny, Nz was not at least 0.")
-        if (
-            (not isinstance(repeats_x, int))
-            or (not isinstance(repeats_y, int))
-            or (not isinstance(repeats_z, int))
-        ):
-            raise TypeError("One of, or multiple of, Nx Ny, Nz was not an integer.")
+            raise ValueError("One of, or multiple of, repeats_x repeats_y, repeats_z was not at least 0.")
 
         self.repeats_x = repeats_x
         self.repeats_y = repeats_y
@@ -44,15 +41,8 @@ class supercell:
 
     def scale_lattice_vectors(self) -> None:
         """
-        CONQUEST deals with orthorhombic cells only
+        Produce the supercell's lattice vectors based on the repeats supplied.
         """
-        # self.supercell_coords.lattice_vectors = np.vstack(
-        #     [
-        #         np.array([self.coords.lattice_vectors[0][0] * (self.repeats_x + 1), 0, 0]),
-        #         np.array([0, self.coords.lattice_vectors[1][1] * (self.repeats_y + 1), 0]),
-        #         np.array([0, 0, self.coords.lattice_vectors[2][2] * (self.repeats_z + 1)]),
-        #     ]
-        # )
         repeat_matrix = np.array(
             [
                 [(self.repeats_x + 1), 0, 0],
@@ -65,36 +55,14 @@ class supercell:
         )
 
     def new_num_atoms(self) -> int:
+        """Gets the number of atoms in the new supercell. Needed for the coordinates file.
+
+        :return: The number of atoms in the new supercell
+        :rtype: ``int``
+        """
         natoms = len(self.supercell_coords.atoms)
         self.supercell_coords.natoms = str(natoms)
         return natoms
-
-    def create_atom(
-        self,
-        species: int,
-        can_move: Sequence[str],
-        atom_number: int,
-        label: str,
-        coord_0: int | float,
-        coord_1: int | float,
-        coord_2: int | float,
-        disp_0: int | float = 0.0,
-        disp_1: int | float = 0.0,
-        disp_2: int | float = 0.0,
-    ) -> Atom:
-        return Atom(
-            species,
-            np.array(
-                [
-                    coord_0 + disp_0,
-                    coord_1 + disp_1,
-                    coord_2 + disp_2,
-                ]
-            ),
-            can_move=can_move,
-            label=label,
-            number=atom_number,
-        )
 
     def range(self, upper_bound: int) -> list[int] | range:
         if upper_bound == 0:
@@ -102,13 +70,14 @@ class supercell:
         return range(0, upper_bound + 1, 1)
 
     def create_supercell(self) -> None:
-        """
+        """This method creates the :class:`Atom` s of the new supercell, looping through the original atoms, creating new ones corresponding to the repeats in each direction.
+
         In terms of fractional coordinates, we set new coords of the original atoms to be
-        x' = x/Nx, y' = y/Ny, z' = z/Nz
+        :math:`x' = x/N_x, y' = y/N_y, z' = z/N_z`
 
         We then take these new coordinates, and create new atoms of the same elements,
-        with coords (x', y', z') for every Nx, Ny, Nz
-        i.e. we add 1/Nx, 1/Ny, 1/Nz in the appropriate direction.
+        with coords :math:`(x', y', z')` for every ``repeats_x,y,z`` respectively.
+        i.e. we add :math:`1/N_x, 1/N_y, 1/N_z` in the appropriate direction.
 
         Example:
         Consider a bcc crystal defined by A: (0,0,0) and B: (1/2, 1/2, 1/2).

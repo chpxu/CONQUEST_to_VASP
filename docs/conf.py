@@ -8,7 +8,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path('..', 'conquest2a').resolve()))
+sys.path.insert(0, str(Path('..').resolve()))
 project = "CONQUEST2a"
 copyright = "2026, chpxu"
 author = "chpxu"

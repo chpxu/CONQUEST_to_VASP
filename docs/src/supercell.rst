@@ -2,5 +2,5 @@
 Supercells
 ==========
 
-.. automodule:: supercell
+.. automodule:: conquest2a.supercell
   :members:

@@ -1,5 +1,3 @@
-from ctypes import ArgumentError
-from tkinter.tix import REAL
 from typing import Any, Literal
 import numpy as np
 from ase.io.cube import read_cube
@@ -106,7 +104,7 @@ _ELEMENT_COLOURS = {
 
 
 class chden(processor_base):
-    """process charge density data
+    """Process charge density data
 
     CONQUEST supplies up to two chden .cube files:
         - chden_up/dn.cube for a spin polarised calculation
@@ -126,7 +124,7 @@ class chden(processor_base):
     :type ch2: ``str | None``, optional
     :param mode: If two charge densities are supplied, whether to sum the data or find the difference, defaults to ``None``
     :type mode: ``Literal["sum", "diff"] | None``, optional
-    :raises ArgumentError: Cannot provide a mode if only one file is specified.
+    :raises ValueError: Cannot provide a mode if only one file is specified.
     :raises ValueError: If all Miller indices are 0: cannot slice through the origin
     """
     def __init__(
@@ -147,7 +145,7 @@ class chden(processor_base):
         self.atoms = self.dens1[1]
         self.cell = self.atoms.get_cell() / Bohr  # ASE cell information
         if self.mode is not None and ch2 is None:
-            raise ArgumentError("Cannot have sum/diff mode if a second file is not provided!")
+            raise ValueError("Cannot have sum/diff mode if a second file is not provided!")
         if ch2 is not None:
             self.dens2 = self.load_cube(ch2)
             if self.mode == "sum":
@@ -158,7 +156,7 @@ class chden(processor_base):
         if hkl[0] == 0 and hkl[1] == 0 and hkl[2] == 0:
             raise ValueError("Miller indices (h k l) cannot all be zero.")
 
-    def load_cube(self, filename: str) -> Any:
+    def load_cube(self, filename: str) -> tuple[Any,Any]:
         self.resolve_path(filename=filename)
         with open(filename, "r", encoding="utf-8") as fh:
             cube = read_cube(fh)  # type: ignore
@@ -168,18 +166,13 @@ class chden(processor_base):
     def inplane_basis(
         self,
     ) -> tuple[REAL_ARRAY, REAL_ARRAY, REAL_ARRAY]:
-        """
-        Return two orthonormal Cartesian vectors (v1, v2) spanning the (hkl) plane
-        and the unit plane-normal n_hat.
+        """Return two orthonormal Cartesian vectors :math:`(v_1, v_2)` spanning the :math:`[hkl]` plane
+        and the unit plane-normal :math:`\\hat{n}`.
 
-        Steps
-        --------
-        1. The plane normal in Cartesian space is  n = ha* + kb* + lc*
-        where a*, b*, c* are the (non-2π) reciprocal basis vectors
-        (rows of inv(cell)^T).
-        2. Two fractional-space null vectors of [h k l] are found via SVD.
-        3. Those are converted to Cartesian, then Gram-Schmidt
-        orthonormalised so the axes are perpendicular in real-space.
+        1. The plane normal in Cartesian space is  :math:`n = ha^* + kb^* + lc^*`
+        where :math:`a^*, b^*, c^*` are the reciprocal lattice vectors (rows of inv(cell)^T).
+        2. Two fractional-space null vectors of :math:`[hkl]` are found via SVD.
+        3. Those are converted to Cartesian, then Gram-Schmidt orthonormalised so the axes are perpendicular in real-space.
 
         """
         cell = self.cell
@@ -198,12 +191,14 @@ class chden(processor_base):
         return v1, v2, n_hat
 
     def plane_origin(self) -> Any:
-        """
-        Return a Cartesian point lying on the plane  ha + kb + lc = offset.
+        """Return a Cartesian point lying on the plane  :math:`ha + kb + lc =` ``offset``.
 
-        `offset` is a dimensionless fractional intercept (0-1 spans one
+        ``offset`` is a dimensionless fractional intercept (0-1 spans one
         interplanar period). Pick the simplest fractional coordinate
         satisfying the plane equation.
+
+        :returns: Origin of the slice.
+        :rtype: :ref:`REAL ARRAY <types>`
         """
         n = self.hkl / (self.hkl @ self.hkl)  # normal direction in fractional space
         centre = np.array([0.5, 0.5, 0.5])
@@ -219,27 +214,29 @@ class chden(processor_base):
         self,
         n_points: int = 1000,
         interp_order: int = 5,
-    ) -> Any:
-        """
-        Sample the charge density on the (hkl) plane at fractional offset `offset`.
+    ) -> tuple[Any, REAL_ARRAY, REAL_ARRAY, REAL_ARRAY, REAL_ARRAY, REAL_ARRAY]:
+        """Sample the charge density on the :math:`[hkl]` plane at fractional ``offset``.
 
-        Algorithm
-        ---------
-        For each point on a 2-D (t1, t2) grid centred on the plane origin:
+        For each point on a 2D :math:`(t_1, t_2)` grid centred on the plane origin:
+
         1. Compute its Cartesian position:
-            p = origin + t1*v1 + t2*v2
-        2. Convert to fractional coordinates:
-            s = p @ inv(cell)
-        3. Wrap into the unit cell to enforce PBC.
-        4. Map fractional -> voxel index and interpolate via
-            scipy.ndimage.map_coordinates.
+            :math:`p = \\text{origin} + t_1 v_1 + t_2 v_2`
+        2. Convert to fractional coordinates: ``s = p @ inv(cell)``
+        3. Wrap into the unit cell to enforce periodic boundaries.
+        4. Map fractional -> voxel index and interpolate via ``scipy.ndimage.map_coordinates``.
 
-        Returns
-        -------
-        density: (n_points, n_points) ndarray - charge density in e/a_0^3
-        v1, v2: unit in-plane Cartesian vectors (Å)
-        t1, t2: 1-D coordinate axes (Å, symmetric about 0)
-        origin: Cartesian slice origin (Å)
+        :param n_points: Number of points to sample on the slice, defaults to 1000
+        :type n_points: ``int``, optional
+        :param interp_order: The polynomial degree for interpolation, defaults to 5
+        :type interp_order: ``int``, optional
+        :returns: A tuple containing:
+
+            - **density** (:ref:`REAL ARRAY <types>`) -- Charge density in :math:`e/a_0^3`, shape ``(n_points, n_points)``
+            - **v1** (:ref:`REAL ARRAY <types>`) -- First unit vector spanning the :math:`[hkl]` plane
+            - **v2** (:ref:`REAL ARRAY <types>`) -- Second unit vector spanning the :math:`[hkl]` plane
+            - **t1** (:ref:`REAL ARRAY <types>`) -- Scalar grid along :math:`v_1`
+            - **t2** (:ref:`REAL ARRAY <types>`) -- Scalar grid along :math:`v_2`
+            - **origin** (``float``) -- Cartesian slice origin in Bohr
         """
         v1, v2, _ = self.inplane_basis()
         origin = self.plane_origin()
@@ -267,15 +264,28 @@ class chden(processor_base):
         n_hat: REAL_ARRAY,
         origin: REAL_ARRAY,
         thickness: float = 0.5,
-    ) -> Any:
-        """
-        Project atoms within `thickness` Å of the slice plane onto (v1, v2) axes.
+    ) -> tuple[REAL_ARRAY, REAL_ARRAY, list[str]]:
+        """Project atoms within ``thickness`` of the slice plane onto :math:`(v_1, v_2)` axes.
 
-        Returns (t1_coords, t2_coords, symbol_list).
+        :param v1: First unit vector spanning the :math:`[hkl]` plane
+        :type v1: :ref:`REAL ARRAY <types>`
+        :param v2: Second unit vector spanning the :math:`[hkl]` plane
+        :type v2: :ref:`REAL ARRAY <types>`
+        :param n_hat: Unit vector defining the slice
+        :type n_hat: :ref:`REAL ARRAY <types>`
+        :param origin: The origin of the slice
+        :type origin: :ref:`REAL ARRAY <types>`
+        :param thickness: The Cartesian distance perpendicular to the plane to consider atoms as lying on the slice, defaults to 0.5 Bohr.
+        :type thickness: ``float``, optional
+        :returns: A tuple containing:
+
+            - **t1_proj** (:ref:`REAL ARRAY <types>`) -- Positions of label along :math:`v_1`
+            - **t2_proj** (:ref:`REAL ARRAY <types>`) -- Positions of label along :math:`v_2`
+            - **syms** (``list[str]``) -- List of atom labels
         """
-        positions = self.atoms.get_positions()  # (N, 3) Å
+        positions = self.atoms.get_positions()
         symbols = self.atoms.get_chemical_symbols()
-        disp = positions - origin  # displacement from slice origin
+        disp = positions - origin
         dist_norm = disp @ n_hat  # signed distance to plane
 
         mask = np.abs(dist_norm) < thickness
@@ -286,10 +296,15 @@ class chden(processor_base):
 
 
 class chden_plot:
-    """
-    Helper class to plot output
-    """
+    """Helper class to analyse and plot charge densities.
 
+        :param chden_instance: :class:`chden` instance to use
+        :type chden_instance: :class:`chden`
+        :param show_atoms: Whether to show atom labels on the charge density plot, defaults to False
+        :type show_atoms: ``bool``, optional
+        :param extension: File extension, defaults to "png"
+        :type extension: ``str``, optional
+        """
     def __init__(
         self, chden_instance: chden, show_atoms: bool = False, extension: str = "png"
     ) -> None:
@@ -297,13 +312,13 @@ class chden_plot:
         self.show_atoms = show_atoms
         self.extension = extension
 
-    def miller_str(self, idx: int) -> str:
+    def _miller_str(self, idx: int) -> str:
         if idx >= 0:
             return str(idx)
         return rf"$\overline{{{abs(idx):.2}}}$"
 
-    def vec_str(self, v: REAL_ARRAY) -> str:
-        parts = [self.miller_str(x) for x in v]
+    def _vec_str(self, v: REAL_ARRAY) -> str:
+        parts = [self._miller_str(x) for x in v]
         return f"Position along [{','.join(parts)}]"
 
     def plot_slice(
@@ -313,7 +328,7 @@ class chden_plot:
         t2: REAL_ARRAY,
         v1: REAL_ARRAY,
         v2: REAL_ARRAY,
-        atom_data: Any = None,  # (t1s, t2s, symbols) tuple or None
+        atom_data: tuple[REAL_ARRAY, REAL_ARRAY, list[str]] | None = None,  # (t1s, t2s, symbols) tuple or None
         cmap: str = "viridis",
         log_scale: bool = False,
         vmin: float | None = 0.0,
@@ -321,6 +336,31 @@ class chden_plot:
         interpolation: str = "lanczos",
         output: str | None = None,
     ) -> None:
+        """Function to create the actual plot and figure instance.
+
+        :param density: Charge density
+        :type density: :ref:`REAL ARRAY <types>`
+        :param t1: Scalar grid along :math:`v_1`
+        :type t1: :ref:`REAL ARRAY <types>`
+        :param t2: Scalar grid along :math:`v_2`
+        :type t2:  :ref:`REAL ARRAY <types>`
+        :param v1: First unit vector spanning the :math:`[hkl]` plane
+        :type v1: :ref:`REAL ARRAY <types>`
+        :param v2: Second unit vector spanning the :math:`[hkl]` plane
+        :type v2: :ref:`REAL ARRAY <types>`
+        :param atom_data: Data for atom labels, see :func:`chden.project_atoms`, defaults to None
+        :type atom_data: ``tuple[REAL_ARRAY, REAL_ARRAY, list[str]] | None``, optional
+        :param log_scale: Whether to plot the charge density on a base-10 logarithmic scale - useful for revealing details without colour clipping, defaults to False
+        :type log_scale: ``bool``, optional
+        :param vmin: Minimum value to set the colour scale at, defaults to 0.0
+        :type vmin: ``float | None``, optional
+        :param vmax: Maximum value to set the colour scale at, defaults to None
+        :type vmax: ``float | None``, optional
+        :param interpolation: Interpolation type, see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html, defaults to "lanczos"
+        :type interpolation: ``str``, optional
+        :param output: Filename to save as. Will save with a useful name if not provided, defaults to None
+        :type output: ``str | None``, optional
+        """
         l1 = t1[-1] - t1[0]
         l2 = t2[-1] - t2[0]
         transpose_label = False
@@ -383,8 +423,8 @@ class chden_plot:
                     fontweight="bold",
                 )
 
-        ax.set_xlabel(f"{self.vec_str(v1)}" + r"$[a_0]$", fontsize=8)
-        ax.set_ylabel(f"{self.vec_str(v2)}" + r"$[a_0]$", fontsize=8)
+        ax.set_xlabel(f"{self._vec_str(v1)}" + r"$[a_0]$", fontsize=8)
+        ax.set_ylabel(f"{self._vec_str(v2)}" + r"$[a_0]$", fontsize=8)
 
         fig.tight_layout()
         if output is None or output == "":
@@ -410,8 +450,26 @@ class chden_plot:
         cmap: str = "viridis",
         interpolation: str = "lanczos",
     ) -> None:
-        """
-        Runs the full sequence of steps including plotting
+        """Runs the full sequence of steps:
+
+        1. Fetches charge density files
+        2. Extracts and analyses data
+        3. Plots data and save
+        
+        :param filename: Filename to save as. Will save with a useful name if not provided, defaults to None
+        :type filename: ``str | None``, optional
+         :param vmin: Minimum value to set the colour scale at, defaults to 0.0
+        :type vmin: ``float | None``, optional
+        :param vmax: Maximum value to set the colour scale at, defaults to None
+        :type vmax: ``float | None``, optional
+        :param interpolation: Interpolation type, see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html, defaults to "lanczos"
+        :type interpolation: ``str``, optional
+        :param thickness: The Cartesian distance perpendicular to the plane to consider atoms as lying on the slice, defaults to 0.5 Bohr.
+        :type thickness: ``float``, optional
+        :param log_scale: Whether to plot the charge density on a base-10 logarithmic scale - useful for revealing details without colour clipping, defaults to False
+        :type log_scale: ``bool``, optional
+        :param cmap: Colour map to use, see https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.Colormap.html#matplotlib.colors.Colormap, defaults to "viridis"
+        :type cmap: ``str``, optional
         """
         density, v1, v2, t1, t2, origin = self.chden.extract_slice()
         atom_data = None

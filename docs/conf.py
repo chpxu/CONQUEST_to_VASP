@@ -6,9 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import sys
+import os
 from pathlib import Path
 
-sys.path.insert(0, str(Path('..').resolve()))
+sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
 project = "CONQUEST2a"
 copyright = "2026, chpxu"
 author = "chpxu"

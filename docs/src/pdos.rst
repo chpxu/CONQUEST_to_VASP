@@ -1,5 +1,5 @@
 PDOS
 ====
 
-.. automodule:: pdos
+.. automodule:: conquest2a.pdos
   :members:

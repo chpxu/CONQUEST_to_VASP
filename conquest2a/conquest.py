@@ -6,6 +6,7 @@ import importlib.resources
 from pathlib import Path
 from collections.abc import Sequence
 import numpy as np
+import ase
 from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
 import conquest2a._types as c2at
 
@@ -54,6 +55,15 @@ class Atom:
             f"  Force         : {fmt_array(self.forces)}\n"
             f"  Spin          : {fmt_array(self.spins)}\n"
         )
+    def to_ase(self) -> ase.Atom:
+        """Method to return an equivalent ASE ```Atom`` <https://ase-lib.org/ase/atom.html>`__. 
+        The ``spins`` field is set to the ``Atom.magmom`` whilst the ``forces`` field is set to ``Atom.momentum``.
+
+        
+        :returns: ase.Atom: Equivalent ASE ``Atom`` object.
+        :rtype: ``ase.Atom``
+        """
+        return ase.Atom(symbol=self.label, position=self.coords, magmom=self.spins, momentum=self.forces)
 
 
 class conquest_input:
@@ -100,7 +110,7 @@ class processor_base:
         self.re_index = re.compile(r"\d+")
 
     def resolve_path(self, filename: str | None = None) -> None:
-        """_summary_
+        """Checks for a file's existence and validity.
 
         :param filename: Path to a file, defaults to None, which will use the ``path`` passed into the class instance.
         :type filename: ``str | None``, optional

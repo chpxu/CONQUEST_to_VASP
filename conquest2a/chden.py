@@ -242,8 +242,8 @@ class chden(processor_base):
         origin = self.plane_origin()
 
         length_1, length_2 = self.inplane_range(v1, v2)
-        t1 = np.linspace(-length_1 / 2, length_2 / 2, n_points)
-        t2 = np.linspace(-length_1 / 2, length_2 / 2, n_points)
+        t1 = np.linspace(-length_1 / 2, length_1 / 2, n_points)
+        t2 = np.linspace(-length_2 / 2, length_2 / 2, n_points)
         grid_1, grid_2 = np.meshgrid(t1, t2, indexing="ij")
         pts_cart = origin + grid_1[..., None] * v1 + grid_2[..., None] * v2
         pts_frac = (pts_cart @ np.linalg.inv(self.cell)) % 1.0
@@ -283,9 +283,13 @@ class chden(processor_base):
             - **t2_proj** (:ref:`REAL ARRAY <types>`) -- Positions of label along :math:`v_2`
             - **syms** (``list[str]``) -- List of atom labels
         """
-        positions = self.atoms.get_positions()
+        positions = self.atoms.get_positions() / Bohr
         symbols = self.atoms.get_chemical_symbols()
-        disp = positions - origin
+        inv_cell = np.linalg.inv(self.cell)
+        disp = positions - origin  # displacement from slice origin
+        disp_frac = disp @ inv_cell
+        disp_frac -= np.round(disp_frac) 
+        disp = disp_frac @ self.cell
         dist_norm = disp @ n_hat  # signed distance to plane
 
         mask = np.abs(dist_norm) < thickness
@@ -476,7 +480,7 @@ class chden_plot:
         if self.show_atoms:
             _, _, n_hat = self.chden.inplane_basis()
             atom_data = self.chden.project_atoms(v1, v2, n_hat, origin, thickness=thickness)
-            print(f"  Atoms within {thickness} (ang) of plane: {len(atom_data[0])}")
+            print(f"  Atoms within {thickness} (Bohr) of plane: {len(atom_data[0])}")
         self.plot_slice(
             density,
             t1,

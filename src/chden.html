@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Charge densities &mdash; CONQUEST2a 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e259d695"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="File conversion" href="writers.html" />
+    <link rel="prev" title="Supercells" href="supercell.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CONQUEST2a
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conquest.html">General Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdos.html">PDOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supercell.html">Supercells</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Charge densities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.chden.chden"><code class="docutils literal notranslate"><span class="pre">chden</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.chden.chden.extract_slice"><code class="docutils literal notranslate"><span class="pre">chden.extract_slice()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.chden.chden.inplane_basis"><code class="docutils literal notranslate"><span class="pre">chden.inplane_basis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.chden.chden.plane_origin"><code class="docutils literal notranslate"><span class="pre">chden.plane_origin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.chden.chden.project_atoms"><code class="docutils literal notranslate"><span class="pre">chden.project_atoms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.chden.chden_plot"><code class="docutils literal notranslate"><span class="pre">chden_plot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.chden.chden_plot.plot_slice"><code class="docutils literal notranslate"><span class="pre">chden_plot.plot_slice()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.chden.chden_plot.run"><code class="docutils literal notranslate"><span class="pre">chden_plot.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="writers.html">File conversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CONQUEST2a</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Charge densities</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/src/chden.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="charge-densities">
+<h1>Charge densities<a class="headerlink" href="#charge-densities" title="Link to this heading"></a></h1>
+<p>The classes under the <cite>chden</cite> module handle the processing and plotting of charge densities. Note that there is no explicit dependence on any of the classes used in C2a, and therefore could be used standalone. However, it only supports <em>orthorhombic cells</em>.</p>
+<dl class="py class" id="module-conquest2a.chden">
+<dt class="sig sig-object py" id="conquest2a.chden.chden">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.chden.</span></span><span class="sig-name descname"><span class="pre">chden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">int64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'sum'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'diff'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.chden.chden" title="Link to this definition"></a></dt>
+<dd><p>Process charge density data</p>
+<dl class="simple">
+<dt>CONQUEST supplies up to two chden .cube files:</dt><dd><ul class="simple">
+<li><p>chden_up/dn.cube for a spin polarised calculation</p></li>
+<li><p>a single cube file, e.g. chden.cube for unpolarised calculations</p></li>
+</ul>
+</dd>
+</dl>
+<p>This class uses ASE’s .cube file processor to get atoms and data.
+It combines chden up and dn if both arguments are supplied, to make a total charge density
+It also does up - dn to see the spin difference, if both arguments are supplied</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hkl</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">INT ARRAY</span></a>) – The <span class="math notranslate nohighlight">\(hkl\)</span> slice of the crystal to plot charge densities in.</p></li>
+<li><p><strong>offset</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – The <span class="math notranslate nohighlight">\(hkl\)</span> direction defines a family of planes. Use <code class="docutils literal notranslate"><span class="pre">offset</span></code> to select which one (i.e. where in the unit cell).</p></li>
+<li><p><strong>ch1</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Path to a charge density (<code class="docutils literal notranslate"><span class="pre">.cube</span></code>) file.</p></li>
+<li><p><strong>ch2</strong> (<code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional) – Path to another charge density (<code class="docutils literal notranslate"><span class="pre">.cube</span></code>) file, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>mode</strong> (<code class="docutils literal notranslate"><span class="pre">Literal[&quot;sum&quot;,</span> <span class="pre">&quot;diff&quot;]</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional) – If two charge densities are supplied, whether to sum the data or find the difference, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – Cannot provide a mode if only one file is specified.</p></li>
+<li><p><strong>ValueError</strong> – If all Miller indices are 0: cannot slice through the origin</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.chden.chden.extract_slice">
+<span class="sig-name descname"><span class="pre">extract_slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#conquest2a.chden.chden.extract_slice" title="Link to this definition"></a></dt>
+<dd><p>Sample the charge density on the <span class="math notranslate nohighlight">\([hkl]\)</span> plane at fractional <code class="docutils literal notranslate"><span class="pre">offset</span></code>.</p>
+<p>For each point on a 2D <span class="math notranslate nohighlight">\((t_1, t_2)\)</span> grid centred on the plane origin:</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>Compute its Cartesian position:</dt><dd><p><span class="math notranslate nohighlight">\(p = \text{origin} + t_1 v_1 + t_2 v_2\)</span></p>
+</dd>
+</dl>
+</li>
+<li><p>Convert to fractional coordinates: <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">p</span> <span class="pre">&#64;</span> <span class="pre">inv(cell)</span></code></p></li>
+<li><p>Wrap into the unit cell to enforce periodic boundaries.</p></li>
+<li><p>Map fractional -&gt; voxel index and interpolate via <code class="docutils literal notranslate"><span class="pre">scipy.ndimage.map_coordinates</span></code>.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_points</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, optional) – Number of points to sample on the slice, defaults to 1000</p></li>
+<li><p><strong>interp_order</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, optional) – The polynomial degree for interpolation, defaults to 5</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p><strong>density</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Charge density in <span class="math notranslate nohighlight">\(e/a_0^3\)</span>, shape <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">n_points)</span></code></p></li>
+<li><p><strong>v1</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – First unit vector spanning the <span class="math notranslate nohighlight">\([hkl]\)</span> plane</p></li>
+<li><p><strong>v2</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Second unit vector spanning the <span class="math notranslate nohighlight">\([hkl]\)</span> plane</p></li>
+<li><p><strong>t1</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Scalar grid along <span class="math notranslate nohighlight">\(v_1\)</span></p></li>
+<li><p><strong>t2</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Scalar grid along <span class="math notranslate nohighlight">\(v_2\)</span></p></li>
+<li><p><strong>origin</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Cartesian slice origin in Bohr</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.chden.chden.inplane_basis">
+<span class="sig-name descname"><span class="pre">inplane_basis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#conquest2a.chden.chden.inplane_basis" title="Link to this definition"></a></dt>
+<dd><p>Return two orthonormal Cartesian vectors <span class="math notranslate nohighlight">\((v_1, v_2)\)</span> spanning the <span class="math notranslate nohighlight">\([hkl]\)</span> plane
+and the unit plane-normal <span class="math notranslate nohighlight">\(\hat{n}\)</span>.</p>
+<p>1. The plane normal in Cartesian space is  <span class="math notranslate nohighlight">\(n = ha^* + kb^* + lc^*\)</span>
+where <span class="math notranslate nohighlight">\(a^*, b^*, c^*\)</span> are the reciprocal lattice vectors (rows of inv(cell)^T).
+2. Two fractional-space null vectors of <span class="math notranslate nohighlight">\([hkl]\)</span> are found via SVD.
+3. Those are converted to Cartesian, then Gram-Schmidt orthonormalised so the axes are perpendicular in real-space.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.chden.chden.plane_origin">
+<span class="sig-name descname"><span class="pre">plane_origin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#conquest2a.chden.chden.plane_origin" title="Link to this definition"></a></dt>
+<dd><p>Return a Cartesian point lying on the plane  <span class="math notranslate nohighlight">\(ha + kb + lc =\)</span> <code class="docutils literal notranslate"><span class="pre">offset</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">offset</span></code> is a dimensionless fractional intercept (0-1 spans one
+interplanar period). Pick the simplest fractional coordinate
+satisfying the plane equation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Origin of the slice.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.chden.chden.project_atoms">
+<span class="sig-name descname"><span class="pre">project_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#conquest2a.chden.chden.project_atoms" title="Link to this definition"></a></dt>
+<dd><p>Project atoms within <code class="docutils literal notranslate"><span class="pre">thickness</span></code> of the slice plane onto <span class="math notranslate nohighlight">\((v_1, v_2)\)</span> axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v1</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – First unit vector spanning the <span class="math notranslate nohighlight">\([hkl]\)</span> plane</p></li>
+<li><p><strong>v2</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Second unit vector spanning the <span class="math notranslate nohighlight">\([hkl]\)</span> plane</p></li>
+<li><p><strong>n_hat</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Unit vector defining the slice</p></li>
+<li><p><strong>origin</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – The origin of the slice</p></li>
+<li><p><strong>thickness</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, optional) – The Cartesian distance perpendicular to the plane to consider atoms as lying on the slice, defaults to 0.5 Bohr.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p><strong>t1_proj</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Positions of label along <span class="math notranslate nohighlight">\(v_1\)</span></p></li>
+<li><p><strong>t2_proj</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Positions of label along <span class="math notranslate nohighlight">\(v_2\)</span></p></li>
+<li><p><strong>syms</strong> (<code class="docutils literal notranslate"><span class="pre">list[str]</span></code>) – List of atom labels</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conquest2a.chden.chden_plot">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.chden.</span></span><span class="sig-name descname"><span class="pre">chden_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chden_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#conquest2a.chden.chden" title="conquest2a.chden.chden"><span class="pre">chden</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'png'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.chden.chden_plot" title="Link to this definition"></a></dt>
+<dd><p>Helper class to analyse and plot charge densities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chden_instance</strong> (<a class="reference internal" href="#conquest2a.chden.chden" title="conquest2a.chden.chden"><code class="xref py py-class docutils literal notranslate"><span class="pre">chden</span></code></a>) – <a class="reference internal" href="#conquest2a.chden.chden" title="conquest2a.chden.chden"><code class="xref py py-class docutils literal notranslate"><span class="pre">chden</span></code></a> instance to use</p></li>
+<li><p><strong>show_atoms</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether to show atom labels on the charge density plot, defaults to False</p></li>
+<li><p><strong>extension</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – File extension, defaults to “png”</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.chden.chden_plot.plot_slice">
+<span class="sig-name descname"><span class="pre">plot_slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lanczos'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#conquest2a.chden.chden_plot.plot_slice" title="Link to this definition"></a></dt>
+<dd><p>Function to create the actual plot and figure instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Charge density</p></li>
+<li><p><strong>t1</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Scalar grid along <span class="math notranslate nohighlight">\(v_1\)</span></p></li>
+<li><p><strong>t2</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Scalar grid along <span class="math notranslate nohighlight">\(v_2\)</span></p></li>
+<li><p><strong>v1</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – First unit vector spanning the <span class="math notranslate nohighlight">\([hkl]\)</span> plane</p></li>
+<li><p><strong>v2</strong> (<a class="reference internal" href="types.html#types"><span class="std std-ref">REAL ARRAY</span></a>) – Second unit vector spanning the <span class="math notranslate nohighlight">\([hkl]\)</span> plane</p></li>
+<li><p><strong>atom_data</strong> (<code class="docutils literal notranslate"><span class="pre">tuple[REAL_ARRAY,</span> <span class="pre">REAL_ARRAY,</span> <span class="pre">list[str]]</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional) – Data for atom labels, see <a class="reference internal" href="#conquest2a.chden.chden.project_atoms" title="conquest2a.chden.chden.project_atoms"><code class="xref py py-func docutils literal notranslate"><span class="pre">chden.project_atoms()</span></code></a>, defaults to None</p></li>
+<li><p><strong>log_scale</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether to plot the charge density on a base-10 logarithmic scale - useful for revealing details without colour clipping, defaults to False</p></li>
+<li><p><strong>vmin</strong> (<code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional) – Minimum value to set the colour scale at, defaults to 0.0</p></li>
+<li><p><strong>vmax</strong> (<code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional) – Maximum value to set the colour scale at, defaults to None</p></li>
+<li><p><strong>interpolation</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – Interpolation type, see <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html">https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html</a>, defaults to “lanczos”</p></li>
+<li><p><strong>output</strong> (<code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional) – Filename to save as. Will save with a useful name if not provided, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.chden.chden_plot.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lanczos'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#conquest2a.chden.chden_plot.run" title="Link to this definition"></a></dt>
+<dd><p>Runs the full sequence of steps:</p>
+<ol class="arabic simple">
+<li><p>Fetches charge density files</p></li>
+<li><p>Extracts and analyses data</p></li>
+<li><p>Plots data and save</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional
+:param vmin: Minimum value to set the colour scale at, defaults to 0.0) – Filename to save as. Will save with a useful name if not provided, defaults to None</p></li>
+<li><p><strong>vmax</strong> (<code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span></code>, optional) – Maximum value to set the colour scale at, defaults to None</p></li>
+<li><p><strong>interpolation</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – Interpolation type, see <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html">https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html</a>, defaults to “lanczos”</p></li>
+<li><p><strong>thickness</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, optional) – The Cartesian distance perpendicular to the plane to consider atoms as lying on the slice, defaults to 0.5 Bohr.</p></li>
+<li><p><strong>log_scale</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether to plot the charge density on a base-10 logarithmic scale - useful for revealing details without colour clipping, defaults to False</p></li>
+<li><p><strong>cmap</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – Colour map to use, see <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.Colormap.html#matplotlib.colors.Colormap">https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.Colormap.html#matplotlib.colors.Colormap</a>, defaults to “viridis”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="supercell.html" class="btn btn-neutral float-left" title="Supercells" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="writers.html" class="btn btn-neutral float-right" title="File conversion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, chpxu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

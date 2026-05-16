@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File conversion &mdash; CONQUEST2a 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e259d695"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Roadmap" href="roadmap.html" />
+    <link rel="prev" title="Charge densities" href="chden.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CONQUEST2a
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conquest.html">General Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdos.html">PDOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supercell.html">Supercells</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chden.html">Charge densities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File conversion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.writers.conquest_writer"><code class="docutils literal notranslate"><span class="pre">conquest_writer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.writers.extxyz_writer"><code class="docutils literal notranslate"><span class="pre">extxyz_writer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.writers.extxyz_writer.create_comment_line"><code class="docutils literal notranslate"><span class="pre">extxyz_writer.create_comment_line()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.writers.file_writer"><code class="docutils literal notranslate"><span class="pre">file_writer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.writers.vasp_writer"><code class="docutils literal notranslate"><span class="pre">vasp_writer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.writers.xsf_writer"><code class="docutils literal notranslate"><span class="pre">xsf_writer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.writers.xsf_writer_spins"><code class="docutils literal notranslate"><span class="pre">xsf_writer_spins</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.writers.xsf_writer_spins.process_xsf_file"><code class="docutils literal notranslate"><span class="pre">xsf_writer_spins.process_xsf_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conquest2a.writers.xyz_writer"><code class="docutils literal notranslate"><span class="pre">xyz_writer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.writers.xyz_writer.create_atoms_str"><code class="docutils literal notranslate"><span class="pre">xyz_writer.create_atoms_str()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conquest2a.writers.xyz_writer.write"><code class="docutils literal notranslate"><span class="pre">xyz_writer.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CONQUEST2a</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">File conversion</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/src/writers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="file-conversion">
+<h1>File conversion<a class="headerlink" href="#file-conversion" title="Link to this heading"></a></h1>
+<p>File conversion from the CONQUEST coordinates file is handled by the <code class="docutils literal notranslate"><span class="pre">writers</span></code> module.</p>
+<dl class="py class" id="module-conquest2a.writers">
+<dt class="sig sig-object py" id="conquest2a.writers.conquest_writer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.writers.</span></span><span class="sig-name descname"><span class="pre">conquest_writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="conquest.html#conquest2a.conquest.conquest_coordinates" title="conquest2a.conquest.conquest_coordinates"><span class="pre">conquest_coordinates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.writers.conquest_writer" title="Link to this definition"></a></dt>
+<dd><p>Class to write a CONQUEST coordinates file given a <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Path to write the new coordinates file.</p></li>
+<li><p><strong>coords</strong> (<code class="docutils literal notranslate"><span class="pre">conquest_coordinates</span></code>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance to write.</p></li>
+<li><p><strong>encoding</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – File encoding, defaults to “utf-8”</p></li>
+<li><p><strong>precision</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, optional) – Float precision, defaults to 10</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the float precision is not at least 1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conquest2a.writers.extxyz_writer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.writers.</span></span><span class="sig-name descname"><span class="pre">extxyz_writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="conquest.html#conquest2a.conquest.conquest_coordinates" title="conquest2a.conquest.conquest_coordinates"><span class="pre">conquest_coordinates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.writers.extxyz_writer" title="Link to this definition"></a></dt>
+<dd><p>Class to write a <code class="docutils literal notranslate"><span class="pre">.extxyz</span></code> for a basic XYZ file given a <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance.</p>
+<p>The main advantage of <cite>.extxyz</cite> is the ability to specify columns and the time, which is very useful for animations. I recommend just using CONQUEST’s ability to output <code class="docutils literal notranslate"><span class="pre">.extxyz</span></code> files at different timesteps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Path to write the new coordinates file.</p></li>
+<li><p><strong>data</strong> (<code class="docutils literal notranslate"><span class="pre">conquest_coordinates</span></code>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance to write.</p></li>
+<li><p><strong>encoding</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – File encoding, defaults to “utf-8”.</p></li>
+<li><p><strong>time</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, optional) – The instance of time of the cell, defaults to <cite>0.0</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.writers.extxyz_writer.create_comment_line">
+<span class="sig-name descname"><span class="pre">create_comment_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#conquest2a.writers.extxyz_writer.create_comment_line" title="Link to this definition"></a></dt>
+<dd><p>Creates the <code class="docutils literal notranslate"><span class="pre">.extxyz</span></code> comment line: specifies columns, formats and time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The file’s comment line.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conquest2a.writers.file_writer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.writers.</span></span><span class="sig-name descname"><span class="pre">file_writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_angstrom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.writers.file_writer" title="Link to this definition"></a></dt>
+<dd><p>Generic parent class to define file operations and variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<em>str</em>) – _description_</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_, defaults to “w”</p></li>
+<li><p><strong>encoding</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_, defaults to “utf-8”</p></li>
+<li><p><strong>is_angstrom</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conquest2a.writers.vasp_writer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.writers.</span></span><span class="sig-name descname"><span class="pre">vasp_writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="conquest.html#conquest2a.conquest.conquest_coordinates" title="conquest2a.conquest.conquest_coordinates"><span class="pre">conquest_coordinates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_angstrom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.writers.vasp_writer" title="Link to this definition"></a></dt>
+<dd><p>Class to write a VASP file given a <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Path to write the new coordinates file.</p></li>
+<li><p><strong>data</strong> (<code class="docutils literal notranslate"><span class="pre">conquest_coordinates</span></code>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance to write.</p></li>
+<li><p><strong>encoding</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – File encoding, defaults to “utf-8”</p></li>
+<li><p><strong>is_angstrom</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the data in <code class="docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> is already in angstroms instead of Bohrs, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conquest2a.writers.xsf_writer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.writers.</span></span><span class="sig-name descname"><span class="pre">xsf_writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="conquest.html#conquest2a.conquest.conquest_coordinates" title="conquest2a.conquest.conquest_coordinates"><span class="pre">conquest_coordinates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'spin'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'force'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'spin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'utf-8'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.writers.xsf_writer" title="Link to this definition"></a></dt>
+<dd><p>Class to write <cite>.xsf</cite> files given a <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance.</p>
+<p>XSF files support an extra 3 columns alongside the 3 columns used for position. These columns specify a vector associated with each atom. In CONQUEST, the relevant vectors are forces and spins. Note that CONQUEST only supports <em>collinear spin</em> (up and down), so the spin vector is visualised along the <span class="math notranslate nohighlight">\(c\)</span>-axis of the simulation cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Path to write the new coordinates file.</p></li>
+<li><p><strong>data</strong> (<code class="docutils literal notranslate"><span class="pre">conquest_coordinates</span></code>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance to write.</p></li>
+<li><p><strong>encoding</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – File encoding, defaults to “utf-8”.</p></li>
+<li><p><strong>write_extra</strong> (<em>Literal</em><em>[</em><em>&quot;spin&quot;</em><em>, </em><em>&quot;force&quot;</em><em>]</em><em>, </em><em>optional</em>) – Whether to extract the force vector or spin vector of atoms, defaults to “spin”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conquest2a.writers.xsf_writer_spins">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.writers.</span></span><span class="sig-name descname"><span class="pre">xsf_writer_spins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="conquest.html#conquest2a.conquest.atom_charge" title="conquest2a.conquest.atom_charge"><span class="pre">atom_charge</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">xsf_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'utf-8'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.writers.xsf_writer_spins" title="Link to this definition"></a></dt>
+<dd><p>XSF writer class that includes spin information from the AtomCharge.dat file,
+by editing an existing XSF file generated by PostProcessCQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Path to write the new coordinates file.</p></li>
+<li><p><strong>data</strong> (<code class="docutils literal notranslate"><span class="pre">conquest_coordinates</span></code>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance to write.</p></li>
+<li><p><strong>encoding</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – File encoding, defaults to “utf-8”.</p></li>
+<li><p><strong>charges</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">atom_charge</span></code>
+:param xsf_file: XSF file to modify.) – <code class="xref py py-class docutils literal notranslate"><span class="pre">atom_charge</span></code> instance to read spin data from.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.writers.xsf_writer_spins.process_xsf_file">
+<span class="sig-name descname"><span class="pre">process_xsf_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#conquest2a.writers.xsf_writer_spins.process_xsf_file" title="Link to this definition"></a></dt>
+<dd><p>Process an existing XSF file to include spin information.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="conquest2a.writers.xyz_writer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">conquest2a.writers.</span></span><span class="sig-name descname"><span class="pre">xyz_writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="conquest.html#conquest2a.conquest.conquest_coordinates" title="conquest2a.conquest.conquest_coordinates"><span class="pre">conquest_coordinates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'comment</span> <span class="pre">line'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conquest2a.writers.xyz_writer" title="Link to this definition"></a></dt>
+<dd><p>Class to write a <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> for a basic XYZ file given a <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – Path to write the new coordinates file.</p></li>
+<li><p><strong>data</strong> (<code class="docutils literal notranslate"><span class="pre">conquest_coordinates</span></code>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">conquest_coordinates</span></code> instance to write.</p></li>
+<li><p><strong>encoding</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – File encoding, defaults to “utf-8”</p></li>
+<li><p><strong>comment_line</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, optional) – What string to write as the comment line</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.writers.xyz_writer.create_atoms_str">
+<span class="sig-name descname"><span class="pre">create_atoms_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#conquest2a.writers.xyz_writer.create_atoms_str" title="Link to this definition"></a></dt>
+<dd><p>Creates a line for an atom, for the XYZ file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Components of the line to write: the element and the numbers</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="conquest2a.writers.xyz_writer.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#conquest2a.writers.xyz_writer.write" title="Link to this definition"></a></dt>
+<dd><p>XYZ format expects cells in Cartesian coordinates.
+Since CONQUEST only deals with orthorhombic unit cells,
+we can just multiply the non-zero coordinates of the lattice vectors
+with the fractional coordinates</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="chden.html" class="btn btn-neutral float-left" title="Charge densities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="roadmap.html" class="btn btn-neutral float-right" title="Roadmap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, chpxu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

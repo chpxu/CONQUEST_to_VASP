@@ -125,19 +125,26 @@ class pdos_processor(block_processor):
         """
         if self.lm == "t":
             self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
+            for filename in self.all_pdos_files:
+                self.read_file(filename)
             tdos: c2at.REAL_ARRAY
             ldos: c2at.REAL_ARRAY
-            fig = plt.figure(figsize=())
-            for idx, block in enumerate(self.blocks):
-                energy = block[:, 0]
-                self.energy_values[idx + 1] = energy
-                tdos = block[:, 1]
-                ldos = block[:, 2]
-                plt.plot(energy, tdos)
-                plt.savefig("DOS.png")
-                plt.clf()
-                plt.plot(energy, ldos)
-                plt.savefig("LDOS.png")
+            fig = plt.figure(figsize=(3,2))
+            # print(self.blocks)
+            energy = self.blocks[0][:, 0]
+            self.energy_values[0] = energy
+            tdos_up = self.blocks[0][:, 1]
+            tdos_dn = self.blocks[1][:, 1]
+            ldos_up = self.blocks[0][:, 2]
+            ldos_dn = self.blocks[1][:, 2]
+
+            plt.plot(energy, tdos_up, color="red", label="Spin up")
+            plt.plot(energy, -1 * tdos_dn, color="blue", label="Spin down")
+            plt.savefig("DOS.png")
+
+            plt.plot(energy, ldos_up, color="red", label="Spin up")
+            plt.plot(energy, -1 * ldos_dn, color="blue", label="Spin down")
+            plt.savefig("LDOS.png")
 
 
 class pdos_l_processor(pdos_processor):

@@ -2,14 +2,15 @@
 
 ## Features
 - Introduced basic plotting into `pdos` module
-- Introduce Sphinx documentation at https://chpxu.github.io/CONQUEST_TO_VASP
+- Introduce Sphinx documentation at https://conquest-to-vasp.readthedocs.io/en/latest/
 - Interopability with ASE
     - `conquest2a.conquest.Atom` now has a `to_ase()` method which returns an ASE `Atom` object
+- Band structure plotting
 
 ## Fixes
 
 - Fix calculation of grid vectors in charge density plot
-- Fix incorrect placement of atom labels in chage density plot
+- Fix incorrect placement of atom labels in charge density plot
 - Convert `chden` to use Bohr units completely 
 
 ## Other

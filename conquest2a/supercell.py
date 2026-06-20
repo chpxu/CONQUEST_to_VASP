@@ -2,19 +2,21 @@ import copy
 import numpy as np
 from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
 
+
 class supercell:
     """Class to produce supercells. CONQUEST deals with orthorhombic cells only. The resulting supercell will therefore be orthorhombic.
 
-        :param repeats_x: Number of repeats along the :math:`a` lattice vector
-        :type repeats_x: ``int``
-        :param repeats_y: Number of repeats along the :math:`b` lattice vector
-        :type repeats_y: ``int``
-        :param repeats_z: Number of repeats along the :math:`c` lattice vector
-        :type repeats_z: ``int``
-        :param coords_proc: The :class:`conquest_coordinates_processor` to use.
-        :type coords_proc: conquest_coordinates_processor
-        :raises ValueError: If any of the ``repeats_*`` is not a positive integer
+    :param repeats_x: Number of repeats along the :math:`a` lattice vector
+    :type repeats_x: ``int``
+    :param repeats_y: Number of repeats along the :math:`b` lattice vector
+    :type repeats_y: ``int``
+    :param repeats_z: Number of repeats along the :math:`c` lattice vector
+    :type repeats_z: ``int``
+    :param coords_proc: The :class:`conquest_coordinates_processor` to use.
+    :type coords_proc: conquest_coordinates_processor
+    :raises ValueError: If any of the ``repeats_*`` is not a positive integer
     """
+
     def __init__(
         self,
         repeats_x: int,
@@ -22,9 +24,11 @@ class supercell:
         repeats_z: int,
         coords_proc: conquest_coordinates_processor,
     ) -> None:
-       
+
         if repeats_x < 0 or repeats_y < 0 or repeats_z < 0:
-            raise ValueError("One of, or multiple of, repeats_x repeats_y, repeats_z was not at least 0.")
+            raise ValueError(
+                "One of, or multiple of, repeats_x repeats_y, repeats_z was not at least 0."
+            )
 
         self.repeats_x = repeats_x
         self.repeats_y = repeats_y

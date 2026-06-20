@@ -9,15 +9,16 @@ from conquest2a.constants import BOHR_TO_ANGSTROM
 class file_writer:
     """Generic parent class to define file operations and variables.
 
-        :param dest: _description_
-        :type dest: str
-        :param mode: _description_, defaults to "w"
-        :type mode: str, optional
-        :param encoding: _description_, defaults to "utf-8"
-        :type encoding: str, optional
-        :param is_angstrom: _description_, defaults to False
-        :type is_angstrom: bool, optional
-        """
+    :param dest: _description_
+    :type dest: str
+    :param mode: _description_, defaults to "w"
+    :type mode: str, optional
+    :param encoding: _description_, defaults to "utf-8"
+    :type encoding: str, optional
+    :param is_angstrom: _description_, defaults to False
+    :type is_angstrom: bool, optional
+    """
+
     def __init__(
         self, dest: str, mode: str = "w", encoding: str = "utf-8", is_angstrom: bool = False
     ) -> None:
@@ -41,16 +42,17 @@ class file_writer:
 class conquest_writer(file_writer):
     """Class to write a CONQUEST coordinates file given a :class:`conquest_coordinates` instance.
 
-        :param dest: Path to write the new coordinates file.
-        :type dest: ``str``
-        :param coords: :class:`conquest_coordinates` instance to write.
-        :type coords: ``conquest_coordinates``
-        :param encoding: File encoding, defaults to "utf-8"
-        :type encoding: ``str``, optional
-        :param precision: Float precision, defaults to 10
-        :type precision: ``int``, optional
-        :raises ValueError: If the float precision is not at least 1.
-        """
+    :param dest: Path to write the new coordinates file.
+    :type dest: ``str``
+    :param coords: :class:`conquest_coordinates` instance to write.
+    :type coords: ``conquest_coordinates``
+    :param encoding: File encoding, defaults to "utf-8"
+    :type encoding: ``str``, optional
+    :param precision: Float precision, defaults to 10
+    :type precision: ``int``, optional
+    :raises ValueError: If the float precision is not at least 1.
+    """
+
     def __init__(
         self,
         dest: str,
@@ -91,15 +93,16 @@ class conquest_writer(file_writer):
 class vasp_writer(file_writer):
     """Class to write a VASP file given a :class:`~conquest.conquest_coordinates` instance.
 
-        :param dest: Path to write the new coordinates file.
-        :type dest: ``str``
-        :param data: :class:`~conquest.conquest_coordinates` instance to write.
-        :type data: ``conquest_coordinates``
-        :param encoding: File encoding, defaults to "utf-8"
-        :type encoding: ``str``, optional
-        :param is_angstrom: Whether the data in ``conquest_coordinates`` is already in angstroms instead of Bohrs, defaults to ``False``.
-        :type is_angstrom: ``bool``, optional
-        """
+    :param dest: Path to write the new coordinates file.
+    :type dest: ``str``
+    :param data: :class:`~conquest.conquest_coordinates` instance to write.
+    :type data: ``conquest_coordinates``
+    :param encoding: File encoding, defaults to "utf-8"
+    :type encoding: ``str``, optional
+    :param is_angstrom: Whether the data in ``conquest_coordinates`` is already in angstroms instead of Bohrs, defaults to ``False``.
+    :type is_angstrom: ``bool``, optional
+    """
+
     def __init__(
         self,
         dest: str,
@@ -143,15 +146,15 @@ class vasp_writer(file_writer):
 class xyz_writer(file_writer):
     """Class to write a ``.xyz`` for a basic XYZ file given a :class:`~conquest.conquest_coordinates` instance.
 
-        :param dest: Path to write the new coordinates file.
-        :type dest: ``str``
-        :param data: :class:`~conquest.conquest_coordinates` instance to write.
-        :type data: ``conquest_coordinates``
-        :param encoding: File encoding, defaults to "utf-8"
-        :type encoding: ``str``, optional
-        :param comment_line: What string to write as the comment line
-        :type comment_line: ``str``, optional
-        """
+    :param dest: Path to write the new coordinates file.
+    :type dest: ``str``
+    :param data: :class:`~conquest.conquest_coordinates` instance to write.
+    :type data: ``conquest_coordinates``
+    :param encoding: File encoding, defaults to "utf-8"
+    :type encoding: ``str``, optional
+    :param comment_line: What string to write as the comment line
+    :type comment_line: ``str``, optional
+    """
 
     def __init__(
         self,
@@ -200,17 +203,18 @@ class xyz_writer(file_writer):
 class extxyz_writer(xyz_writer):
     """Class to write a ``.extxyz`` for a basic XYZ file given a :class:`~conquest.conquest_coordinates` instance.
 
-        The main advantage of `.extxyz` is the ability to specify columns and the time, which is very useful for animations. I recommend just using CONQUEST's ability to output ``.extxyz`` files at different timesteps.
+    The main advantage of `.extxyz` is the ability to specify columns and the time, which is very useful for animations. I recommend just using CONQUEST's ability to output ``.extxyz`` files at different timesteps.
 
-        :param dest: Path to write the new coordinates file.
-        :type dest: ``str``
-        :param data: :class:`~conquest.conquest_coordinates` instance to write.
-        :type data: ``conquest_coordinates``
-        :param encoding: File encoding, defaults to "utf-8".
-        :type encoding: ``str``, optional
-        :param time: The instance of time of the cell, defaults to `0.0`.
-        :type time: ``float``, optional
-        """
+    :param dest: Path to write the new coordinates file.
+    :type dest: ``str``
+    :param data: :class:`~conquest.conquest_coordinates` instance to write.
+    :type data: ``conquest_coordinates``
+    :param encoding: File encoding, defaults to "utf-8".
+    :type encoding: ``str``, optional
+    :param time: The instance of time of the cell, defaults to `0.0`.
+    :type time: ``float``, optional
+    """
+
     def __init__(
         self,
         dest: str,
@@ -218,7 +222,7 @@ class extxyz_writer(xyz_writer):
         encoding: str = "utf-8",
         time: float = 0.0,
     ) -> None:
-        
+
         self.time = time
         super().__init__(dest=dest, data=data, encoding=encoding)
 
@@ -242,17 +246,18 @@ class extxyz_writer(xyz_writer):
 class xsf_writer(file_writer):
     """Class to write `.xsf` files given a :class:`~conquest.conquest_coordinates` instance.
 
-        XSF files support an extra 3 columns alongside the 3 columns used for position. These columns specify a vector associated with each atom. In CONQUEST, the relevant vectors are forces and spins. Note that CONQUEST only supports *collinear spin* (up and down), so the spin vector is visualised along the :math:`c`-axis of the simulation cell.
+    XSF files support an extra 3 columns alongside the 3 columns used for position. These columns specify a vector associated with each atom. In CONQUEST, the relevant vectors are forces and spins. Note that CONQUEST only supports *collinear spin* (up and down), so the spin vector is visualised along the :math:`c`-axis of the simulation cell.
 
-        :param dest: Path to write the new coordinates file.
-        :type dest: ``str``
-        :param data: :class:`~conquest.conquest_coordinates` instance to write.
-        :type data: ``conquest_coordinates``
-        :param encoding: File encoding, defaults to "utf-8".
-        :type encoding: ``str``, optional
-        :param write_extra: Whether to extract the force vector or spin vector of atoms, defaults to "spin".
-        :type write_extra: Literal["spin", "force"], optional
-        """
+    :param dest: Path to write the new coordinates file.
+    :type dest: ``str``
+    :param data: :class:`~conquest.conquest_coordinates` instance to write.
+    :type data: ``conquest_coordinates``
+    :param encoding: File encoding, defaults to "utf-8".
+    :type encoding: ``str``, optional
+    :param write_extra: Whether to extract the force vector or spin vector of atoms, defaults to "spin".
+    :type write_extra: Literal["spin", "force"], optional
+    """
+
     def __init__(
         self,
         dest: str,
@@ -292,20 +297,21 @@ class xsf_writer(file_writer):
 
 class xsf_writer_spins(file_writer):
     """
-        XSF writer class that includes spin information from the AtomCharge.dat file,
-        by editing an existing XSF file generated by PostProcessCQ.
+    XSF writer class that includes spin information from the AtomCharge.dat file,
+    by editing an existing XSF file generated by PostProcessCQ.
 
-        :param dest: Path to write the new coordinates file.
-        :type dest: ``str``
-        :param data: :class:`~conquest.conquest_coordinates` instance to write.
-        :type data: ``conquest_coordinates``
-        :param encoding: File encoding, defaults to "utf-8".
-        :type encoding: ``str``, optional
-        :param charges: :class:`~conquest.atom_charge` instance to read spin data from.
-        :type charges: :class:`~conquest.atom_charge`
-         :param xsf_file: XSF file to modify.
-        :type xsf_file: ``str``
-        """
+    :param dest: Path to write the new coordinates file.
+    :type dest: ``str``
+    :param data: :class:`~conquest.conquest_coordinates` instance to write.
+    :type data: ``conquest_coordinates``
+    :param encoding: File encoding, defaults to "utf-8".
+    :type encoding: ``str``, optional
+    :param charges: :class:`~conquest.atom_charge` instance to read spin data from.
+    :type charges: :class:`~conquest.atom_charge`
+     :param xsf_file: XSF file to modify.
+    :type xsf_file: ``str``
+    """
+
     def __init__(
         self, dest: str, charges: atom_charge, xsf_file: str, encoding: str = "utf-8"
     ) -> None:

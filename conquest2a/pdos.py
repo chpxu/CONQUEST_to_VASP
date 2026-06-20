@@ -11,15 +11,16 @@ import matplotlib.pyplot as plt
 
 class pdos_processor(block_processor):
     """Initialise generic PDOS processor class.
-    
+
     CONQUEST can produce a ``DOS.dat`` containing the total DOS and the local DOS, which ``lm="t"`` will process. To process :math:`l` and :math:`lm`-resolved PDOS files, initialise an instance of :class:`pdos_l_processor` and :class:`pdos_lm_processor` respectively.
 
     :param conquest_rundir: String or Path to the directory containing the PDOS files generated from CONQUEST's PostProcessing tool.
     :type conquest_rundir: ``string | Path``
-    :param lm: Determines the file-processing mode. Defaults to ``"t"``. 
-    
+    :param lm: Determines the file-processing mode. Defaults to ``"t"``.
+
     :type lm: ``Literal["lm", "l", "t"]``, optional
     """
+
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
         # self.dos_file = dos_file
         self.lm = lm
@@ -121,15 +122,14 @@ class pdos_processor(block_processor):
                 return
 
     def plot_pdos(self, *args, **kwargs) -> None:  # type: ignore
-        """Method which plots the PDOS and LDOS inside `DOS.dat`.
-        """
+        """Method which plots the PDOS and LDOS inside `DOS.dat`."""
         if self.lm == "t":
             self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
             for filename in self.all_pdos_files:
                 self.read_file(filename)
             tdos: c2at.REAL_ARRAY
             ldos: c2at.REAL_ARRAY
-            fig = plt.figure(figsize=(3,2))
+            fig = plt.figure(figsize=(3, 2))
             # print(self.blocks)
             energy = self.blocks[0][:, 0]
             self.energy_values[0] = energy
@@ -150,18 +150,18 @@ class pdos_processor(block_processor):
 class pdos_l_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
         """Class to process and plot :math:`l`-resolved PDOS.
-            
+
         * PDOS file is split into blocks separated by "&" lines. The first block is the spin-up and second is spin-down.
         * Column 1 records the energy in electronvolts
         * Column 2 records the sum over all :math:`l`-PDOS at that energy
         * From column 3 onwards, records specific :math:`l`-contributions, and columns are sorted by ascending :math:`l` values.
-        
+
         :param conquest_rundir:  String or Path to the directory containing the PDOS files generated from CONQUEST's `PostProcess` binary.
         :type conquest_rundir: ``str | Path``
         """
         super().__init__(conquest_rundir=conquest_rundir, lm="l")
         self.l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
-       
+
         # e.g., l = 0,  l =1,  l = 2, etc.
         # So dict will be of the form {"l": [array(spin1), array(spin2), ...],}
         self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
@@ -180,8 +180,7 @@ class pdos_l_processor(pdos_processor):
         }
 
     def l_map(self) -> None:
-        """Reads and stores the columns of an :math:`l`-resolved PDOS file.
-        """
+        """Reads and stores the columns of an :math:`l`-resolved PDOS file."""
         l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
@@ -236,7 +235,7 @@ class pdos_l_processor(pdos_processor):
         """
         x_label = r"$E - E_F~[\text{eV}]$" if self.is_shifted_to_fermi else r"$E~[\text{eV}]$"
         y_label = r"$\text{DOS} [\text{states/eV}]$"
-        
+
         fig = plt.figure()
 
         self.get_pdos(atomno)
@@ -262,7 +261,7 @@ class pdos_l_processor(pdos_processor):
 class pdos_lm_processor(pdos_processor):
     def __init__(self, conquest_rundir: str | Path) -> None:
         """Class to process and plot :math:`lm`-resolved PDOS.
-            
+
         * PDOS file is split into blocks separated by "&" lines. The first block is the spin-up and second is spin-down.
         * Column 1 records the energy in electronvolts
         * Column 2 records the sum over all :math:`lm`-PDOS at that energy
@@ -279,7 +278,7 @@ class pdos_lm_processor(pdos_processor):
         # The second column is the total PDOS, i.e sum of all l and m, at that energy
         # Subsequent columns are the PDOS values for each lm component, sorted in
         # ascending order of l and m
-       
+
         # So dict will be of the form {"l,m": [array(spin1), array(spin2), ...],}
         self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
 
@@ -313,7 +312,7 @@ class pdos_lm_processor(pdos_processor):
         * For every :math:`l`, there are :math:`2l + 1` columns of PDOS. These become the keys of a dictionary and will be accessed in the form ``["l,m"]``.
         * The values of this dictionary will be a list of NumPy arrays, ordered first by spin-up and then spin-down.
         """
-       
+
         lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
@@ -362,7 +361,7 @@ class pdos_lm_processor(pdos_processor):
 
         :param atomnos: The atom numbers as defined in the coordinates, to plot.
         :type atomnos: ``int``
-        :param orbitals: The orbitals to plot. These are a list of the keys in the dictionary. 
+        :param orbitals: The orbitals to plot. These are a list of the keys in the dictionary.
         :type orbitals: ``list[int]``
         :param x1: Lower energy limit. If ``None``, defaults to the lowest energy in the data.
         :type x1: ``float | None``

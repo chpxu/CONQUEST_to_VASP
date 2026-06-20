@@ -127,6 +127,7 @@ class chden(processor_base):
     :raises ValueError: Cannot provide a mode if only one file is specified.
     :raises ValueError: If all Miller indices are 0: cannot slice through the origin
     """
+
     def __init__(
         self,
         hkl: INT_ARRAY,
@@ -156,7 +157,7 @@ class chden(processor_base):
         if hkl[0] == 0 and hkl[1] == 0 and hkl[2] == 0:
             raise ValueError("Miller indices (h k l) cannot all be zero.")
 
-    def load_cube(self, filename: str) -> tuple[Any,Any]:
+    def load_cube(self, filename: str) -> tuple[Any, Any]:
         self.resolve_path(filename=filename)
         with open(filename, "r", encoding="utf-8") as fh:
             cube = read_cube(fh)  # type: ignore
@@ -288,7 +289,7 @@ class chden(processor_base):
         inv_cell = np.linalg.inv(self.cell)
         disp = positions - origin  # displacement from slice origin
         disp_frac = disp @ inv_cell
-        disp_frac -= np.round(disp_frac) 
+        disp_frac -= np.round(disp_frac)
         disp = disp_frac @ self.cell
         dist_norm = disp @ n_hat  # signed distance to plane
 
@@ -302,13 +303,14 @@ class chden(processor_base):
 class chden_plot:
     """Helper class to analyse and plot charge densities.
 
-        :param chden_instance: :class:`chden` instance to use
-        :type chden_instance: :class:`chden`
-        :param show_atoms: Whether to show atom labels on the charge density plot, defaults to False
-        :type show_atoms: ``bool``, optional
-        :param extension: File extension, defaults to "png"
-        :type extension: ``str``, optional
-        """
+    :param chden_instance: :class:`chden` instance to use
+    :type chden_instance: :class:`chden`
+    :param show_atoms: Whether to show atom labels on the charge density plot, defaults to False
+    :type show_atoms: ``bool``, optional
+    :param extension: File extension, defaults to "png"
+    :type extension: ``str``, optional
+    """
+
     def __init__(
         self, chden_instance: chden, show_atoms: bool = False, extension: str = "png"
     ) -> None:
@@ -332,7 +334,9 @@ class chden_plot:
         t2: REAL_ARRAY,
         v1: REAL_ARRAY,
         v2: REAL_ARRAY,
-        atom_data: tuple[REAL_ARRAY, REAL_ARRAY, list[str]] | None = None,  # (t1s, t2s, symbols) tuple or None
+        atom_data: (
+            tuple[REAL_ARRAY, REAL_ARRAY, list[str]] | None
+        ) = None,  # (t1s, t2s, symbols) tuple or None
         cmap: str = "viridis",
         log_scale: bool = False,
         vmin: float | None = 0.0,
@@ -459,7 +463,7 @@ class chden_plot:
         1. Fetches charge density files
         2. Extracts and analyses data
         3. Plots data and save
-        
+
         :param filename: Filename to save as. Will save with a useful name if not provided, defaults to None
         :type filename: ``str | None``, optional
          :param vmin: Minimum value to set the colour scale at, defaults to 0.0

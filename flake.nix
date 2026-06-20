@@ -85,7 +85,7 @@
               pylint.enable = true;
               treefmt = {
                 enable = true;
-                package = pkgs.treefmt;
+                package = config.treefmt.build.wrapper;
               };
             };
             treefmt = {
@@ -100,6 +100,7 @@
               settings = {
                 global.excludes = [
                   ".direnv/*"
+                  "examples/*"
                 ];
 
                 formatter = {

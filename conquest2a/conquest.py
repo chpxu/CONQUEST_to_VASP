@@ -32,6 +32,7 @@ class Atom:
     :param spins: Spin moment on the atom,  defaults to ``np.array([0.0, 0.0, 0.0])``.
     :type spins: :ref:`REAL ARRAY <types>`
     """
+
     species: int
     coords: c2at.REAL_ARRAY
     can_move: Sequence[str]
@@ -55,15 +56,18 @@ class Atom:
             f"  Force         : {fmt_array(self.forces)}\n"
             f"  Spin          : {fmt_array(self.spins)}\n"
         )
+
     def to_ase(self) -> ase.Atom:
-        """Method to return an equivalent ASE ```Atom`` <https://ase-lib.org/ase/atom.html>`__. 
+        """Method to return an equivalent ASE ```Atom`` <https://ase-lib.org/ase/atom.html>`__.
         The ``spins`` field is set to the ``Atom.magmom`` whilst the ``forces`` field is set to ``Atom.momentum``.
 
-        
+
         :returns: ase.Atom: Equivalent ASE ``Atom`` object.
         :rtype: ``ase.Atom``
         """
-        return ase.Atom(symbol=self.label, position=self.coords, magmom=self.spins, momentum=self.forces)
+        return ase.Atom(
+            symbol=self.label, position=self.coords, magmom=self.spins, momentum=self.forces
+        )
 
 
 class conquest_input:
@@ -137,15 +141,16 @@ class processor_base:
 
 class conquest_coordinates:
     """Class which holds data about the system, including the :class:`Atom` s in the system.
-    
+
     :param conquest_input: :class:`conquest_input` instance.
     :type conquest_input: ``conquest_input``
     """
+
     def __init__(
         self,
         conquest_input: conquest_input,
     ) -> None:
-        
+
         self.atoms: list[Atom] = []
         self.conquest_input = conquest_input
         self.natoms: str
@@ -182,7 +187,7 @@ class conquest_coordinates:
         self.element_map = ele_to_atom
 
     def number_of_elements(self) -> dict[str, int]:
-        """Function to get the number of atoms of each element. 
+        """Function to get the number of atoms of each element.
 
         :return: Returns a dictionary of the number of atoms per element
         :rtype: ``dict[str, int]``
@@ -196,11 +201,12 @@ class conquest_coordinates:
 class conquest_coordinates_processor(processor_base):
     """Class which extracts data from a CONQUEST coordinates file and populates a :class:`conquest_coordinates` instance.
 
-        :param path: Path of the CONQUEST coordinates file to read.
-        :type path: ``str``
-        :param conquest_input: :class:`conquest_input` instance.
-        :type conquest_input: conquest_input
+    :param path: Path of the CONQUEST coordinates file to read.
+    :type path: ``str``
+    :param conquest_input: :class:`conquest_input` instance.
+    :type conquest_input: conquest_input
     """
+
     def __init__(self, path: str, conquest_input: conquest_input) -> None:
         processor_base.__init__(
             self, path=path, err_str="Error opening specified CONQUEST coordinates file."
@@ -260,7 +266,7 @@ class atom_charge(processor_base):
     same CONQUEST input coordinates file.
 
     In particular, make use of the conquest_coordinates class to contain the list of Atoms
-    
+
     :param coordinates: The :class:`conquest_coordinates` instance to use
     :type coordinates: :class:`conquest_coordinates`
     :param atom_charge_path: Path to the ``AtomCharge.dat`` file.

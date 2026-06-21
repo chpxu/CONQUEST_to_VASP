@@ -1,5 +1,6 @@
 from typing import Any, Literal
 import numpy as np
+from ase.atoms import Atoms
 from ase.io.cube import read_cube
 from ase.units import Bohr
 from scipy.ndimage import map_coordinates
@@ -15,7 +16,7 @@ from conquest2a.constants import MPLGENERIC
 mpl.rcParams.update(MPLGENERIC)
 plt.style.use(["science", "no-latex"])
 
-_ELEMENT_COLOURS = {
+_ELEMENT_COLOURS: dict[str, str] = {
     # Alkali metals
     "Li": "#cc80ff",
     "Na": "#ab5cf2",
@@ -116,7 +117,8 @@ class chden(processor_base):
 
     :param hkl: The :math:`hkl` slice of the crystal to plot charge densities in.
     :type hkl: :ref:`INT ARRAY <types>`
-    :param offset: The :math:`hkl` direction defines a family of planes. Use ``offset`` to select which one (i.e. where in the unit cell).
+    :param offset: The :math:`hkl` direction defines a family of planes.
+    Use ``offset`` to select which one (i.e. wherein the unit cell).
     :type offset: ``float``
     :param ch1: Path to a charge density (``.cube``) file.
     :type ch1: ``str``
@@ -130,21 +132,21 @@ class chden(processor_base):
 
     def __init__(
         self,
-        hkl: INT_ARRAY,
+        hkl: tuple[int, int, int],
         offset: float,
         ch1: str,
         ch2: str | None = None,
         mode: Literal["sum", "diff"] | None = None,
     ) -> None:
-        self.hkl = hkl
-        self.offset = offset
-        self.mode = mode
+        self.hkl: INT_ARRAY = np.array(hkl)
+        self.offset: float = offset
+        self.mode: Literal["sum", "diff"] | None = mode
         super().__init__(path=ch1)
-        self.dens1 = self.load_cube(ch1)
-        self.data = self.dens1[0]
-        self.dens2 = None
-        self.atoms = self.dens1[1]
-        self.cell = self.atoms.get_cell() / Bohr  # ASE cell information
+        self.dens1: tuple[Any, Any] = self.load_cube(ch1)
+        self.data: Any = self.dens1[0]
+        self.dens2: tuple[Any, Any] | None = None
+        self.atoms: Any = self.dens1[1]
+        self.cell: REAL_ARRAY = self.atoms.get_cell() / Bohr  # ASE cell information
         if self.mode is not None and ch2 is None:
             raise ValueError("Cannot have sum/diff mode if a second file is not provided!")
         if ch2 is not None:
@@ -160,7 +162,7 @@ class chden(processor_base):
     def load_cube(self, filename: str) -> tuple[Any, Any]:
         self.resolve_path(filename=filename)
         with open(filename, "r", encoding="utf-8") as fh:
-            cube = read_cube(fh)  # type: ignore
+            cube: dict[str, Atoms] = read_cube(fh)
         fh.close()
         return cube["data"], cube["atoms"]
 
@@ -176,8 +178,8 @@ class chden(processor_base):
         3. Those are converted to Cartesian, then Gram-Schmidt orthonormalised so the axes are perpendicular in real-space.
 
         """
-        cell = self.cell
-        recip = np.linalg.inv(cell).T
+        cell: REAL_ARRAY = self.cell
+        recip: REAL_ARRAY = (np.linalg.inv(cell).T).astype(float)
         n_cart = self.hkl[0] * recip[0] + self.hkl[1] * recip[1] + self.hkl[2] * recip[2]
         n_hat = n_cart / np.linalg.norm(n_cart)
         _, _, Vt = np.linalg.svd(self.hkl.reshape(1, 3))
@@ -191,7 +193,7 @@ class chden(processor_base):
 
         return v1, v2, n_hat
 
-    def plane_origin(self) -> Any:
+    def plane_origin(self) -> REAL_ARRAY:
         """Return a Cartesian point lying on the plane  :math:`ha + kb + lc =` ``offset``.
 
         ``offset`` is a dimensionless fractional intercept (0-1 spans one
@@ -201,14 +203,14 @@ class chden(processor_base):
         :returns: Origin of the slice.
         :rtype: :ref:`REAL ARRAY <types>`
         """
-        n = self.hkl / (self.hkl @ self.hkl)  # normal direction in fractional space
-        centre = np.array([0.5, 0.5, 0.5])
-        frac = centre - (centre @ self.hkl) * n + self.offset * n
+        n: REAL_ARRAY = self.hkl / (self.hkl @ self.hkl)  # normal direction in fractional space
+        centre: REAL_ARRAY = np.array([0.5, 0.5, 0.5])
+        frac: REAL_ARRAY = centre - (centre @ self.hkl) * n + self.offset * n
         return frac @ self.cell
 
     def inplane_range(self, v1: REAL_ARRAY, v2: REAL_ARRAY) -> tuple[float, float]:
-        length_1 = sum(abs(self.cell[i] @ v1) for i in range(3))
-        length_2 = sum(abs(self.cell[i] @ v2) for i in range(3))
+        length_1: float = sum(abs(self.cell[i] @ v1) for i in range(3))
+        length_2: float = sum(abs(self.cell[i] @ v2) for i in range(3))
         return length_1, length_2
 
     def extract_slice(
@@ -252,9 +254,9 @@ class chden(processor_base):
         data_padded = np.pad(self.data, interp_order + 1, mode="wrap")
 
         coords = vox.reshape(-1, 3).T + interp_order + 1
-        density = map_coordinates(data_padded, coords, order=interp_order, mode="nearest").reshape(
-            n_points, n_points
-        )
+        density: REAL_ARRAY = map_coordinates(
+            data_padded, coords, order=interp_order, mode="nearest"
+        ).reshape(n_points, n_points)
 
         return density, v1, v2, t1, t2, origin
 
@@ -286,9 +288,9 @@ class chden(processor_base):
         """
         positions = self.atoms.get_positions() / Bohr
         symbols = self.atoms.get_chemical_symbols()
-        inv_cell = np.linalg.inv(self.cell)
+        inv_cell: REAL_ARRAY = np.linalg.inv(self.cell).astype(float)
         disp = positions - origin  # displacement from slice origin
-        disp_frac = disp @ inv_cell
+        disp_frac: REAL_ARRAY = disp @ inv_cell
         disp_frac -= np.round(disp_frac)
         disp = disp_frac @ self.cell
         dist_norm = disp @ n_hat  # signed distance to plane
@@ -296,7 +298,7 @@ class chden(processor_base):
         mask = np.abs(dist_norm) < thickness
         t1_proj = disp[mask] @ v1
         t2_proj = disp[mask] @ v2
-        syms = [symbols[i] for i in np.where(mask)[0]]
+        syms: list[Any] = [symbols[i] for i in np.where(mask)[0]]
         return t1_proj, t2_proj, syms
 
 
@@ -314,9 +316,9 @@ class chden_plot:
     def __init__(
         self, chden_instance: chden, show_atoms: bool = False, extension: str = "png"
     ) -> None:
-        self.chden = chden_instance
-        self.show_atoms = show_atoms
-        self.extension = extension
+        self.chden: chden = chden_instance
+        self.show_atoms: bool = show_atoms
+        self.extension: str = extension
 
     def _miller_str(self, idx: int) -> str:
         if idx >= 0:
@@ -324,7 +326,7 @@ class chden_plot:
         return rf"$\overline{{{abs(idx):.2}}}$"
 
     def _vec_str(self, v: REAL_ARRAY) -> str:
-        parts = [self._miller_str(x) for x in v]
+        parts: list[str] = [self._miller_str(x) for x in v]
         return f"Position along [{','.join(parts)}]"
 
     def plot_slice(
@@ -373,20 +375,21 @@ class chden_plot:
         l2 = t2[-1] - t2[0]
         transpose_label = False
         # Rotate so the longer axis is always horizontal
+        mutable_density: REAL_ARRAY = density
         if l2 > l1:
-            density = density.T
+            mutable_density = density.T
             t1, t2 = t2, t1
             l1, l2 = l2, l1
             v1, v2 = v2, v1
             transpose_label = True
 
-        fig_w = 5.0
+        fig_w: float = 5.0
         fig_h = fig_w * (l2 / l1) + 0.5
         fig, ax = plt.subplots(figsize=(fig_w, fig_h))
         divider = mal(ax)
-        extent = (t1[0], t1[-1], t2[0], t2[-1])
+        extent: tuple[float, float, float, float] = (t1[0], t1[-1], t2[0], t2[-1])
         vmin = float(vmin) if vmin is not None else 0.0
-        vmax = float(vmax) if vmax is not None else np.max(density)
+        vmax = float(vmax) if vmax is not None else np.max(mutable_density)
         imshow_args: dict[str, Any] = {
             "origin": "lower",
             "extent": extent,
@@ -400,7 +403,7 @@ class chden_plot:
         else:
             imshow_args["vmax"] = vmax
             imshow_args["vmin"] = vmin
-        im = ax.imshow(density.T, **imshow_args)
+        im = ax.imshow(mutable_density, **imshow_args)
         ax.tick_params(direction="out", which="both")
         cax = divider.append_axes("right", size="5%", pad=0.1)
         cbar = fig.colorbar(im, cax=cax, fraction=0.04, pad=0.1)
@@ -480,7 +483,7 @@ class chden_plot:
         :type cmap: ``str``, optional
         """
         density, v1, v2, t1, t2, origin = self.chden.extract_slice()
-        atom_data = None
+        atom_data: tuple[REAL_ARRAY, REAL_ARRAY, list[str]] | None = None
         if self.show_atoms:
             _, _, n_hat = self.chden.inplane_basis()
             atom_data = self.chden.project_atoms(v1, v2, n_hat, origin, thickness=thickness)

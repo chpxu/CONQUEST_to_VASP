@@ -7,12 +7,12 @@ import re
 import numpy as np
 import conquest2a._types as c2at
 from conquest2a.constants import ANGSTROM_TO_BOHR
-from conquest2a.conquest import processor_base, conquest_input, conquest_coordinates, Atom
+from conquest2a.conquest import processor_base, conquest_species, conquest_coordinates, Atom
 from conquest2a.writers import conquest_writer
 
 
 class vesta_to_conquest(processor_base):
-    def __init__(self, vesta_path: str, output_path: str, conq_in: conquest_input) -> None:
+    def __init__(self, vesta_path: str, output_path: str, conq_in: conquest_species) -> None:
         super().__init__(vesta_path)
         self.resolve_path()
         self.vesta_path = self.abs_input_path
@@ -138,7 +138,7 @@ class vesta_to_conquest(processor_base):
 
 if __name__ == "__main__":
     species = {1: "O", 2: "Bi", 3: "Co", 4: "Co", 5: "Mn", 6: "Mn"}
-    conqin = conquest_input(species_dict=species)
+    conqin = conquest_species(species_dict=species)
     vesta_to_conquest(
         "tests/data/test_vesta_to_conquest.vesta",
         "tests/data/test_vesta_to_conquest.coords",

@@ -14,7 +14,11 @@
 - Convert `chden` to use Bohr units completely 
 
 ## Other
-- dev: fix `black` excluding `conquest2a` directory
+- BREAKING: the `conquest_input` class has been renamed to `conquest_species` to better reflect its purpose. The argument `conquest_input` will now take in this new class instead.
+- fix: `black` excluding `conquest2a` directory
+- `hkl` now accepts a basic tuple of ints instead of a NumPy array
+- Add more type hints throughout
+- Add `@override` where appropriate
 
 # 0.2.0
 

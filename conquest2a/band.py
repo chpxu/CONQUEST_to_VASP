@@ -1,6 +1,11 @@
+from typing import Any, override
 from dataclasses import dataclass, field
 import re
+from numpy._core.multiarray import _Array1D
+from matplotlib.axes import Axes
+from numpy import dtype, float64, ndarray, signedinteger
 import numpy as np
+import matplotlib.pyplot as plt
 from conquest2a.conquest import block_processor
 import conquest2a._types as c2at
 
@@ -23,15 +28,18 @@ class bst_processor(block_processor):
         :type bst_file: ``str``
         """
         super().__init__()
-        self.bst_file = bst_file
+        self.bst_file: str = bst_file
         self.blocks: list[c2at.REAL_ARRAY] = []
         self.bands: list[band] = []
         self.fermi_level: float = 0.0
         self.is_shifted_to_fermi: bool = True
         self.block_counter: int = 0
-        self.current_spin = 0
+        self.current_spin: int = 0
+        self.num_spins: int = 0
+        self.current_block: list[Any] = []
         self.read_file(filename=self.bst_file)
 
+    @override
     def process_headers(
         self,
         line: str,
@@ -40,19 +48,20 @@ class bst_processor(block_processor):
             self.num_spins += 1
             self.current_spin += 1
         if "# Original" in line:
-            result = re.findall(self.re_float, line)
+            result: list[Any] = re.findall(self.re_float, line)
             self.fermi_level = float(result[0])
         if "# Band " in line:
-            band_index = re.findall(self.re_index, line)
+            band_index: list[Any] = re.findall(self.re_index, line)
             self.bands.append(band(index=int(band_index[0]), spin=self.current_spin))
         if not line.startswith("# Bands shifted"):
             self.is_shifted_to_fermi = False
 
+    @override
     def process_block(self, line: str) -> None:
         if line == "&":
             if self.current_block:
-                arrayed_block = np.array(self.current_block, dtype=float)
-                self.bands[self.block_counter].kpoint = arrayed_block[:, 0]
+                arrayed_block: c2at.REAL_ARRAY = np.array(self.current_block, dtype=np.float64)
+                self.bands[self.block_counter].kpoint = arrayed_block[:, 0].astype(int)
                 self.bands[self.block_counter].energies = arrayed_block[:, 1]
                 self.block_counter += 1
                 self.current_block = []
@@ -65,7 +74,7 @@ class bst:
 
     def __init__(
         self,
-        processor,
+        processor: bst_processor,
         spin_colors: dict[int, str] | None = None,
     ) -> None:
         """Plot a bandstructure using ``BandStructure.dat``.
@@ -82,8 +91,8 @@ class bst:
             unchanged.
         :type spin_colors: ``dict[int, str]`` or ``None``
         """
-        self._processor = processor
-        self._spin_colors = {**self.DEFAULT_SPIN_COLORS, **(spin_colors or {})}
+        self._processor: bst_processor = processor
+        self._spin_colors: dict[int, str] = {**self.DEFAULT_SPIN_COLORS, **(spin_colors or {})}
 
     def plot(
         self,
@@ -98,7 +107,7 @@ class bst:
         :param band_range: Inclusive ``(min_index, max_index)`` range of band
             indices to plot.  Bands whose :attr:`~band.index` falls outside
             this range are excluded.  Pass ``None`` to include all bands.
-        :type band_range: ``tucple[int, int]`` or ``None``
+        :type band_range: ``tuple[int, int]`` or ``None``
 
         :param energy_range: :math:`(E_{\\min}, E_{\\max})` energy window in eV.
             Only bands that contain at least one :math:`k` -point with an energy
@@ -122,15 +131,14 @@ class bst:
         :raises ValueError: If no bands remain after the *band_range* and/or
             *energy_range* filters are applied.
         """
-        bands = self._filter_bands(band_range, energy_range)
+        bands: list[band] = self._filter_bands(band_range, energy_range)
         if not bands:
             raise ValueError(
-                "No bands remain after filtering. "
-                "Check your band_range / energy_range arguments."
+                "No bands remain after filtering. Check your band_range / energy_range arguments."
             )
 
-        fig, ax = plt.subplots(figsize=figsize)
-        ax.set_ylabel(ylabel)
+        _fig, ax = plt.subplots(1, 1, figsize=figsize)
+        _ = ax.set_ylabel(ylabel)
         self._draw_bands(ax, bands)
 
         if energy_range is not None:
@@ -142,7 +150,7 @@ class bst:
         self,
         band_range: tuple[int, int] | None,
         energy_range: tuple[float, float] | None,
-    ) -> list:
+    ) -> list[band]:
         """Return the subset of bands that satisfy all active filters.
 
         :param band_range: Inclusive ``(min_index, max_index)`` band-index
@@ -158,7 +166,7 @@ class bst:
         :returns: Filtered list of :class:`band` objects.
         :rtype: ``list[band]``
         """
-        result = []
+        result: list[band] = []
 
         for b in self._processor.bands:
             if band_range is not None:
@@ -168,7 +176,7 @@ class bst:
 
             if energy_range is not None:
                 e_lo, e_hi = energy_range
-                energies = np.asarray(b.energies).ravel()
+                energies: ndarray[tuple[int], dtype[float64]] = np.asarray(b.energies).ravel()
                 if not np.any((energies >= e_lo) & (energies <= e_hi)):
                     continue
 
@@ -176,7 +184,7 @@ class bst:
 
         return result
 
-    def _draw_bands(self, ax: Axes, bands: list) -> None:
+    def _draw_bands(self, ax: Axes, bands: list[band]) -> None:
         """Plot each band as energy versus sequential k-point index.
 
         Spin-up bands (``spin == 1``) and spin-down bands (``spin == 2``) are
@@ -186,13 +194,13 @@ class bst:
         :param bands: Pre-filtered list of :class:`band` objects to plot.
         :type bands: ``list[band]``
         """
-        _spin_labels = {1: "Spin up", 2: "Spin down"}
+        _spin_labels: dict[int, str] = {1: "Spin up", 2: "Spin down"}
         _seen: set[int] = set()
         for b in bands:
-            energies = np.asarray(b.energies).ravel()
-            k_indices = np.arange(len(energies))
-            color = self._spin_colors.get(b.spin, "black")
-            label = _spin_labels.get(b.spin) if b.spin not in _seen else None
+            energies: ndarray[tuple[int], dtype[float64]] = np.asarray(b.energies).ravel()
+            k_indices: _Array1D[signedinteger[Any]] = np.arange(len(energies))
+            color: str = self._spin_colors.get(b.spin, "black")
+            label: str | None = _spin_labels.get(b.spin) if b.spin not in _seen else None
             _seen.add(b.spin)
 
-            ax.plot(k_indices, energies, color=color, linewidth=0.8)
+            _ = ax.plot(k_indices, energies, color=color, linewidth=0.8, label=label)

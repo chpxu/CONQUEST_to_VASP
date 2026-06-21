@@ -19,7 +19,7 @@ from itertools import islice
 from collections import deque
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import conquest_input, conquest_coordinates_processor, Atom
+from conquest2a.conquest import conquest_species, conquest_coordinates_processor, Atom
 
 
 class read_static_output:
@@ -147,7 +147,7 @@ class read_static_output:
 
 
 if __name__ == "__main__":
-    conq_input = conquest_input({1: "O", 2: "Bi", 3: "Mn", 4: "Mn", 5: "Mn", 6: "Mn"})
+    conq_input = conquest_species({1: "O", 2: "Bi", 3: "Mn", 4: "Mn", 5: "Mn", 6: "Mn"})
     conq_proc = conquest_coordinates_processor("tests/data/test_output_input_coords.in", conq_input)
     output = read_static_output("tests/data/test_output.txt", conq_proc)
 

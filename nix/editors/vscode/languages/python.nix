@@ -17,7 +17,7 @@ in
     "python.analysis.typeCheckingMode" = "strict";
     "python.defaultInterpreterPath" = "${pythonEnv}/bin/python3";
     "python.diagnostics.sourceMapsEnabled" = true;
-    "python.languageServer" = "Pylance";
+    "python.languageServer" = "basedpyright";
     # Configure extensions
     "[python]" = {
       "editor.defaultFormatter" = "ms-python.black-formatter";

@@ -1,7 +1,5 @@
 from io import TextIOWrapper
-from typing import IO, Any, Literal
-import numpy as np
-import conquest2a._types as c2at
+from typing import IO, Any, Literal, override
 from conquest2a.conquest import Atom, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
 
@@ -22,14 +20,14 @@ class file_writer:
     def __init__(
         self, dest: str, mode: str = "w", encoding: str = "utf-8", is_angstrom: bool = False
     ) -> None:
-        self.mode = mode
-        self.dest_path = dest.strip()
-        self.encoding = encoding
-        self.is_ang = is_angstrom
-        self.file = self.open_file()
+        self.mode: str = mode
+        self.dest_path: str = dest.strip()
+        self.encoding: str = encoding
+        self.is_ang: bool = is_angstrom
+        self.file: IO[Any] = self.open_file()
 
-    def open_file(self) -> TextIOWrapper | IO[Any]:
-        file = open(self.dest_path, mode=self.mode, encoding=self.encoding)
+    def open_file(self) -> IO[Any]:
+        file: IO[Any] = open(self.dest_path, mode=self.mode, encoding=self.encoding)
         return file
 
     def close_file(self, file: TextIOWrapper | IO[Any]) -> None:
@@ -59,15 +57,16 @@ class conquest_writer(file_writer):
         coords: conquest_coordinates,
         encoding: str = "utf-8",
         precision: int = 10,
-    ):
+    ) -> None:
         super().__init__(dest=dest, encoding=encoding)
-        self.coords = coords
-        self.precision = precision
+        self.coords: conquest_coordinates = coords
+        self.precision: int = precision
         if self.precision < 1:
             raise ValueError("Cannot have less than 1 decimal of float precision.")
         self.write()
         self.close_file(file=self.file)
 
+    @override
     def write(self) -> None:
         prec = self.precision
         self.file.write(
@@ -82,8 +81,8 @@ class conquest_writer(file_writer):
         self.file.write(self.coords.natoms)
         self.file.write("\n")
         for atom in self.coords.atoms:
-            move_str = f"{atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}"
-            atom_str = (
+            move_str: str = f"{atom.can_move[0]} {atom.can_move[1]} {atom.can_move[2]}"
+            atom_str: str = (
                 f"{atom.coords[0]:.{prec}f} {atom.coords[1]:.{prec}f} {atom.coords[2]:.{prec}f}"
             )
             self.file.write(f"{atom_str} {atom.species} {move_str}")
@@ -111,16 +110,17 @@ class vasp_writer(file_writer):
         is_angstrom: bool = False,
     ) -> None:
         super().__init__(dest=dest, encoding=encoding, is_angstrom=is_angstrom)
-        self.data = data
+        self.data: conquest_coordinates = data
         self.write()
         self.close_file(file=self.file)
 
     def create_atoms_str(self) -> tuple[str, str]:
-        num_ele = self.data.number_of_elements()
-        ele_string = " ".join(list(num_ele.keys()))
-        num_string = " ".join(str(x) for x in num_ele.values())
+        num_ele: dict[str, int] = self.data.number_of_elements()
+        ele_string: str = " ".join(list(num_ele.keys()))
+        num_string: str = " ".join(str(x) for x in num_ele.values())
         return ele_string, num_string
 
+    @override
     def write(self) -> None:
         ele_string, num_string = self.create_atoms_str()
         with self.file as file:
@@ -164,8 +164,8 @@ class xyz_writer(file_writer):
         comment_line: str = "comment line",
     ) -> None:
         super().__init__(dest=dest, encoding=encoding)
-        self.data = data
-        self.comment_line = comment_line
+        self.data: conquest_coordinates = data
+        self.comment_line: str = comment_line
         self.write()
         self.close_file(file=self.file)
 
@@ -178,11 +178,12 @@ class xyz_writer(file_writer):
         :return: Components of the line to write: the element and the numbers
         :rtype: tuple[str, str]
         """
-        num_ele = self.data.number_of_elements()
-        ele_string = " ".join(list(num_ele.keys()))
-        num_string = " ".join(str(x) for x in num_ele.values())
+        num_ele: dict[str, int] = self.data.number_of_elements()
+        ele_string: str = " ".join(list(num_ele.keys()))
+        num_string: str = " ".join(str(x) for x in num_ele.values())
         return ele_string, num_string
 
+    @override
     def write(self) -> None:
         """XYZ format expects cells in Cartesian coordinates.
         Since CONQUEST only deals with orthorhombic unit cells,
@@ -223,9 +224,10 @@ class extxyz_writer(xyz_writer):
         time: float = 0.0,
     ) -> None:
 
-        self.time = time
+        self.time: float = time
         super().__init__(dest=dest, data=data, encoding=encoding)
 
+    @override
     def create_comment_line(self) -> str:
         """Creates the ``.extxyz`` comment line: specifies columns, formats and time.
 
@@ -238,15 +240,17 @@ class extxyz_writer(xyz_writer):
             lattice.append(single_vector[1])
             lattice.append(single_vector[2])
         property_str = "Properties=species:S:1:pos:R:3"
-        time_str = f"Time={str(self.time)}"
-        lat = " ".join(str(x) for x in lattice)
+        time_str: str = f"Time={str(self.time)}"
+        lat: str = " ".join(str(x) for x in lattice)
         return f'Lattice="{lat}" {property_str} {time_str}'
 
 
 class xsf_writer(file_writer):
     """Class to write `.xsf` files given a :class:`~conquest.conquest_coordinates` instance.
 
-    XSF files support an extra 3 columns alongside the 3 columns used for position. These columns specify a vector associated with each atom. In CONQUEST, the relevant vectors are forces and spins. Note that CONQUEST only supports *collinear spin* (up and down), so the spin vector is visualised along the :math:`c`-axis of the simulation cell.
+    XSF files support an extra 3 columns alongside the 3 columns used for position. These columns specify a vector associated with each atom.
+    In CONQUEST, the relevant vectors are forces and spins.
+    Note that CONQUEST only supports *collinear spin* (up and down), so the spin vector is visualised along the :math:`c`-axis of the simulation cell.
 
     :param dest: Path to write the new coordinates file.
     :type dest: ``str``
@@ -266,8 +270,8 @@ class xsf_writer(file_writer):
         encoding: str = "utf-8",
     ) -> None:
         super().__init__(dest=dest, encoding=encoding)
-        self.data = data
-        self.write_extra = write_extra
+        self.data: conquest_coordinates = data
+        self.write_extra: Literal["spin", "force"] = write_extra
         self.write()
         self.close_file(file=self.file)
 
@@ -278,6 +282,7 @@ class xsf_writer(file_writer):
             return " ".join(str(x) for x in atom.forces)
         return ""
 
+    @override
     def write(self) -> None:
         with self.file as file:
             file.write("CRYSTAL\n")
@@ -286,12 +291,12 @@ class xsf_writer(file_writer):
                 file.write(rf' {" ".join(str(x * BOHR_TO_ANGSTROM) for x in lattice_vect)}')
                 file.write("\n")
             file.write("PRIMCOORD\n")
-            natom_line = f'{" ".join(self.data.natoms.split())} 1\n'
+            natom_line: str = f'{" ".join(self.data.natoms.split())} 1\n'
             file.write(natom_line)
             for element, atoms in self.data.element_map.items():
                 for atom in atoms:
-                    pos_string = " ".join(str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords)
-                    extra = self._format_extra(atom)
+                    pos_string: str = " ".join(str(x * BOHR_TO_ANGSTROM) for x in atom.cart_coords)
+                    extra: str = self._format_extra(atom)
                     file.write(f" {element} {pos_string} {extra}\n")
 
 
@@ -315,9 +320,9 @@ class xsf_writer_spins(file_writer):
     def __init__(
         self, dest: str, charges: atom_charge, xsf_file: str, encoding: str = "utf-8"
     ) -> None:
-        self.charges = charges
-        self.original_xsf_file = xsf_file.strip()
-        self.encoding = encoding
+        self.charges: atom_charge = charges
+        self.original_xsf_file: str = xsf_file.strip()
+        self.encoding: str = encoding
         if dest == self.original_xsf_file:
             raise ValueError(
                 "Destination path for modified XSF file "
@@ -342,9 +347,11 @@ class xsf_writer_spins(file_writer):
                 modified_xsf.write(header_line)
             for line in lines:
                 if line.strip() and atom_index < len(self.charges.coordinates.atoms):
-                    atom = self.charges.coordinates.atoms[atom_index]
-                    spin_info = f"{atom.spins[0]:.10f} {atom.spins[1]:.10f} {atom.spins[2]:.10f}"
-                    modified_line = f"{line.strip()} {spin_info}\n"
+                    atom: Atom = self.charges.coordinates.atoms[atom_index]
+                    spin_info: str = (
+                        f"{atom.spins[0]:.10f} {atom.spins[1]:.10f} {atom.spins[2]:.10f}"
+                    )
+                    modified_line: str = f"{line.strip()} {spin_info}\n"
                     modified_xsf.write(modified_line)
                     atom_index += 1
                 else:

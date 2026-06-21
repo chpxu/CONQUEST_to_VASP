@@ -18,7 +18,10 @@ Issues = "https://github.com/chpxu/CONQUEST_TO_VASP/issues"
 
 [tool.pyright]
 reportPrivateUsage = false
-
+typeCheckingMode = "recommended"
+reportAny = "none"
+reportExplicitAny = "none"
+reportUnusedCallResult = false
 [tool.mypy]
 strict = true
 disallow_any_generics = true

@@ -1,9 +1,7 @@
 from typing import Any, override
 from dataclasses import dataclass, field
 import re
-from numpy._core.multiarray import _Array1D
 from matplotlib.axes import Axes
-from numpy import dtype, float64, ndarray, signedinteger
 import numpy as np
 import matplotlib.pyplot as plt
 from conquest2a.conquest import block_processor
@@ -32,7 +30,7 @@ class bst_processor(block_processor):
         self.blocks: list[c2at.REAL_ARRAY] = []
         self.bands: list[band] = []
         self.fermi_level: float = 0.0
-        self.is_shifted_to_fermi: bool = True
+        self.is_shifted_to_fermi: bool = False
         self.block_counter: int = 0
         self.current_spin: int = 0
         self.num_spins: int = 0
@@ -53,8 +51,8 @@ class bst_processor(block_processor):
         if "# Band " in line:
             band_index: list[Any] = re.findall(self.re_index, line)
             self.bands.append(band(index=int(band_index[0]), spin=self.current_spin))
-        if not line.startswith("# Bands shifted"):
-            self.is_shifted_to_fermi = False
+        if line.startswith("# Bands shifted"):
+            self.is_shifted_to_fermi = True
 
     @override
     def process_block(self, line: str) -> None:
@@ -176,7 +174,7 @@ class bst:
 
             if energy_range is not None:
                 e_lo, e_hi = energy_range
-                energies: ndarray[tuple[int], dtype[float64]] = np.asarray(b.energies).ravel()
+                energies = np.asarray(b.energies).ravel()
                 if not np.any((energies >= e_lo) & (energies <= e_hi)):
                     continue
 
@@ -197,8 +195,8 @@ class bst:
         _spin_labels: dict[int, str] = {1: "Spin up", 2: "Spin down"}
         _seen: set[int] = set()
         for b in bands:
-            energies: ndarray[tuple[int], dtype[float64]] = np.asarray(b.energies).ravel()
-            k_indices: _Array1D[signedinteger[Any]] = np.arange(len(energies))
+            energies = np.asarray(b.energies).ravel()
+            k_indices = np.arange(len(energies))
             color: str = self._spin_colors.get(b.spin, "black")
             label: str | None = _spin_labels.get(b.spin) if b.spin not in _seen else None
             _seen.add(b.spin)

@@ -1,6 +1,11 @@
 from pathlib import Path
 from re import Match
-from typing import Any, Literal, override
+from typing import Any, Literal
+import sys
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 import os
 import re
 from os.path import abspath

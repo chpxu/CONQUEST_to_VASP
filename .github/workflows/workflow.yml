@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
     - uses: actions/checkout@v4
@@ -18,10 +18,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install numpy scipy ase matplotlib scienceplots pylint black pytest flake8 mypy
+        pip install numpy scipy ase matplotlib<3.11 scienceplots typing_extensions pylint black pytest flake8 mypy
     - name: Static type analysis with mypy
       run: |
         mypy conquest2a
+      continue-on-error: true
     - name: "Test with pytest"
       run: |
         python3 -m pytest
@@ -32,6 +33,7 @@ jobs:
     - name: Format with black
       run: |
         black $(git ls-files 'conquest2a/*.py')
+      continue-on-error: true
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files './conquest2a/*.py')

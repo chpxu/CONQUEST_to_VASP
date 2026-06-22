@@ -506,7 +506,7 @@ class chden_plot:
 
 def main() -> None:
     example_chden = chden(
-        np.array([1, 0, 0]),
+        (1, 0, 0),
         0.0,
         ch1="tests/data/chden_up.cube",
         ch2="tests/data/chden_dn.cube",

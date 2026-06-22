@@ -1,6 +1,11 @@
 from dataclasses import dataclass, field
 from re import Pattern
-from typing import Callable, override
+from typing import Callable
+import sys
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 import os
 import re
 import importlib.resources

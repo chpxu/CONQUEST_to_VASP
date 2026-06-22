@@ -15,10 +15,12 @@
 
 ## Other
 - BREAKING: the `conquest_input` class has been renamed to `conquest_species` to better reflect its purpose. The argument `conquest_input` will now take in this new class instead.
+- BREAKING: drop Python 3.10
 - fix: `black` excluding `conquest2a` directory
 - `hkl` now accepts a basic tuple of ints instead of a NumPy array
 - Add more type hints throughout
 - Add `@override` where appropriate
+- Update Nix deps to 26.05
 
 # 0.2.0
 

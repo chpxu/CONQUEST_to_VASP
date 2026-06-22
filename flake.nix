@@ -1,7 +1,7 @@
 {
   description = "CONQUEST2a";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/a0374025a863d007d98e3297f6aa46cc3141c2f0";
     nixpkgs2505.url = "github:NixOS/nixpkgs/2b0d2b456e4e8452cf1c16d00118d145f31160f9"; # to use for older packages
     flake-parts.url = "github:hercules-ci/flake-parts/a34fae9c08a15ad73f295041fec82323541400a9";
     devshell.url = "github:numtide/devshell/17ed8d9744ebe70424659b0ef74ad6d41fc87071";
@@ -11,6 +11,7 @@
   };
   outputs =
     {
+      nixpkgs,
       nixpkgs2505,
       flake-parts,
       ...
@@ -56,6 +57,22 @@
                 inherit system inputs';
               };
               helper = import ./nix/helpers;
+              pkgs = import inputs.nixpkgs {
+                inherit system;
+                overlays = [
+                  (final: prev: {
+                    black = prev.black.override rec {
+                      pname = "black";
+                      version = "26.5.1";
+                      src = prev.fetchPypi {
+                        inherit pname version;
+                        hash = "";
+                      };
+                    };
+                  })
+                ];
+                config = {};
+              };
             };
             imports = [ userConfig ]; # settings from config.nix defined by user
             packages.default = pkgs."python${config.languages.python.version}Packages".buildPythonPackage {

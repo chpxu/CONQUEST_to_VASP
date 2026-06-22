@@ -1,4 +1,8 @@
-from typing import Any, override
+import sys
+if sys.version_info >= (3, 12):
+    from typing import Any, override
+else:
+    from typing_extensions import Any, override
 from dataclasses import dataclass, field
 import re
 from matplotlib.axes import Axes

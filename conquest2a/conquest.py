@@ -172,7 +172,7 @@ class conquest_coordinates:
         """
         atom_frac_pos: c2at.REAL_ARRAY = np.vstack([atom.coords for atom in self.atoms])
         cart_coords: c2at.REAL_ARRAY = atom_frac_pos @ self.lattice_vectors.T
-        for atom, cart_coord in zip[tuple[Atom, c2at.REAL_ARRAY]](self.atoms, cart_coords):
+        for atom, cart_coord in zip(self.atoms, cart_coords):
             atom.cart_coords = cart_coord
         self.cart_position_vectors = cart_coords
         return cart_coords

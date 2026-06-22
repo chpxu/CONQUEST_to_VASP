@@ -1,5 +1,9 @@
 from io import TextIOWrapper
-from typing import IO, Any, Literal, override
+from typing import IO, Any, Literal
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 from conquest2a.conquest import Atom, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
 
@@ -53,7 +57,7 @@ class conquest_writer(file_writer):
 
     def __init__(
         self,
-        dest: str,
+
         coords: conquest_coordinates,
         encoding: str = "utf-8",
         precision: int = 10,

@@ -9,19 +9,36 @@ dependencies = [
   "numpy>=2.0.0",
   "scipy>=1.10.0",
   "ase",
-  "matplotlib<3.11",
-  "scienceplots",
+  "matplotlib",
+  "scienceplots>=2.2.2",
 ]
 [project.urls]
 Homepage = "https://github.com/chpxu/CONQUEST_TO_VASP"
 Issues = "https://github.com/chpxu/CONQUEST_TO_VASP/issues"
 
-[tool.pyright]
-reportPrivateUsage = false
-typeCheckingMode = "recommended"
-reportAny = "none"
-reportExplicitAny = "none"
-reportUnusedCallResult = false
+[tool.basedpyright]
+include = ["conquest2a"]
+exclude = [
+  "**/node_modules",
+  "**/__pycache__",
+  "**/.direnv",
+  "**/.github",
+  "**/*_cache",
+]
+ignore = ["src/oldstuff"]
+reportUnusedCallResul = false
+reportMissingImports = "warning"
+reportPrivateImportUsage = false
+reportMissingTypeStubs = false
+reportMissingModuleSource = false
+reportAny = false
+pythonVersion = "3.13"
+pythonPlatform = "Linux"
+
+executionEnvironments = [
+  { root = "conquest2a/tests", reportPrivateUsage = false },
+  { root = "conquest2a" },
+]
 [tool.mypy]
 strict = true
 disallow_any_generics = true

@@ -1,6 +1,7 @@
 from io import TextIOWrapper
 from typing import IO, Any, Literal
 import sys
+
 if sys.version_info >= (3, 12):
     from typing import override
 else:
@@ -58,7 +59,6 @@ class conquest_writer(file_writer):
 
     def __init__(
         self,
-
         coords: conquest_coordinates,
         encoding: str = "utf-8",
         precision: int = 10,

@@ -41,4 +41,4 @@ MPLGRID: dict[str, Any] = {
     "grid.alpha": 0.7,
 }
 
-mpl.rcParams.update(MPLGENERIC) 
+mpl.rcParams.update(MPLGENERIC)

@@ -7,6 +7,8 @@
   languages = {
     python = {
       enable = true;
+      uv.enable = false;
+      version = "313";
       nixPackages = with pkgs."python${config.languages.python.version}Packages"; [
         hatchling
         twine
@@ -17,10 +19,12 @@
         black
         pylint
         ase
+        hatch
         matplotlib
         scienceplots
         sphinx
         sphinx-rtd-theme
+        keyring
       ];
     };
   };

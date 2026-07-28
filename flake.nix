@@ -1,7 +1,7 @@
 {
   description = "CONQUEST2a";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/a0374025a863d007d98e3297f6aa46cc3141c2f0";
+    nixpkgs.url = "github:NixOS/nixpkgs/";
     nixpkgs2505.url = "github:NixOS/nixpkgs/2b0d2b456e4e8452cf1c16d00118d145f31160f9"; # to use for older packages
     flake-parts.url = "github:hercules-ci/flake-parts/a34fae9c08a15ad73f295041fec82323541400a9";
     devshell.url = "github:numtide/devshell/17ed8d9744ebe70424659b0ef74ad6d41fc87071";
@@ -11,7 +11,6 @@
   };
   outputs =
     {
-      nixpkgs,
       nixpkgs2505,
       flake-parts,
       ...
@@ -44,6 +43,7 @@
           {
             config,
             inputs',
+            self',
             pkgs,
             system,
             ...
@@ -60,18 +60,18 @@
               pkgs = import inputs.nixpkgs {
                 inherit system;
                 overlays = [
-                  (final: prev: {
-                    black = prev.black.override rec {
-                      pname = "black";
-                      version = "26.5.1";
-                      src = prev.fetchPypi {
-                        inherit pname version;
-                        hash = "";
+                  (_final: prev: {
+                    black = prev.black.overrideAttrs {
+                      src = pkgs.fetchFromGitHub {
+                        owner = "psf";
+                        repo = "black";
+                        tag = "26.5.1";
+                        sha256 = "sha256-xALg9ta0U2V6i/b7VYiPKu0oNnHfg9T+XuK3CvqJmjs=";
                       };
                     };
                   })
                 ];
-                config = {};
+                config = { };
               };
             };
             imports = [ userConfig ]; # settings from config.nix defined by user
@@ -80,19 +80,41 @@
               version = "0.3.0";
               pyproject = true;
               src = ./.;
-              buildInputs = with pkgs."python${config.languages.python.version}Packages"; [
-                numpy
-                scipy
-                hatchling
-                ase
-                matplotlib
-                scienceplots
-              ];
+              buildInputs =
+                with pkgs."python${config.languages.python.version}Packages";
+                [
+                  numpy
+                  scipy
+                  hatchling
+                  ase
+                  matplotlib
+                ]
+                ++ [ self'.packages.scienceplots ];
               enableParallelBuilding = true;
+            };
+            packages.scienceplots = pkgs."python${config.languages.python.version}Packages".buildPythonPackage {
+              pname = "SciencePlots";
+              version = "2.2.2";
+              pyproject = true;
+              src = pkgs.fetchFromGitHub {
+                owner = "garrettj403";
+                repo = "SciencePlots";
+                rev = "b9b16959570bd2fbc9ff5118bacc423c3bddd592";
+                sha256 = "sha256-Sj0SdTu0M0wgTiUuC9ad73W8olsnbjzJgkaIsYKPYvo=";
+              };
+              build-system = with pkgs."python${config.languages.python.version}Packages"; [
+                setuptools
+                setuptools-scm
+              ];
+              dependencies = with pkgs."python${config.languages.python.version}Packages"; [
+                matplotlib
+                setuptools-scm
+              ];
+              pythonImportsCheck = [ "scienceplots" ];
+              doCheck = false; # no tests
             };
             pre-commit.settings.hooks = {
               nixfmt.enable = true;
-              nixfmt-rfc-style.enable = true;
               flake-checker = {
                 enable = true;
                 after = [ "nixfmt-rfc-style" ];

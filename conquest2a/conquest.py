@@ -221,12 +221,13 @@ class conquest_coordinates_processor(processor_base):
         self.coords: conquest_coordinates = conquest_coordinates(conquest_input=conquest_input)
         self.resolve_path()
         self.open_file()
-        _ = self.coords.get_cartesian_positions()
+        self.coords.get_cartesian_positions()
         self.coords.assign_atom_labels()
         self.coords.index_to_atom_map()
         self.volume_bohr: float = (
-            self.coords.lattice_vectors[0][0] * self.coords.lattice_vectors[1][1]
-            + self.coords.lattice_vectors[2][2]
+            self.coords.lattice_vectors[0][0]
+            * self.coords.lattice_vectors[1][1]
+            * self.coords.lattice_vectors[2][2]
         )
         self.volume_ang: float = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
 

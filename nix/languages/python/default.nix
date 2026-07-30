@@ -92,6 +92,7 @@ in
             pythonPackages = pkgs."python${cfg.version}Packages";
             finalPythonPackages = (import ./packages.nix { inherit config pythonPackages lib; }).packages ++ [
               self'.packages.default
+              self'.packages.scienceplots
             ];
             evaluateUV = import ./uv.nix {
               inherit
@@ -110,7 +111,10 @@ in
             packages = lib.mkMerge [
               (lib.mkIf cfg.uv.enable evaluateUV.packages)
               [ (lib.mkIf (!cfg.uv.enable) (python.withPackages (_: finalPythonPackages))) ]
-              [ self'.packages.default ]
+              [
+                self'.packages.default
+                self'.packages.scienceplots
+              ]
               [ pkgs.gnumake ]
             ];
             env = cfg.env ++ evaluateUV.env;

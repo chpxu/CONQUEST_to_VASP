@@ -9,7 +9,7 @@ dependencies = [
   "numpy>=2.0.0",
   "scipy>=1.10.0",
   "ase",
-  "matplotlib",
+  "matplotlib>=3.11",
   "scienceplots>=2.2.2",
 ]
 [project.urls]
@@ -26,7 +26,7 @@ exclude = [
   "**/*_cache",
 ]
 ignore = ["src/oldstuff"]
-reportUnusedCallResul = false
+reportUnusedCallResult = false
 reportMissingImports = "warning"
 reportPrivateImportUsage = false
 reportMissingTypeStubs = false
@@ -49,6 +49,7 @@ warn_redundant_casts = true
 warn_return_any = true
 warn_unused_ignores = true
 untyped_calls_exclude = ["ase"]
+
 [[tool.mypy.overrides]]
 disable_error_code = [
   # "abstract",

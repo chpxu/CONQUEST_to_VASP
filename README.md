@@ -159,12 +159,16 @@ output.harris_foulkes_energy
 
 Forces can be accessed per atom.
 
-### Charge density analysis
-If you have a non-spin-polarised calculation, you will get a single `chden.cube` file by default from CONQUEST. If you do have a spin-polarised calculation, you will get both `chden_up.cube` and `chden_dn.cube` files if you haven't changed the string prefix in the input. These files contain volumetric data to allow you to perform charge density analysis. By adding the data, you will get the _total charge density_. By subtracting the spin down data from spin up, you will get spin density differences. Both calculations are supported in this package.
+### Density analysis
+CONQUEST allows outputting both band and charge densities. See [CONQUEST post processing for more details](https://conquest.readthedocs.io/en/latest/post-proc.html) including file structure and file naming conventions.
 
-To use the class, simply
+The `density` class uses ASE's [`read_cube`](https://docs.ase-lib.org/_modules/ase/io/cube.html) function to load the volumetric data and atom information. This module is therefore completely independent of the rest of `conquest2a`. It takes in a list of paths, the Miller indices of the plane, the distance from this plane and a string of operations like "+-/" to apply to each subsequent file supplied, see the docs and example below.
+
+To handle specifically charge density and band density, individual classes are supplied, called `chden` and `bandden`. These require the above parameters but instead of a list of paths, simply supply a directory to look for relevant files instead. `chden` will look for `charge_stub.cube` or `charge_stub_up|dn.cube` whilst `bandden` supports filtering by band number, spin and $k$-point. See docs and example for more information.
+
+To use the classes, simply
 ```py
-from conquest2a.chden import chden, chden_plot
+from conquest2a.density import demsity, chden, bandden
 example_chden = chden(
     np.array([1, 0, 0]),
     0.0,
@@ -222,34 +226,6 @@ vesta_to_conquest(
     )
 ```
 In CONQUEST, to treat species with different spin (i.e. up/down, collinear spin only), the species entries must be duplicated inside the dictionary `species`. This library treats vectors $(0, 0, 1)$ as spin "up" and $(0, 0, -1)$ as spin "down" when inputting from VESTA. Additionally, it will set the lowest index corresponding to a species as spin up, and then spin down, so `5: "Mn", 6: "Mn"` will make species 5 be spin up and species 6 to be spin down, so make sure you check your `Conquest_input` correctly!
-
-
-### 0.1.0 and older
-Usage is simple and there are **no external library dependencies** (currently). Either use `main.py` from the Releases tab, or clone the repo and copy `main.py` to your desired location.
-
-1. Define a `dict` mapping your CONQUEST species to elements. E.g., if `Conquest_input` has a block like this:
-  ```
-  %block ChemicalSpeciesLabel
-    1 208.9800000 Bi_SpinUp
-    2 208.9800000 Bi_SpinDown
-    3 16.000000 O
-  %endblock
-  ```
-  Your `dict` will be `{1: "Bi", 2: "Bi", 3: "O"}`. Note that the `dict` integers should match the ones specified in `Conquest_input` and are completely arbitrary. please ensure however, that the element labels represent real elements (see `main.py`, `CONQUEST_INPUT` class)!
-
-2. Create an instance of `CONQUEST_INPUT`, e.g. `CONQUEST_INPUT({1: "Bi", 2: "Bi", 3: "O"})`
-
-3. Create an instance of `CONQUEST_COORDINATES`, feeding in the coordinate file you want to post-process and the instance of `CONQUEST_INPUT` created in Step 2:
-  ```py
-  conq = CONQUEST_COORDINATES(
-      "./test/test.dat", CONQUEST_input=CONQUEST_INPUT({1: "Bi", 2: "Bi", 3: "O"})
-  )
-  ```
-4. You may now call any of the writers with the path to the desination file, in this case, `test/test.ABC`:
-   1. `vasp_writer("test/test.vasp", data=conq)`
-   2. `xyz_writer("test/test.xyz", data=conq)`
-   3. `extxyz_writer("test/test.extxyz", data=conq)`
-
 
 ## CONTRIBUTING
 

@@ -120,7 +120,7 @@ class processor_base:
         self.re_float: Pattern[str] = re.compile(r"[-+]?\d*\.\d+")
         self.re_index: Pattern[str] = re.compile(r"\d+")
 
-    def resolve_path(self, filename: str | None = None) -> None:
+    def resolve_path(self, filename: str | None = None) -> bool:
         """Checks for a file's existence and validity.
 
         :param filename: Path to a file, defaults to None, which will use the ``path`` passed into the class instance.
@@ -138,6 +138,7 @@ class processor_base:
         if abs_coord_path.is_file() and os.stat(abs_coord_path).st_size <= 0:
             raise RuntimeError(f"{abs_coord_path} was an existing file, but has no file contents.")
         self.abs_input_path = abs_coord_path
+        return True
 
     def open_file(self) -> None:
         pass

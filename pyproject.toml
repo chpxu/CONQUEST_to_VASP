@@ -32,6 +32,7 @@ reportPrivateImportUsage = false
 reportMissingTypeStubs = false
 reportMissingModuleSource = false
 reportAny = false
+reportExplicitAny = false
 pythonVersion = "3.13"
 pythonPlatform = "Linux"
 

@@ -3,9 +3,9 @@ This module takes a VESTA file and converts it to CONQUEST coordinates.
 Only reads in CELLP (cell params), STRUC (atom positions) and VECTR (arrows, treating as spin)
 """
 
+from pathlib import Path
 import re
 import numpy as np
-import conquest2a._types as c2at
 from conquest2a.constants import ANGSTROM_TO_BOHR
 from conquest2a.conquest import processor_base, conquest_species, conquest_coordinates, Atom
 from conquest2a.writers import conquest_writer
@@ -15,13 +15,13 @@ class vesta_to_conquest(processor_base):
     def __init__(self, vesta_path: str, output_path: str, conq_in: conquest_species) -> None:
         super().__init__(vesta_path)
         self.resolve_path()
-        self.vesta_path = self.abs_input_path
-        self.output_path = output_path
+        self.vesta_path: Path = self.abs_input_path
+        self.output_path: str = output_path
         self.content: str = ""  # holds block as giant string
         self.atom_to_vector: dict[int, int] = {}
         self.atom_to_spin: dict[int, int] = {}
-        self.conquest_input = conq_in
-        self.conq_coords = conquest_coordinates(self.conquest_input)
+        self.conquest_input: conquest_species = conq_in
+        self.conq_coords: conquest_coordinates = conquest_coordinates(self.conquest_input)
         self.content = self.vesta_path.read_text()
         self.parse_cellp()
         self.parse_struc()
@@ -118,8 +118,7 @@ class vesta_to_conquest(processor_base):
                 spin_species_map[(element, 0)] = indices[0]
             else:
                 raise ValueError(
-                    f"Element '{element}' maps to more than 2 species indices {indices}; "
-                    "only collinear  spin is supported."
+                    f"Element '{element}' maps to more than 2 species indices {indices}; only collinear  spin is supported."
                 )
         return spin_species_map
 
@@ -131,7 +130,7 @@ class vesta_to_conquest(processor_base):
             if key not in spin_species_map:
                 raise ValueError(
                     f"No species found for element '{atom.label}' with spin {spin}. "
-                    "Check your species_dict."
+                    + "Check your species_dict."
                 )
             atom.species = spin_species_map[key]  # set species for spin
 

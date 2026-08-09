@@ -115,7 +115,10 @@ in
                 self'.packages.default
                 self'.packages.scienceplots
               ]
-              [ pkgs.gnumake ]
+              [
+                pkgs.gnumake
+                pkgs.basedpyright
+              ]
             ];
             env = cfg.env ++ evaluateUV.env;
           };

@@ -17,6 +17,7 @@ Homepage = "https://github.com/chpxu/CONQUEST_TO_VASP"
 Issues = "https://github.com/chpxu/CONQUEST_TO_VASP/issues"
 
 [tool.basedpyright]
+extraPaths = ["."]
 include = ["conquest2a"]
 exclude = [
   "**/node_modules",
@@ -25,7 +26,6 @@ exclude = [
   "**/.github",
   "**/*_cache",
 ]
-ignore = ["src/oldstuff"]
 reportUnusedCallResult = false
 reportMissingImports = "warning"
 reportPrivateImportUsage = false
@@ -40,6 +40,7 @@ executionEnvironments = [
   { root = "conquest2a/tests", reportPrivateUsage = false },
   { root = "conquest2a" },
 ]
+
 [tool.mypy]
 strict = true
 disallow_any_generics = true

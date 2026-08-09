@@ -59,6 +59,7 @@ class conquest_writer(file_writer):
 
     def __init__(
         self,
+        dest: str,
         coords: conquest_coordinates,
         encoding: str = "utf-8",
         precision: int = 10,
@@ -103,7 +104,8 @@ class vasp_writer(file_writer):
     :type data: ``conquest_coordinates``
     :param encoding: File encoding, defaults to "utf-8"
     :type encoding: ``str``, optional
-    :param is_angstrom: Whether the data in ``conquest_coordinates`` is already in angstroms instead of Bohrs, defaults to ``False``.
+    :param is_angstrom: Whether the data in ``conquest_coordinates`` is 
+    already in angstroms instead of Bohrs, defaults to ``False``.
     :type is_angstrom: ``bool``, optional
     """
 

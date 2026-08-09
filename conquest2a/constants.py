@@ -1,4 +1,3 @@
-from typing import Any
 import importlib.resources
 from ase.units import Bohr, Hartree
 import matplotlib as mpl
@@ -16,7 +15,7 @@ LIBRARY = importlib.resources.files("conquest2a")
 
 
 # Some custom MPL params to use with SciencePlots
-MPLGENERIC: dict[str, Any] = {
+MPLGENERIC = {
     # Muted grey gridlines
     "axes.axisbelow": True,
     "savefig.dpi": 600,
@@ -33,7 +32,7 @@ MPLGENERIC: dict[str, Any] = {
     "legend.columnspacing": 1.0,
 }
 
-MPLGRID: dict[str, Any] = {
+MPLGRID = {
     "axes.grid": True,
     "grid.color": "#CCCCCC",
     "grid.linewidth": 0.5,
@@ -41,4 +40,4 @@ MPLGRID: dict[str, Any] = {
     "grid.alpha": 0.7,
 }
 
-mpl.rcParams.update(MPLGENERIC)
+mpl.rcParams.update(MPLGENERIC)  # basedpyright: ignore

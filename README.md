@@ -1,23 +1,24 @@
 # CONQUEST2a
 
 A [CONQUEST](https://github.com/OrderN/CONQUEST-release/) post-processing tool written in Python to do multiple, useful things:
-- Convert CONQUEST coordinates format into `.vasp` and `.(ext)xyz` formats for quick and easy visualisation, e.g. in [VESTA](https://jp-minerals.org/vesta/en/).
+- Convert between CONQUEST coordinates format and popular `.vasp` and `.(ext)xyz` formats for quick and easy visualisation, e.g. in [VESTA](https://jp-minerals.org/vesta/en/).
 - Create `xsf` files using `AtomCharge.dat` to visualise net spins
 - Create supercells (larger cells formed of repeats of a unit cell)
 - Process and sort (p)DOS files into something easy to use for plotting via matplotlib
 - Process and sort `BandStructure.dat` into something easy to use for plotting via matplotlib
 - Nearest-neighbour searching
 - Calculation of dihedral and planar angles
-- Charge density post-processing
+- Charge and band density post-processing
 - VESTA to CONQUEST coordinates
 
-## Installation From 0.2.0
+## Installation
 Usage is simple. In your `venv`, simply
 ```
 pip3 install numpy scipy ase matplotlib scienceplots conquest2a
 ```
 If you are attempting to integrate this directly into your Nix devShell, you will have to manually build the package with `buildPythonPackage`. Support for this as a standalone package will come soon. The [devflake](https://github.com/chpxu/development-flake) in this repo automatically builds and adds it to the devshell environment.
 
+Note: if using SciencePlots<2.2.2 use matplotlib 3.10 or earlier.
 ## Usage
 
 1. [Initialising your input](#initialising-your-input)
@@ -210,7 +211,7 @@ chden_plot(chden: chden, show_atoms: bool = False).run(
 
 ### VESTA
 
-VESTA is a very useful tool to set spin patterns using `Edit > Vectors`. CONQUEST2a now supports reading VESTA files with vector informationn to produce CONQUEST coordinate files. As always, the output should be checked before using it to start any simulation.
+VESTA is a very useful tool to set spin patterns using `Edit > Vectors`. CONQUEST2a now supports reading VESTA files with vector information to produce CONQUEST coordinate files. As always, the output should be checked before using it to start any simulation.
 
 Usage:
 ```py

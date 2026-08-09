@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from multiprocessing import process
 from typing import Any
 from pathlib import Path
 import os
@@ -19,7 +18,7 @@ from conquest2a._types import INT_ARRAY, REAL_ARRAY
 from conquest2a.conquest import processor_base
 from conquest2a.constants import MPLGENERIC
 
-mpl.rcParams.update(MPLGENERIC)
+mpl.rcParams.update(MPLGENERIC)  # type: ignore
 plt.style.use(["science", "no-latex"])
 
 _ELEMENT_COLOURS: dict[str, str] = {
@@ -529,7 +528,7 @@ class bandden(processor_base):
             raise ValueError("Selected band(s) is not in the directory")
 
         # Filter by kpt or kpt sum
-        pattern: str = self._bykpt_regex if kpt is not None else self._sumkpt_regex
+        pattern: re.Pattern[str] = self._bykpt_regex if kpt is not None else self._sumkpt_regex
         compiled: re.Pattern[str] = re.compile(pattern)
 
         category_matches: list[tuple[str, re.Match[str]]] = []

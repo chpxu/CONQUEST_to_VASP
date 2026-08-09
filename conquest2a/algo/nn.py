@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from typing import Any
 from scipy.spatial import KDTree
 from conquest2a.conquest import conquest_coordinates_processor, Atom
@@ -7,12 +6,12 @@ from conquest2a.conquest import conquest_coordinates_processor, Atom
 class nearest_neighbours:
     def __init__(
         self,
-        conquest_coordinates_processor: conquest_coordinates_processor,
+        coordinates_processor: conquest_coordinates_processor,
         atom: Atom,
     ) -> None:
-        self.coords_proc = conquest_coordinates_processor
-        self.kdtree = self.build_kdtree()
-        self.atom_to_query = atom
+        self.coords_proc: conquest_coordinates_processor = coordinates_processor
+        self.kdtree: KDTree = self.build_kdtree()
+        self.atom_to_query: Atom = atom
 
     def build_kdtree(self) -> KDTree:
         return KDTree(

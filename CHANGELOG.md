@@ -1,3 +1,15 @@
+# 0.4.0
+
+## Features
+- New density API
+    - generic processing is handled by the `density` class inside the `density` module. It now handles a generic set of parameters to slice and extract the relevant data from supplied files. It now supports combining an arbitrary amount of files in a specified way. For example, if you pass in files `["a", "b", "c"]` and "+*" then the class will contain the resulting data as `(a + b) * c`, i.e. it applies operations sequentially and left-to-right like VESTA.
+    - Subclasses `chden` and `bandden` handle file searching for charge density output or band density output.These classes then attach a `density` instance to themselves with the filtered files
+    - `bandden` supports filtering by band number, $k$-point and spin
+    - `chden` supports filtering for spin-(un)polarised calculations, as well as searching for stubs instead.
+
+## Other
+- Tests introduced for `conquest` module
+- Tests introduced for new `density` module on real data
 # 0.3.0
 
 ## Features

@@ -30,7 +30,7 @@ Reference
 * :doc:`src/pdos`
 * :doc:`src/band`
 * :doc:`src/supercell`
-* :doc:`src/chden`
+* :doc:`src/density`
 * :doc:`src/writers`
 * :doc:`src/roadmap`
 
@@ -44,7 +44,7 @@ Reference
    src/pdos
    src/band
    src/supercell
-   src/chden
+   src/density
    src/writers
    src/roadmap
 

@@ -30,12 +30,14 @@ class supercell:
                 "One of, or multiple of, repeats_x repeats_y, repeats_z was not at least 0."
             )
 
-        self.repeats_x = repeats_x
-        self.repeats_y = repeats_y
-        self.repeats_z = repeats_z
-        self.coords_proc = coords_proc
+        self.repeats_x: int = repeats_x
+        self.repeats_y: int = repeats_y
+        self.repeats_z: int = repeats_z
+        self.coords_proc: conquest_coordinates_processor = coords_proc
         # Create new CONQUEST_COORDINATES
-        supercell_coords_instance = conquest_coordinates(self.coords_proc.coords.conquest_input)
+        supercell_coords_instance: conquest_coordinates = conquest_coordinates(
+            self.coords_proc.coords.conquest_input
+        )
         self.supercell_coords: conquest_coordinates = supercell_coords_instance
         self.scale_lattice_vectors()
         self.create_supercell()

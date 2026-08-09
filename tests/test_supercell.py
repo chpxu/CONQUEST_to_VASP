@@ -21,13 +21,6 @@ def test_at_least_zero() -> None:
         supercell(repeats_x=1, repeats_y=1, repeats_z=-1, coords_proc=test_coords_proc)
 
 
-def non_integer_repeat() -> None:
-    with pytest.raises(TypeError):
-        supercell(repeats_x=-0.5, repeats_y=1, repeats_z=1, coords_proc=test_coords_proc)
-        supercell(repeats_x=0, repeats_y=1.5, repeats_z=1, coords_proc=test_coords_proc)
-        supercell(repeats_x=-0.5, repeats_y=1, repeats_z=0.000001, coords_proc=test_coords_proc)
-
-
 def test_single_repeat_x() -> None:
     new_cell: supercell = supercell(repeats_x=1, repeats_y=0, repeats_z=0, coords_proc=test_coords_proc)
     num_repeats = (new_cell.repeats_x + new_cell.repeats_y + new_cell.repeats_z) + 1

@@ -120,7 +120,7 @@ class processor_base:
         self.re_float: Pattern[str] = re.compile(r"[-+]?\d*\.\d+")
         self.re_index: Pattern[str] = re.compile(r"\d+")
 
-    def resolve_path(self, filename: str | None = None) -> None:
+    def resolve_path(self, filename: str | None = None) -> bool:
         """Checks for a file's existence and validity.
 
         :param filename: Path to a file, defaults to None, which will use the ``path`` passed into the class instance.
@@ -138,6 +138,7 @@ class processor_base:
         if abs_coord_path.is_file() and os.stat(abs_coord_path).st_size <= 0:
             raise RuntimeError(f"{abs_coord_path} was an existing file, but has no file contents.")
         self.abs_input_path = abs_coord_path
+        return True
 
     def open_file(self) -> None:
         pass
@@ -221,12 +222,13 @@ class conquest_coordinates_processor(processor_base):
         self.coords: conquest_coordinates = conquest_coordinates(conquest_input=conquest_input)
         self.resolve_path()
         self.open_file()
-        _ = self.coords.get_cartesian_positions()
+        self.coords.get_cartesian_positions()
         self.coords.assign_atom_labels()
         self.coords.index_to_atom_map()
         self.volume_bohr: float = (
-            self.coords.lattice_vectors[0][0] * self.coords.lattice_vectors[1][1]
-            + self.coords.lattice_vectors[2][2]
+            self.coords.lattice_vectors[0][0]
+            * self.coords.lattice_vectors[1][1]
+            * self.coords.lattice_vectors[2][2]
         )
         self.volume_ang: float = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
 

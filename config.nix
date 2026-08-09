@@ -21,7 +21,6 @@
         ase
         hatch
         matplotlib
-        scienceplots
         sphinx
         sphinx-rtd-theme
         keyring

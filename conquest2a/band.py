@@ -82,7 +82,8 @@ class bst:
     ) -> None:
         """Plot a bandstructure using ``BandStructure.dat``.
 
-        Bands are plotted as energy (eV) against :math:`k`-point index. CONQUEST only supports collinear spin only.
+        Bands are plotted as energy (eV) against :math:`k`-point index.
+        CONQUEST only supports collinear spin only.
 
         Energies may be plotted shifted to the Fermi level or not.
 
@@ -117,7 +118,8 @@ class bst:
             inside the closed interval :math:`[E_{\\min},\\, E_{\\max}]` are plotted, and the
             y-axis is clipped to this range.  Pass ``None`` (default) to  plot all bands.
 
-            Note: energy filtering is done based on the energy ranges inside :class:`bst_processor`. Shifting the Fermi level is purely done for plotting purposes.
+            Note: energy filtering is done based on the energy ranges inside :class:`bst_processor`.
+            Shifting the Fermi level is purely done for plotting purposes.
         :type energy_range: ``tuple[float, float]`` or ``None``
 
         :param figsize: ``(width, height)`` of the figure in inches, forwarded
@@ -174,7 +176,7 @@ class bst:
         for b in self._processor.bands:
             if band_range is not None:
                 lo, hi = band_range
-                if not (lo <= b.index <= hi):
+                if not lo <= b.index <= hi:
                     continue
 
             if energy_range is not None:
@@ -206,4 +208,4 @@ class bst:
             label: str | None = _spin_labels.get(b.spin) if b.spin not in _seen else None
             _seen.add(b.spin)
 
-            _ = ax.plot(k_indices, energies, color=color, linewidth=0.8, label=label)
+            ax.plot(k_indices, energies, color=color, linewidth=0.8, label=label)

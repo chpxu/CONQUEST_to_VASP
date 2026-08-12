@@ -117,7 +117,6 @@
               nixfmt.enable = true;
               flake-checker = {
                 enable = true;
-                after = [ "nixfmt-rfc-style" ];
               };
               mypy.enable = true;
               flake8.enable = true;

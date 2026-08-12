@@ -22,7 +22,7 @@ jobs:
     - name: Static type analysis with mypy
       run: |
         mypy conquest2a
-      continue-on-error: true
+      continue-on-error: false
     - name: "Test with pytest"
       run: |
         python3 -m pytest

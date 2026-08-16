@@ -14,7 +14,6 @@ from conquest2a.writers import conquest_writer
 
 
 class cell_to_conquest(processor_base):
-
     def __init__(
         self,
         path: str,
@@ -44,16 +43,13 @@ class cell_to_conquest(processor_base):
 
       for line in self._block_lines(lines):
           line = line.strip()
-
           if len(vectors) == 0 and self._is_unit(line):
               units = line
               continue
           vector = np.fromstring(line, sep=" ")
 
-          if vector.size != 3:
-              raise RuntimeError(
-                  "Expected three components."
-              )
+          if len(vector) != 3:
+              raise RuntimeError("Expected three position components.")
           vectors.append(vector)
 
       if len(vectors) != 3:
@@ -78,8 +74,49 @@ class cell_to_conquest(processor_base):
         for line in lines:
             if line.strip().upper().startswith(self._ENDBLOCK):
                 return
-    def _parse_atom(self, line) -> Atom:
-      pass
+    def _parse_atom(self, line: str) -> Atom:
+        """
+            Parse an atom positions line of the form:
+            "Element label xpos ypos zpos"
+            "Element label xpos ypos zpos SPIN spinval"
+            "Element label xpos ypos zpos SPIN sx sy sz"   -> raises error (non-collinear not supported)
+        
+        :param line: the atom line with or without `SPIN` flag
+        :type line: ``str ``
+        Returns:
+            tuple: (label: str, position: list[float], spin: float or None)
+        :raises ValueError: Exits if the line does not have the correct format
+        :raises ValueError: Exits if the line does not have the correct format
+        """
+        parts: list[str] = line.split()
+
+        if len(parts) < 4:
+            raise ValueError(f"Atom line is formatted incorrectly: {line!r}")
+
+        label = parts[0]
+        position = np.array([float(x) for x in parts[1:4]])
+
+        spin = None
+        rest = parts[4:]
+
+        if rest[0].upper() != "SPIN":
+            raise ValueError(f"Unexpected trailing content in atom line: {line!r}")
+
+        spin_values = rest[1:]
+
+        if len(spin_values) == 1:
+            spin = np.array([0.0,0.0,float(spin_values[0])])
+        elif len(spin_values) == 3:
+            raise ValueError(
+                f"Non-collinear spin is not supported: {line!r}"
+            )
+        else:
+            raise ValueError(
+                f"SPIN flag must be followed by 1 (collinear) or 3 (non-collinear) " +
+                f"values, got {len(spin_values)}: {line!r}"
+            )
+
+        return label, position, spin
 #       ├── _parse_atom_line()
 # ├── _parse_spin()
     def _block_lines(

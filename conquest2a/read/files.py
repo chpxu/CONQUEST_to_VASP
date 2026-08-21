@@ -3,6 +3,7 @@ from multiprocessing import Value
 from typing import IO, Any, Callable, Literal
 from collections.abc import Iterator
 import sys
+
 if sys.version_info >= (3, 12):
     from typing import override
 else:
@@ -42,28 +43,26 @@ class cell_to_conquest(processor_base):
         conquest_writer(destination, self.coords, precision=precision)
 
     def _read_lattice_cart(self, lines: Iterator[str]) -> None:
-      units: str = "BOHR"
-      vectors: list[c2at.REAL_ARRAY] = []
+        units: str = "BOHR"
+        vectors: list[c2at.REAL_ARRAY] = []
 
-      for line in self._block_lines(lines):
-          line = line.strip()
-          if len(vectors) == 0 and line.isalpha():
-              units = line
-              continue
-          vector = np.fromstring(line, sep=" ")
+        for line in self._block_lines(lines):
+            line = line.strip()
+            if len(vectors) == 0 and line.isalpha():
+                units = line
+                continue
+            vector = np.fromstring(line, sep=" ")
 
-          if len(vector) != 3:
-              raise RuntimeError("Expected three position components.")
-          vectors.append(vector)
+            if len(vector) != 3:
+                raise RuntimeError("Expected three position components.")
+            vectors.append(vector)
 
-      if len(vectors) != 3:
-          raise RuntimeError(
-              "LATTICE_CART must contain exactly three lattice vectors."
-          )
+        if len(vectors) != 3:
+            raise RuntimeError("LATTICE_CART must contain exactly three lattice vectors.")
 
-      lattice = np.vstack(vectors)
+        lattice = np.vstack(vectors)
 
-      self.coords.lattice_vectors = lattice if units.upper() == "BOHR" else lattice/Bohr
+        self.coords.lattice_vectors = lattice if units.upper() == "BOHR" else lattice / Bohr
 
     def _read_positions_frac(self, lines: Iterator[str]) -> None:
         units = None
@@ -72,22 +71,23 @@ class cell_to_conquest(processor_base):
             self.coords.atoms.append(atom)
         # Sort by atom number for convenience
         self.coords.atoms.sort(key=lambda d: d.number)
-        
+
     def _skip_block(self, lines: Iterator[str]) -> None:
         for line in lines:
             if line.strip().upper().startswith(self._ENDBLOCK):
                 return
+
     def _parse_atom(self, line: str) -> Atom:
         """
         Parse an atom positions line of the form:
-        
+
         ::
 
             Element label xpos ypos zpos
             Element label xpos ypos zpos SPIN spinval
-            
+
         A line of the form ``Element label xpos ypos zpos SPIN sx sy sz`` will raise an error as non-collinear spin is unsupported in CONQUEST.
-        
+
         :param line: the atom line with or without `SPIN` flag
         :type line: ``str ``
         :return: ``Atom`` instance of the atom
@@ -112,28 +112,29 @@ class cell_to_conquest(processor_base):
                 raise ValueError(f"Unexpected trailing content in atom line: {line!r}")
             spin_values = rest[1:]
             if len(spin_values) == 1:
-                spin = np.array([0.0,0.0,float(spin_values[0])])
+                spin = np.array([0.0, 0.0, float(spin_values[0])])
+                print("??????????????", spin)
             elif len(spin_values) == 3:
-                raise ValueError(
-                    f"Non-collinear spin is not supported: {line!r}"
-                )
+                raise ValueError(f"Non-collinear spin is not supported: {line!r}")
             else:
                 raise ValueError(
-                    f"SPIN flag must be followed by 1 (collinear) or 3 (non-collinear) " +
-                    f"values, got {len(spin_values)}: {line!r}"
+                    f"SPIN flag must be followed by 1 (collinear) or 3 (non-collinear) "
+                    + f"values, got {len(spin_values)}: {line!r}"
                 )
-        move_line = ["F", "F", "F"]  if self.fix_ions else ["T", "T", "T"]
+        move_line = ["F", "F", "F"] if self.fix_ions else ["T", "T", "T"]
         spin_species: list[int] = self.coords.conquest_input.element_to_species_dict[label]
-        atom_line: Atom = Atom(species=(spin_species[-1] if spin[2] < 0.0 else spin_species[0]),
+        atom_line: Atom = Atom(
+            species=spin_species[-1] if spin[2] < 0.0 else spin_species[0],
             number=self._atom_counter,
             coords=position,
             label=label,
             can_move=move_line,
-            spins=spin
+            spins=spin,
         )
         self._atom_counter += 1
 
         return atom_line
+
     def _block_lines(
         self,
         lines: Iterator[str],
@@ -148,6 +149,7 @@ class cell_to_conquest(processor_base):
                 return
 
             yield line
+
     def read_cell(self) -> None:
         with open(self.abs_input_path) as f:
             lines = iter(f)
@@ -157,17 +159,21 @@ class cell_to_conquest(processor_base):
                     continue
                 upper = line.upper()
                 if upper.startswith("FIX_ALL_IONS"):
-                    self.fix_ions = upper.split()[1] == "TRUE"
+                    self.fix_ions = True if upper.split()[1] == "TRUE" else False
                     continue
                 if upper.startswith("%BLOCK"):
                     block = upper.split()[1]
                     handler = self.block_handlers.get(block, self._skip_block)
                     handler(lines)
 
+
 def main() -> None:
     kcuf3spec = conquest_species({1: "K", 2: "Cu", 3: "Cu", 4: "F"})
     cell_to_conquest("../tests/data/files/kcuf3.cell", kcuf3spec, "../tests/data/files/kcuf3.dat")
-    cell_to_conquest("../tests/data/files/kcuf3_spin.cell", kcuf3spec, "../tests/data/files/kcuf3_spin.dat")
+    cell_to_conquest(
+        "../tests/data/files/kcuf3_spin.cell", kcuf3spec, "../tests/data/files/kcuf3_spin.dat"
+    )
+
 
 if __name__ == "__main__":
     main()

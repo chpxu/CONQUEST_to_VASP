@@ -104,11 +104,12 @@ class conquest_species:
     def dict_contains_only_real_elements(self) -> bool:
         species_dict_values: list[str] = list(self.species_dict.values())
         return set(species_dict_values).issubset(self.allowed_element_labels)
-    
+
     def create_element_to_species_dict(self) -> None:
         for element in self.species_dict.values():
-            self.element_to_species_dict[element] = [x for x in self.species_dict.keys() 
-            if self.species_dict[x] == element]
+            self.element_to_species_dict[element] = [
+                x for x in self.species_dict.keys() if self.species_dict[x] == element
+            ]
 
 
 class processor_base:

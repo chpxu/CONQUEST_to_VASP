@@ -40,4 +40,5 @@ MPLGRID = {
     "grid.alpha": 0.7,
 }
 
-mpl.rcParams.update(MPLGENERIC)  # basedpyright: ignore
+for param, value in MPLGENERIC.items():
+    mpl.rcParams[param] = value  # type: ignore

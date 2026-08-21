@@ -9,17 +9,11 @@ from ase.atoms import Atoms
 from ase.io.cube import read_cube
 from ase.units import Bohr
 from scipy.ndimage import map_coordinates
-import matplotlib as mpl
 from matplotlib import colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable as mal
 import matplotlib.pyplot as plt
-import scienceplots
 from conquest2a._types import INT_ARRAY, REAL_ARRAY
 from conquest2a.conquest import processor_base
-from conquest2a.constants import MPLGENERIC
-
-mpl.rcParams.update(MPLGENERIC)  # type: ignore
-plt.style.use(["science", "no-latex"])
 
 _ELEMENT_COLOURS: dict[str, str] = {
     # Alkali metals
@@ -210,7 +204,7 @@ class density(processor_base):
                 data = np.divide(data, other_data)
         self.data: REAL_ARRAY = data
 
-    def load_cube(self, filename: str) -> tuple[REAL_ARRAY, Atoms]:
+    def load_cube(self, filename: str) -> tuple[Any, Atoms]:
         self.resolve_path(filename=filename)
         with open(filename, "r", encoding="utf-8") as fh:
             cube: dict[str, Atoms] = read_cube(fh)

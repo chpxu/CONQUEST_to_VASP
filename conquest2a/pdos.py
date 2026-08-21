@@ -392,9 +392,7 @@ class pdos_lm_processor(pdos_processor):
         y_label = r"$\text{DOS} [\text{states/eV}]$"
         super().plot_pdos()
         if not set(atomnos).issubset(self.pdos_atoms):
-            raise ValueError(f"Some chosen atoms for pdos plotting was not in the atom list")
-        # energy_mask = np.ma.masked_inside(self.energy_values[1], x1, x2).mask #type: ignore
-        # x_energy = self.energy_values[1][energy_mask]
+            raise ValueError("Some chosen atoms for pdos plotting was not in the atom list")
         # Plot the same orbitals from each atom on the same plot
         _fig = plt.figure()
 

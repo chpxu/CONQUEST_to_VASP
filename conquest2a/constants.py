@@ -1,6 +1,8 @@
 import importlib.resources
+from typing import Any
 from ase.units import Bohr, Hartree
 import matplotlib as mpl
+from matplotlib import RcParams
 import matplotlib.pyplot as plt
 import scienceplots
 
@@ -41,4 +43,4 @@ MPLGRID = {
 }
 
 for param, value in MPLGENERIC.items():
-    mpl.rcParams[param] = value  # type: ignore
+    mpl.rcParams[param] = value  # type: ignore[index]

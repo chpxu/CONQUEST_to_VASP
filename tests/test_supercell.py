@@ -1,5 +1,5 @@
 from conquest2a.conquest import *
-from conquest2a.supercell import *
+from conquest2a.cell.supercell import *
 from conquest2a.writers import *
 import pytest
 

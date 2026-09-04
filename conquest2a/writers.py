@@ -8,7 +8,7 @@ else:
     from typing_extensions import override
 from conquest2a.conquest import Atom, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
-
+import numpy as np
 
 class file_writer:
     """Generic parent class to define file operations and variables.
@@ -26,6 +26,7 @@ class file_writer:
     def __init__(
         self, dest: str, mode: str = "w", encoding: str = "utf-8", is_angstrom: bool = False
     ) -> None:
+        self.dest = dest
         self.mode: str = mode
         self.dest_path: str = dest.strip()
         self.encoding: str = encoding
@@ -71,18 +72,15 @@ class conquest_writer(file_writer):
             raise ValueError("Cannot have less than 1 decimal of float precision.")
         self.write()
         self.close_file(file=self.file)
-
+    def _write_array_with_precision(self, arr) -> str:
+        prec = self.precision
+        return '\n'.join('\t'.join(f'%0.{prec}f' %x for x in y) for y in arr)
     @override
     def write(self) -> None:
         prec = self.precision
         self.file.write(
-            f"{self.coords.lattice_vectors[0][0]:.{prec}f} {0.0:.{prec}f} {0.0:.{prec}f}\n"
-        )
-        self.file.write(
-            f"{0.0:.{prec}f} {self.coords.lattice_vectors[1][1]:.{prec}f} {0.0:.{prec}f}\n"
-        )
-        self.file.write(
-            f"{0.0:.{prec}f} {0.0:.{prec}f} {self.coords.lattice_vectors[2][2]:.{prec}f}\n"
+            # f"{self.coords.lattice_vectors[0][0]:.{prec}f} {0.0:.{prec}f} {0.0:.{prec}f}\n"
+            self._write_array_with_precision(self.coords.lattice_vectors)
         )
         self.file.write(self.coords.natoms)
         self.file.write("\n")
@@ -104,7 +102,7 @@ class vasp_writer(file_writer):
     :type data: ``conquest_coordinates``
     :param encoding: File encoding, defaults to "utf-8"
     :type encoding: ``str``, optional
-    :param is_angstrom: Whether the data in ``conquest_coordinates`` is 
+    :param is_angstrom: Whether the data in ``conquest_coordinates`` is
     already in angstroms instead of Bohrs, defaults to ``False``.
     :type is_angstrom: ``bool``, optional
     """

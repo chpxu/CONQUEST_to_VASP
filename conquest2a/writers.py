@@ -6,6 +6,8 @@ if sys.version_info >= (3, 12):
     from typing import override
 else:
     from typing_extensions import override
+import numpy as np
+from conquest2a._types import REAL_ARRAY
 from conquest2a.conquest import Atom, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
 
@@ -13,19 +15,20 @@ from conquest2a.constants import BOHR_TO_ANGSTROM
 class file_writer:
     """Generic parent class to define file operations and variables.
 
-    :param dest: _description_
+    :param dest: String to destination
     :type dest: str
-    :param mode: _description_, defaults to "w"
+    :param mode: File IO mode, defaults to "w"
     :type mode: str, optional
-    :param encoding: _description_, defaults to "utf-8"
+    :param encoding: File encoding, defaults to "utf-8"
     :type encoding: str, optional
-    :param is_angstrom: _description_, defaults to False
+    :param is_angstrom: sets the units, defaults to False (units in Bohr)
     :type is_angstrom: bool, optional
     """
 
     def __init__(
         self, dest: str, mode: str = "w", encoding: str = "utf-8", is_angstrom: bool = False
     ) -> None:
+        self.dest = dest
         self.mode: str = mode
         self.dest_path: str = dest.strip()
         self.encoding: str = encoding
@@ -72,17 +75,16 @@ class conquest_writer(file_writer):
         self.write()
         self.close_file(file=self.file)
 
+    def _write_array_with_precision(self, arr: REAL_ARRAY) -> str:
+        prec = self.precision
+        return "\n".join("\t".join(f"%0.{prec}f" % x for x in y) for y in arr)
+
     @override
     def write(self) -> None:
         prec = self.precision
         self.file.write(
-            f"{self.coords.lattice_vectors[0][0]:.{prec}f} {0.0:.{prec}f} {0.0:.{prec}f}\n"
-        )
-        self.file.write(
-            f"{0.0:.{prec}f} {self.coords.lattice_vectors[1][1]:.{prec}f} {0.0:.{prec}f}\n"
-        )
-        self.file.write(
-            f"{0.0:.{prec}f} {0.0:.{prec}f} {self.coords.lattice_vectors[2][2]:.{prec}f}\n"
+            # f"{self.coords.lattice_vectors[0][0]:.{prec}f} {0.0:.{prec}f} {0.0:.{prec}f}\n"
+            self._write_array_with_precision(self.coords.lattice_vectors)
         )
         self.file.write(self.coords.natoms)
         self.file.write("\n")
@@ -104,8 +106,8 @@ class vasp_writer(file_writer):
     :type data: ``conquest_coordinates``
     :param encoding: File encoding, defaults to "utf-8"
     :type encoding: ``str``, optional
-    :param is_angstrom: Whether the data in ``conquest_coordinates`` is 
-    already in angstroms instead of Bohrs, defaults to ``False``.
+    :param is_angstrom: Whether the data in ``conquest_coordinates`` is
+        already in angstroms instead of Bohrs, defaults to ``False``.
     :type is_angstrom: ``bool``, optional
     """
 

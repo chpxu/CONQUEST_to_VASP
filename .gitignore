@@ -11,3 +11,4 @@ _nix*
 generate*
 *.png
 _build
+**/build

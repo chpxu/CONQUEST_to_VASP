@@ -6,7 +6,7 @@ from os.path import abspath, basename
 import re
 import numpy as np
 from ase.atoms import Atoms
-from ase.io.cube import read_cube
+from ase.io.cube import read_cube_data
 from ase.units import Bohr
 from scipy.ndimage import map_coordinates
 import matplotlib as mpl
@@ -16,10 +16,6 @@ import matplotlib.pyplot as plt
 import scienceplots
 from conquest2a._types import INT_ARRAY, REAL_ARRAY
 from conquest2a.conquest import processor_base
-from conquest2a.constants import MPLGENERIC
-
-mpl.rcParams.update(MPLGENERIC)  # type: ignore
-plt.style.use(["science", "no-latex"])
 
 _ELEMENT_COLOURS: dict[str, str] = {
     # Alkali metals
@@ -135,8 +131,7 @@ class density(processor_base):
 
     :param hkl: The :math:`hkl` slice of the crystal to plot charge densities in.
     :type hkl: :ref:`INT ARRAY <types>`
-    :param offset: The :math:`hkl` direction defines a family of planes.
-    Use ``offset`` to select which one (i.e. wherein the unit cell).
+    :param offset: The :math:`hkl` direction defines a family of planes. Use ``offset`` to select which one (i.e. wherein the unit cell).
     :type offset: ``float``
     :param paths: Path(s) to one or more charge density (``.cube``) files. At least
         one path must be provided.
@@ -213,9 +208,11 @@ class density(processor_base):
     def load_cube(self, filename: str) -> tuple[REAL_ARRAY, Atoms]:
         self.resolve_path(filename=filename)
         with open(filename, "r", encoding="utf-8") as fh:
-            cube: dict[str, Atoms] = read_cube(fh)
+            cube: tuple[REAL_ARRAY, Atoms] = read_cube_data(fh)
         fh.close()
-        return cube["data"], cube["atoms"]
+        density_data = cube[0]
+        atoms_data = cube[1]
+        return density_data, atoms_data
 
     def inplane_basis(
         self,
@@ -720,8 +717,8 @@ class plot_densities:
         if log_scale:
             imshow_args["norm"] = colors.LogNorm()
         else:
-            imshow_args["vmin"] = 0.0 if vmin is None else float(vmin)
-            imshow_args["vmax"] = float(np.max(density_grid)) if vmax is None else float(vmax)
+            imshow_args["vmin"] = 0.0 if vmin is None else vmin
+            imshow_args["vmax"] = float(np.max(density_grid)) if vmax is None else vmax
         imshow_args.update(imshow_kwargs)
 
         im = ax.imshow(density_grid, **imshow_args)

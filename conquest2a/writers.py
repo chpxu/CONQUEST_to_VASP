@@ -15,13 +15,13 @@ from conquest2a.constants import BOHR_TO_ANGSTROM
 class file_writer:
     """Generic parent class to define file operations and variables.
 
-    :param dest: _description_
+    :param dest: String to destination
     :type dest: str
-    :param mode: _description_, defaults to "w"
+    :param mode: File IO mode, defaults to "w"
     :type mode: str, optional
-    :param encoding: _description_, defaults to "utf-8"
+    :param encoding: File encoding, defaults to "utf-8"
     :type encoding: str, optional
-    :param is_angstrom: _description_, defaults to False
+    :param is_angstrom: sets the units, defaults to False (units in Bohr)
     :type is_angstrom: bool, optional
     """
 
@@ -107,7 +107,7 @@ class vasp_writer(file_writer):
     :param encoding: File encoding, defaults to "utf-8"
     :type encoding: ``str``, optional
     :param is_angstrom: Whether the data in ``conquest_coordinates`` is
-    already in angstroms instead of Bohrs, defaults to ``False``.
+        already in angstroms instead of Bohrs, defaults to ``False``.
     :type is_angstrom: ``bool``, optional
     """
 

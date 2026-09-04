@@ -7,20 +7,20 @@ from conquest2a.conquest import conquest_species, Atom, conquest_coordinates
 
 
 class transform_unit_cell:
+    """
+    Class to handle unit cell transformations like VESTA.
+
+    In VESTA, vectors on atoms are maintained if you have symmetry. If you remove the symmetry,
+    the vectors are not kept. This class aims to reproduce the transformations of VESTA, but since
+    atom labels, species numbers, spin and force arrays are not touched, this should preserve
+    the spin and species labels, so a transformed unit cell can be immediately dumped with a writer.
+
+    :param cq_coordinates: ``conquest_coordinates`` instance  of the cell to be transformed
+    :type cq_coordinates: conquest_coordinates
+    :param tol:  numerical tolerance used when wrapping/deduplicating atoms, defaults to 1e-4
+    :type tol: float, optional
+    """
     def __init__(self, cq_coordinates: conquest_coordinates, tol: float = 1e-4) -> None:
-        """
-        Class to handle unit cell transformations like VESTA.
-
-        In VESTA, vectors on atoms are maintained if you have symmetry. If you remove the symmetry,
-        the vectors are not kept. This class aims to reproduce the transformations of VESTA, but since
-        atom labels, species numbers, spin and force arrays are not touched, this should preserve
-        the spin and species labels, so a transformed unit cell can be immediately dumped with a writer.
-
-        :param cq_coordinates: ``conquest_coordinates`` instance  of the cell to be transformed
-        :type cq_coordinates: conquest_coordinates
-        :param tol:  numerical tolerance used when wrapping/deduplicating atoms, defaults to 1e-4
-        :type tol: float, optional
-        """
         self.coords = cq_coordinates
         self.tol = tol
         self.transformed_cell_coords: conquest_coordinates

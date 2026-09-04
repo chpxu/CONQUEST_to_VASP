@@ -12,16 +12,16 @@
 CONQUEST2a: post-processing utilities for CONQUEST
 ==================================================
 
-CONQUEST2a (C2a) is a collection of modules providing various post-processing utilities for `CONQUEST <https://conquest.readthedocs.io/>`__. It aims to be simple and flexible, requiring minimal dependencies on CONQUEST-specific input/output files. C2a is currently able to process and plot (partial) density of states, bandstructures, charge densities, band densities; convert from CONQUEST coordinates to other file formats; calculate nearest neighbours, planar and dihedral angles; create and write supercells; extract stresses, forces, bandgaps from output.
+CONQUEST2a (C2a) is a collection of modules providing various post-processing utilities for `CONQUEST <https://conquest.readthedocs.io/>`__. It aims to be simple and flexible, requiring minimal dependencies on CONQUEST-specific input/output files. C2a is currently able to process and plot (partial) density of states, bandstructures, charge densities, band densities; convert from CONQUEST coordinates to other file formats; calculate nearest neighbours, planar and dihedral angles; create, transform and write unit cells; extract stresses, forces, bandgaps from output.
 
-This library operates independently of CONQUEST's ASE interface, which is documented here: https://conquest.readthedocs.io/en/latest/ase-conquest.html. This library does not manage CONQUEST and only serves to analyse output from runs.
+This library operates independently of CONQUEST's ASE interface, which is documented here: https://conquest.readthedocs.io/en/latest/ase-conquest.html. This library does not manage CONQUEST and only serves to analyse output from runs or prepare coordinates for runs.
 
-Note: this library explicitly depends on ASE for: units and reading cube file. ASE is listed as an explicit dependency but otherwise you should make sure it is available.
+Note: this library explicitly depends on ASE for: units and reading cube files. ASE is listed as an explicit dependency but otherwise you should make sure it is available.
 
 ..    :maxdepth: 2
 ..    :caption: Contents:
 ..    :glob:
-   
+
 
 Reference
 ----------
@@ -35,8 +35,8 @@ Reference
 * :doc:`src/roadmap`
 
 .. toctree::
-   :maxdepth: 1
-   :hidden:      
+   :maxdepth: 4
+   :hidden:
    :caption: Reference
 
    src/types

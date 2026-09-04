@@ -131,8 +131,7 @@ class density(processor_base):
 
     :param hkl: The :math:`hkl` slice of the crystal to plot charge densities in.
     :type hkl: :ref:`INT ARRAY <types>`
-    :param offset: The :math:`hkl` direction defines a family of planes.
-    Use ``offset`` to select which one (i.e. wherein the unit cell).
+    :param offset: The :math:`hkl` direction defines a family of planes. Use ``offset`` to select which one (i.e. wherein the unit cell).
     :type offset: ``float``
     :param paths: Path(s) to one or more charge density (``.cube``) files. At least
         one path must be provided.
@@ -718,8 +717,8 @@ class plot_densities:
         if log_scale:
             imshow_args["norm"] = colors.LogNorm()
         else:
-            imshow_args["vmin"] = 0.0 if vmin is None else float(vmin)
-            imshow_args["vmax"] = float(np.max(density_grid)) if vmax is None else float(vmax)
+            imshow_args["vmin"] = 0.0 if vmin is None else vmin
+            imshow_args["vmax"] = float(np.max(density_grid)) if vmax is None else vmax
         imshow_args.update(imshow_kwargs)
 
         im = ax.imshow(density_grid, **imshow_args)

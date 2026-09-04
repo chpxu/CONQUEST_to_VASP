@@ -5,5 +5,5 @@ numpy>=2.0.0
 matplotlib>=3.11
 scipy>=1.17.0
 ase>=3.26.0
-scienceplots==2.2.2
+scienceplots>=2.2.2
 hatchling>=1.29.0

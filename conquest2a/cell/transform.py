@@ -189,6 +189,7 @@ class transform_unit_cell:
         new_cq_coord = conquest_coordinates(self.coords.conquest_input)
         new_cq_coord.natoms = str(len(new_atoms))
         new_cq_coord.atoms = new_atoms
+        new_cq_coord.natoms = str(len(new_atoms))
         new_cq_coord.lattice_vectors = transformed_lat_vect
         new_params: tuple[float, float, float, float, float, float] = self._get_lattice_parameters(
             new_cq_coord

@@ -187,7 +187,6 @@ class transform_unit_cell:
 
         # initialise new coordinates instance
         new_cq_coord = conquest_coordinates(self.coords.conquest_input)
-        new_cq_coord.natoms = str(len(new_atoms))
         new_cq_coord.atoms = new_atoms
         new_cq_coord.natoms = str(len(new_atoms))
         new_cq_coord.lattice_vectors = transformed_lat_vect
@@ -205,12 +204,12 @@ if __name__ == "__main__":
     from conquest2a.writers import conquest_writer
 
     conquest_spec = conquest_species({1: "O", 2: "Bi", 3: "Mn", 4: "Mn"})
-    ccp = conquest_coordinates_processor(r"../../tests/data/transforms/unitcell.dat", conquest_spec)
+    ccp = conquest_coordinates_processor(r"tests/data/transforms/unitcell.dat", conquest_spec)
     tuc = transform_unit_cell(ccp.coords)
     P = np.array([[1 / 2, 0, 1 / 2], [0, 1, 0], [-1 / 2, 0, 1 / 2]])
     tuc.transform(P)
     if tuc.transformed_cell_coords is not None:
         conquest_writer(
-            r"../../tests/data/transforms/unitcell_transform_result.dat",
+            r"tests/data/transforms/unitcell_transform_result.dat",
             tuc.transformed_cell_coords,
         )

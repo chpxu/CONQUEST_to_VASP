@@ -86,6 +86,7 @@ class conquest_writer(file_writer):
             # f"{self.coords.lattice_vectors[0][0]:.{prec}f} {0.0:.{prec}f} {0.0:.{prec}f}\n"
             self._write_array_with_precision(self.coords.lattice_vectors)
         )
+        self.file.write("\n")
         self.file.write(self.coords.natoms)
         self.file.write("\n")
         for atom in self.coords.atoms:

@@ -6,7 +6,7 @@ from os.path import abspath, basename
 import re
 import numpy as np
 from ase.atoms import Atoms
-from ase.io.cube import read_cube
+from ase.io.cube import read_cube_data
 from ase.units import Bohr
 from scipy.ndimage import map_coordinates
 import matplotlib as mpl
@@ -16,10 +16,6 @@ import matplotlib.pyplot as plt
 import scienceplots
 from conquest2a._types import INT_ARRAY, REAL_ARRAY
 from conquest2a.conquest import processor_base
-from conquest2a.constants import MPLGENERIC
-
-mpl.rcParams.update(MPLGENERIC)  # type: ignore
-plt.style.use(["science", "no-latex"])
 
 _ELEMENT_COLOURS: dict[str, str] = {
     # Alkali metals
@@ -213,9 +209,11 @@ class density(processor_base):
     def load_cube(self, filename: str) -> tuple[REAL_ARRAY, Atoms]:
         self.resolve_path(filename=filename)
         with open(filename, "r", encoding="utf-8") as fh:
-            cube: dict[str, Atoms] = read_cube(fh)
+            cube: tuple[REAL_ARRAY, Atoms] = read_cube_data(fh)
         fh.close()
-        return cube["data"], cube["atoms"]
+        density_data = cube[0]
+        atoms_data = cube[1]
+        return density_data, atoms_data
 
     def inplane_basis(
         self,

@@ -6,9 +6,11 @@ if sys.version_info >= (3, 12):
     from typing import override
 else:
     from typing_extensions import override
+import numpy as np
+from conquest2a._types import REAL_ARRAY
 from conquest2a.conquest import Atom, conquest_coordinates, atom_charge
 from conquest2a.constants import BOHR_TO_ANGSTROM
-import numpy as np
+
 
 class file_writer:
     """Generic parent class to define file operations and variables.
@@ -72,9 +74,11 @@ class conquest_writer(file_writer):
             raise ValueError("Cannot have less than 1 decimal of float precision.")
         self.write()
         self.close_file(file=self.file)
-    def _write_array_with_precision(self, arr) -> str:
+
+    def _write_array_with_precision(self, arr: REAL_ARRAY) -> str:
         prec = self.precision
-        return '\n'.join('\t'.join(f'%0.{prec}f' %x for x in y) for y in arr)
+        return "\n".join("\t".join(f"%0.{prec}f" % x for x in y) for y in arr)
+
     @override
     def write(self) -> None:
         prec = self.precision

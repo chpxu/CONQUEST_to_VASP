@@ -130,6 +130,10 @@ class transform_unit_cell:
             \end{aligned}
 
 
+        Note, the original :class:`Atom` in the original unit cell are deep copied to the new coordinates instance.
+        The only property that is modified in the new Atoms is the fractional coordinate, and then cartesian coordinates
+        This means atom numbers stay the same instead of being regenerated.
+
         :param P: Unit cell transformation matrix
         :type P: c2at.REAL_ARRAY
         :param dedupe: whether to remove duplicate atoms and wrap atoms into new unit cell lengths, defaults to `True`

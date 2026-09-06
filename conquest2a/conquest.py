@@ -111,6 +111,13 @@ class conquest_species:
                 x for x in self.species_dict.keys() if self.species_dict[x] == element
             ]
 
+    def is_element_in_dict(self, element: str) -> bool:
+        if element not in self.species_dict.values():
+            raise RuntimeError(
+                f"{element} is not an element inside the created species dictionary!"
+            )
+        return True
+
 
 class processor_base:
     def __init__(self, path: str, err_str: str | None = None) -> None:

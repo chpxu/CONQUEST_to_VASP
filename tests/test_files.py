@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from ase.units import Bohr
 
-from conquest2a.read.files import cell_to_conquest
+from conquest2a.read.files import cell_to_conquest, poscar_to_conquest
 from conquest2a.conquest import Atom, conquest_species
 
 
@@ -437,3 +437,454 @@ def test_output_file_atom_line_format()-> None:
     first_atom_line = lines[4]
     assert first_atom_line.split()[3] == "1"
     assert first_atom_line.split()[4:7] == ["T", "T", "T"]
+
+### Test vasp output
+
+@pytest.fixture
+def bn_species() -> conquest_species:
+    """Species map for cubic BN, ids in the order they appear in POSCAR."""
+    return conquest_species({1: "B", 2: "N"})
+
+
+@pytest.fixture
+def si_species() -> conquest_species:
+    """Species map for a single-species fcc Si cell."""
+    return conquest_species({1: "Si"})
+
+
+@pytest.fixture
+def mgo_species() -> conquest_species:
+    """Species map for rock-salt MgO."""
+    return conquest_species({1: "Mg", 2: "O"})
+
+
+@pytest.fixture
+def duplicate_species() -> conquest_species:
+    """Species map with two ids for the same element. POSCAR carries no spin
+    information, so parsing should always resolve to the lower id."""
+    return conquest_species({1: "Cu", 2: "Cu"})
+
+
+def write_poscar(tmp_path: Path, content: str, name: str = "POSCAR") -> Path:
+    """Write ``content`` to ``tmp_path/name`` and return the path."""
+    poscar_path = tmp_path / name
+    poscar_path.write_text(content)
+    return poscar_path
+
+
+BN_POSCAR = """\
+Cubic BN
+3.57
+0.0 0.5 0.5
+0.5 0.0 0.5
+0.5 0.5 0.0
+B N
+1 1
+Direct
+0.00 0.00 0.00
+0.25 0.25 0.25
+"""
+
+SI_POSCAR = """\
+fcc Si
+3.9
+ 0.50000000 0.50000000 0.00000000
+ 0.00000000 0.50000000 0.50000000
+ 0.50000000 0.00000000 0.50000000
+  1
+cartesian
+0.00000000 0.00000000 0.00000000
+"""
+
+MGO_POSCAR = """\
+MgO Fm-3m (No. 225)
+1.0
+ 2.606553 0.000000 1.504894
+ 0.868851 2.457482 1.504894
+ 0.000000 0.000000 3.009789
+ Mg O
+ 1 1
+direct
+ 0.000000 0.000000 0.000000 Mg
+ 0.500000 0.500000 0.500000 O
+"""
+
+CUBIC_LATTICE_5ANG = """\
+5.0 0.0 0.0
+0.0 5.0 0.0
+0.0 0.0 5.0
+"""
+
+
+def test_single_scale_factor_applied_to_lattice(tmp_path: Path, si_species: conquest_species) -> None:
+    content = (
+        "Cubic Si\n"
+        "2.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    expected = np.diag([10.0, 10.0, 10.0]) / Bohr
+    np.testing.assert_allclose(converter.coords.lattice_vectors, expected)
+
+
+def test_three_component_scale_factors(tmp_path: Path, si_species: conquest_species) -> None:
+    content = (
+        "Anisotropic scale\n"
+        "1.0 2.0 3.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    expected = np.diag([5.0, 10.0, 15.0]) / Bohr
+    np.testing.assert_allclose(converter.coords.lattice_vectors, expected)
+
+
+def test_three_component_scale_factors_with_nonpositive_value_raises(
+    tmp_path: Path, si_species: conquest_species
+) -> None:
+    content = (
+        "Bad anisotropic scale\n"
+        "1.0 -2.0 3.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    with pytest.raises(RuntimeError, match="must be positive"):
+        poscar_to_conquest(str(poscar), si_species, str(dest))
+
+
+def test_negative_scale_factor_is_target_volume(tmp_path: Path, si_species: conquest_species) -> None:
+    content = (
+        "Target volume\n"
+        "-64.0\n"
+        "1.0 0.0 0.0\n"
+        "0.0 1.0 0.0\n"
+        "0.0 0.0 1.0\n"
+        "Si\n"
+        "1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    expected = np.diag([4.0, 4.0, 4.0]) / Bohr
+    np.testing.assert_allclose(converter.coords.lattice_vectors, expected)
+
+
+def test_scale_factor_line_with_wrong_count_raises(tmp_path: Path, si_species: conquest_species) -> None:
+    content = (
+        "Bad scale count\n"
+        "1.0 2.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    with pytest.raises(RuntimeError, match="1 or 3 numbers"):
+        poscar_to_conquest(str(poscar), si_species, str(dest))
+
+
+def test_direct_positions_not_scaled(tmp_path: Path, si_species: conquest_species) -> None:
+    content = (
+        "Direct positions\n"
+        "2.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "Direct\n"
+        "0.25 0.5 0.75\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    np.testing.assert_allclose(converter.coords.atoms[0].coords, [0.25, 0.5, 0.75])
+
+
+def test_cartesian_positions_converted_to_fractional_and_bohr(
+    tmp_path: Path, si_species: conquest_species
+) -> None:
+    content = (
+        "Cartesian positions\n"
+        "1.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "Cartesian\n"
+        "2.5 2.5 2.5\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    np.testing.assert_allclose(converter.coords.atoms[0].coords, [0.5, 0.5, 0.5])
+
+
+def test_lowercase_cartesian_mode_keyword(tmp_path: Path, si_species: conquest_species) -> None:
+    content = (
+        "Lowercase cartesian\n"
+        "1.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "cartesian\n"
+        "2.5 2.5 2.5\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    np.testing.assert_allclose(converter.coords.atoms[0].coords, [0.5, 0.5, 0.5])
+
+
+def test_only_first_character_of_mode_line_is_significant(
+    tmp_path: Path, si_species: conquest_species
+) -> None:
+    content = (
+        "Verbose mode line\n"
+        "1.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si\n"
+        "1\n"
+        "Cartesian coordinates follow\n"
+        "2.5 2.5 2.5\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    np.testing.assert_allclose(converter.coords.atoms[0].coords, [0.5, 0.5, 0.5])
+
+
+def test_species_names_line_present(tmp_path: Path, bn_species: conquest_species) -> None:
+    poscar = write_poscar(tmp_path, BN_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), bn_species, str(dest))
+
+    labels = [atom.label for atom in converter.coords.atoms]
+    assert labels == ["B", "N"]
+
+
+def test_species_names_line_absent_falls_back_to_species_map_order(
+    tmp_path: Path, si_species: conquest_species
+) -> None:
+    poscar = write_poscar(tmp_path, SI_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    assert converter.coords.atoms[0].label == "Si"
+
+
+def test_species_names_line_absent_with_ambiguous_species_map_raises(
+    tmp_path: Path, duplicate_species: conquest_species
+) -> None:
+    content = (
+        "No names, two ion-count groups but one unique element\n"
+        "1.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "2 1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+        "0.5 0.5 0.5\n"
+        "0.25 0.25 0.25\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    with pytest.raises(RuntimeError, match="species-names line"):
+        poscar_to_conquest(str(poscar), duplicate_species, str(dest))
+
+
+def test_species_names_truncated_to_two_characters(tmp_path: Path, si_species: conquest_species) -> None:
+    content = (
+        "Truncated species name\n"
+        "1.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Si1\n"
+        "1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    assert converter.coords.atoms[0].label == "Si"
+
+
+def test_trailing_atom_label_is_ignored(tmp_path: Path, mgo_species: conquest_species) -> None:
+    poscar = write_poscar(tmp_path, MGO_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), mgo_species, str(dest))
+
+    np.testing.assert_allclose(converter.coords.atoms[0].coords, [0.0, 0.0, 0.0])
+    np.testing.assert_allclose(converter.coords.atoms[1].coords, [0.5, 0.5, 0.5])
+
+
+def test_selective_dynamics_flags_parsed(tmp_path: Path, bn_species: conquest_species) -> None:
+    content = (
+        "Selective dynamics\n"
+        "3.57\n"
+        + CUBIC_LATTICE_5ANG
+        + "B N\n"
+        "1 1\n"
+        "Selective dynamics\n"
+        "Cartesian\n"
+        "0.0 0.0 0.0 T T F\n"
+        "0.25 0.25 0.25 F F F\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), bn_species, str(dest))
+
+    assert converter.coords.atoms[0].can_move == ["T", "T", "F"]
+    assert converter.coords.atoms[1].can_move == ["F", "F", "F"]
+
+
+def test_lowercase_selective_dynamics_keyword(tmp_path: Path, bn_species: conquest_species) -> None:
+    content = (
+        "Lowercase selective dynamics\n"
+        "3.57\n"
+        + CUBIC_LATTICE_5ANG
+        + "B N\n"
+        "1 1\n"
+        "selective dynamics\n"
+        "Direct\n"
+        "0.0 0.0 0.0 T F T\n"
+        "0.25 0.25 0.25 F T F\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), bn_species, str(dest))
+
+    assert converter.coords.atoms[0].can_move == ["T", "F", "T"]
+    assert converter.coords.atoms[1].can_move == ["F", "T", "F"]
+
+
+def test_default_can_move_without_selective_dynamics(
+    tmp_path: Path, si_species: conquest_species
+) -> None:
+    poscar = write_poscar(tmp_path, SI_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    assert converter.coords.atoms[0].can_move == ["T", "T", "T"]
+
+
+def test_ion_counts_match_atom_numbers(tmp_path: Path, mgo_species: conquest_species) -> None:
+    poscar = write_poscar(tmp_path, MGO_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), mgo_species, str(dest))
+
+    numbers = [atom.number for atom in converter.coords.atoms]
+    assert numbers == [0, 1]
+    assert converter.coords.natoms == "2"
+
+
+def test_duplicate_species_ids_resolve_to_lower_id(
+    tmp_path: Path, duplicate_species: conquest_species
+) -> None:
+    content = (
+        "Duplicate Cu ids\n"
+        "1.0\n"
+        + CUBIC_LATTICE_5ANG
+        + "Cu\n"
+        "1\n"
+        "Direct\n"
+        "0.0 0.0 0.0\n"
+    )
+    poscar = write_poscar(tmp_path, content)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), duplicate_species, str(dest))
+
+    assert converter.coords.atoms[0].species == 1
+
+
+def test_missing_file_raises(tmp_path: Path, si_species: conquest_species) -> None:
+    missing = tmp_path / "does_not_exist.POSCAR"
+    dest = tmp_path / "out.dat"
+    with pytest.raises(FileNotFoundError):
+        poscar_to_conquest(str(missing), si_species, str(dest))
+
+
+def test_output_file_is_written(tmp_path: Path, si_species: conquest_species) -> None:
+    poscar = write_poscar(tmp_path, SI_POSCAR)
+    dest = tmp_path / "out.dat"
+    poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    assert dest.exists()
+    lines = dest.read_text().splitlines()
+    assert len(lines) == 5
+    assert lines[3] == "1"
+
+
+def test_bn_integration_atom_count(tmp_path: Path, bn_species: conquest_species) -> None:
+    poscar = write_poscar(tmp_path, BN_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), bn_species, str(dest))
+
+    assert len(converter.coords.atoms) == 2
+    assert converter.coords.natoms == "2"
+
+
+def test_bn_integration_species_assigned_correctly(tmp_path: Path, bn_species: conquest_species) -> None:
+    poscar = write_poscar(tmp_path, BN_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), bn_species, str(dest))
+
+    assert converter.coords.atoms[0].species == 1
+    assert converter.coords.atoms[1].species == 2
+
+
+def test_si_integration_lattice_and_cartesian_positions(
+    tmp_path: Path, si_species: conquest_species
+) -> None:
+    poscar = write_poscar(tmp_path, SI_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), si_species, str(dest))
+
+    expected_lattice = (
+        np.array(
+            [
+                [0.5, 0.5, 0.0],
+                [0.0, 0.5, 0.5],
+                [0.5, 0.0, 0.5],
+            ]
+        )
+        * 3.9
+        / Bohr
+    )
+    np.testing.assert_allclose(converter.coords.lattice_vectors, expected_lattice)
+    np.testing.assert_allclose(converter.coords.atoms[0].coords, [0.0, 0.0, 0.0])
+    np.testing.assert_allclose(converter.coords.atoms[0].cart_coords, [0.0, 0.0, 0.0])
+
+
+def test_mgo_integration_element_labels(tmp_path: Path, mgo_species: conquest_species) -> None:
+    poscar = write_poscar(tmp_path, MGO_POSCAR)
+    dest = tmp_path / "out.dat"
+    converter = poscar_to_conquest(str(poscar), mgo_species, str(dest))
+
+    labels = [atom.label for atom in converter.coords.atoms]
+    assert labels == ["Mg", "O"]
+

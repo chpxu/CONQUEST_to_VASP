@@ -1,6 +1,6 @@
 from conquest2a.conquest import *
 from conquest2a.supercell import *
-from conquest2a.writers import *
+from conquest2a.io.writers import *
 import pytest
 
 test_input = conquest_species({1: "Bi", 2: "Mn", 3: "Mn", 4: "O"})

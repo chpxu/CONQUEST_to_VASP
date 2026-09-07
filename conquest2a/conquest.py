@@ -45,7 +45,7 @@ class Atom:
     can_move: Sequence[str]
     number: int
     label: str = ""
-    cart_coords: c2at.REAL_ARRAY = field(init=False)
+    cart_coords: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
 

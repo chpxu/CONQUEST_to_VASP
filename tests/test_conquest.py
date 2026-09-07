@@ -1,6 +1,6 @@
 from conquest2a.conquest import *
 from conquest2a.supercell import *
-from conquest2a.writers import *
+from conquest2a.io.writers import *
 import numpy as np
 import pytest
 
@@ -82,7 +82,7 @@ def test_atom_numbers_are_sequential() -> None:
     assert numbers == list(range(1, 21))
 
 
-# Atom class 
+# Atom class
 
 
 def test_atom_str_contains_key_fields() -> None:

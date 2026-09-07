@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from ase.units import Bohr
 
-from conquest2a.read.files import cell_to_conquest, poscar_to_conquest
+from conquest2a.io.files import cell_to_conquest, poscar_to_conquest
 from conquest2a.conquest import Atom, conquest_species
 
 

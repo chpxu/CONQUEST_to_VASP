@@ -8,7 +8,7 @@ import re
 import numpy as np
 from conquest2a.constants import ANGSTROM_TO_BOHR
 from conquest2a.conquest import processor_base, conquest_species, conquest_coordinates, Atom
-from conquest2a.writers import conquest_writer
+from conquest2a.io.writers import write_coords
 
 
 class vesta_to_conquest(processor_base):
@@ -27,7 +27,7 @@ class vesta_to_conquest(processor_base):
         self.parse_struc()
         self.parse_vectr()
         self.assign_species()
-        conquest_writer(dest=self.output_path, coords=self.conq_coords)
+        write_coords(dest=self.output_path, cq_coords=self.conq_coords, format="other")
         print(f"Written {self.conq_coords.natoms} atoms to: {self.output_path}")
 
     def parse_cellp(self) -> None:

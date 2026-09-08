@@ -166,8 +166,19 @@ class write_coords(processor_base):
                 self.file.write(self._write_1d_array_with_precision(atom.coords))
                 self.file.write("\n")
 
-    def write_cell(self):
-        pass
+    def write_cell(self) -> None:
+        self.file.write("%block LATTICE_CART\n")
+        self.file.write(f"Bohr\n")
+        self.file.write(self._write_2d_array_with_precision(self.data.lattice_vectors))
+        self.file.write("%endblock LATTICE_CART\n")
+
+        self.file.write("%block POSITIONS_FRAC\n")
+        for atom in self.data.atoms:
+            line = f"{atom.label} {atom.coords[0]:.{self.precision}f} {atom.coords[1]:.{self.precision}f} {atom.coords[2]:.{self.precision}f}"
+            if atom.spins[2] != 0.0:
+                line += f" SPIN {atom.spins[2]:.{self.precision}f}"
+            self.file.write(line + "\n")
+        self.file.write("%endblock POSITIONS_FRAC\n")
 
     def write_xyz(self) -> None:
         """Method to write a ``.xyz`` for a basic XYZ file given a :class:`~conquest.conquest_coordinates` instance."""
@@ -180,7 +191,7 @@ class write_coords(processor_base):
                 )
                 self.file.write("\n")
 
-    def write_extxyz(self):
+    def write_extxyz(self) -> None:
         """Method to write a ``.extxyz`` for a basic XYZ file given a :class:`~conquest.conquest_coordinates` instance.
 
         The main advantage of `.extxyz` is the ability to specify columns and the time, which is very useful for animations. I recommend just using CONQUEST's ability to output ``.extxyz`` files at different timesteps however.
@@ -561,16 +572,16 @@ class read_coords(processor_base):
         if "lattice_abc" in blocks:
             params: list[str] = block_data["lattice_abc"]
             units = params[0]
-            a, b, c = params[1].split()
+            a_s, b_s, c_s = params[1].split()
 
-            alpha, beta, gamma = params[2].split()
+            alpha_s, beta_s, gamma_s = params[2].split()
             a, b, c, alpha, beta, gamma = (
-                float(a),
-                float(b),
-                float(c),
-                float(alpha),
-                float(beta),
-                float(gamma),
+                float(a_s),
+                float(b_s),
+                float(c_s),
+                float(alpha_s),
+                float(beta_s),
+                float(gamma_s),
             )
             if units == "ang" and "bohr" == self.cq_units:
                 a, b, c = a * ANGSTROM_TO_BOHR, b * ANGSTROM_TO_BOHR, c * ANGSTROM_TO_BOHR

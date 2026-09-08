@@ -177,7 +177,8 @@ class conquest_coordinates:
         self,
         conquest_input: conquest_species,
     ) -> None:
-
+        self.re_float: Pattern[str] = re.compile(r"[-+]?\d*\.\d+")
+        self.re_index: Pattern[str] = re.compile(r"\d+")
         self.atoms: list[Atom] = []
         self.conquest_input: conquest_species = conquest_input
         self.natoms: str
@@ -223,70 +224,6 @@ class conquest_coordinates:
         for element in list(self.element_map.keys()):
             num_eles[element] = len(self.element_map[element])
         return num_eles
-
-
-class conquest_coordinates_processor(processor_base):
-    """Class which extracts data from a CONQUEST coordinates file and populates a :class:`conquest_coordinates` instance.
-
-    :param path: Path of the CONQUEST coordinates file to read.
-    :type path: ``str``
-    :param conquest_input: :class:`conquest_input` instance.
-    :type conquest_input: conquest_input
-    """
-
-    def __init__(self, path: str, conquest_input: conquest_species) -> None:
-        processor_base.__init__(
-            self, path=path, err_str="Error opening specified CONQUEST coordinates file."
-        )
-        self.coords: conquest_coordinates = conquest_coordinates(conquest_input=conquest_input)
-        self.resolve_path()
-        self.open_file()
-        self.coords.get_cartesian_positions()
-        self.coords.assign_atom_labels()
-        self.coords.index_to_atom_map()
-        self.volume_bohr: float = (
-            self.coords.lattice_vectors[0][0]
-            * self.coords.lattice_vectors[1][1]
-            * self.coords.lattice_vectors[2][2]
-        )
-        self.volume_ang: float = self.volume_bohr * BOHR_TO_ANGSTROM_VOLUME
-
-    @override
-    def open_file(self) -> None:
-        """This method reads a CONQUEST coordinate file.
-
-        CONQUEST coords file split into 3 main chunks:
-            * first 3 lines are lattice vectors
-            * fourth line is the total number of atoms in the unit cell
-            * the following lines describe each atom and look like
-                <double> <double> <double> <int> <char> <char> <char>
-        """
-        with open(self.abs_input_path, "r", encoding="utf-8") as conquest_coord_file:
-            conquest_lattice_data_str: list[str] = [
-                next(conquest_coord_file).strip() for _ in range(3)
-            ]
-            cell_lattice_vectors: list[c2at.REAL_ARRAY] = []
-            for lattice_vect in conquest_lattice_data_str:
-                coords: c2at.REAL_ARRAY = np.fromstring(lattice_vect, sep=" ")
-                cell_lattice_vectors.append(coords)
-            self.coords.lattice_vectors = np.vstack(cell_lattice_vectors)
-            self.coords.natoms = next(conquest_coord_file)
-            atom_data: list[str] = conquest_coord_file.readlines()
-            atom_data_stripped: list[str] = [atom for atom in atom_data if atom.strip()]
-            atom_number = 1
-            for atom in atom_data_stripped:
-                split_atom_data: list[str] = atom.strip().split()
-                self.coords.atoms.append(
-                    Atom(
-                        species=int(split_atom_data[3]),
-                        can_move=split_atom_data[4:],
-                        coords=np.array(split_atom_data[:3]).astype(float),
-                        number=atom_number,
-                    )
-                )
-                atom_number += 1
-        conquest_coord_file.close()
-        _ = self.coords.get_cartesian_positions()
 
 
 class atom_charge(processor_base):

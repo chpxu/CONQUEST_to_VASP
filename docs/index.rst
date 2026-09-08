@@ -31,7 +31,7 @@ Reference
 * :doc:`src/band`
 * :doc:`src/supercell`
 * :doc:`src/density`
-* :doc:`src/writers`
+* :doc:`src/io`
 * :doc:`src/roadmap`
 
 .. toctree::
@@ -45,7 +45,7 @@ Reference
    src/band
    src/supercell
    src/density
-   src/writers
+   src/io
    src/roadmap
 
 

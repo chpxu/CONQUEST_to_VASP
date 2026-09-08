@@ -123,63 +123,66 @@ def test_bandden_missing_directory_raises() -> None:
     with pytest.raises(FileNotFoundError):
         bandden("tests/data/banddensity_missing", (1, 0, 0), 0.0, operations="", band=1)
 
+
 DATA_DIR2 = "tests/data/chargedensity"
 
 # chden class
+
 
 def test_chden_locates_unpolarised_file_by_default() -> None:
     c = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="")
     names = [f.split("/")[-1] for f in c.filtered_dens_files]
     assert names == ["chden.cube"]
     assert c.density.data.ndim == 3
- 
- 
+
+
 def test_chden_locates_all_matching_files() -> None:
     c = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="")
     # chden.cube, chden_up.cube, chden_dn.cube all match the default "chden" stub
     names = {f.split("/")[-1] for f in c.all_dens_files}
     assert names == {"chden.cube", "chden_up.cube", "chden_dn.cube"}
- 
- 
+
+
 def test_chden_spin_polarised_selects_up_and_dn() -> None:
     c = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="+", spin=1)
     names = {f.split("/")[-1] for f in c.filtered_dens_files}
     assert names == {"chden_up.cube", "chden_dn.cube"}
     assert c.density.data.ndim == 3
- 
- 
+
+
 def test_chden_spin_value_does_not_discriminate_up_vs_dn() -> None:
     c_spin1 = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="+", spin=1)
     c_spin2 = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="+", spin=2)
     assert sorted(c_spin1.filtered_dens_files) == sorted(c_spin2.filtered_dens_files)
- 
- 
+
+
 def test_chden_custom_charge_stub() -> None:
     c = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="+", charge_stub="custom", spin=1)
     names = {f.split("/")[-1] for f in c.filtered_dens_files}
     assert names == {"custom_up.cube", "custom_dn.cube"}
- 
+
+
 def test_chden_add_up_and_dn() -> None:
     c = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="+", spin=1)
     up = next(d for d, _ in c.density.densities if True)
     assert c.density.data.shape == up.shape
- 
- 
+
+
 def test_chden_rejects_missing_directory() -> None:
     with pytest.raises(FileNotFoundError):
         chden("tests/data/chargedensity_missing", (1, 0, 0), 0.0, operations="")
- 
- 
+
+
 def test_chden_rejects_zero_miller_indices() -> None:
     with pytest.raises(ValueError):
         chden(DATA_DIR2, (0, 0, 0), 0.0, operations="")
- 
- 
+
+
 def test_chden_raises_when_no_matching_stub_found() -> None:
     with pytest.raises(ValueError, match="At least one"):
         chden(DATA_DIR2, (1, 0, 0), 0.0, operations="", charge_stub="doesnotexist")
- 
- 
+
+
 def test_chden_locate_is_idempotent() -> None:
     c = chden(DATA_DIR2, (1, 0, 0), 0.0, operations="")
     first = list(c.all_dens_files)

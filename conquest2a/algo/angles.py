@@ -1,11 +1,12 @@
 import numpy as np
-from conquest2a.conquest import conquest_coordinates_processor, Atom
+from conquest2a.conquest import Atom, conquest_coordinates
+from conquest2a.io import read_coords
 import conquest2a._types as c2at
 
 
 class angles:
-    def __init__(self, conquest_coords_processor: conquest_coordinates_processor) -> None:
-        self.conquest_coords_processor: conquest_coordinates_processor = conquest_coords_processor
+    def __init__(self, conquest_coords_processor: read_coords) -> None:
+        self.conquest_coords: conquest_coordinates = conquest_coords_processor.coords
 
     def find_unit_normal_of_three_points(self, atoms: tuple[Atom, Atom, Atom]) -> c2at.REAL_ARRAY:
         d01 = atoms[0].coords - atoms[1].coords

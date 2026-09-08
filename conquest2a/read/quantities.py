@@ -19,15 +19,13 @@ from itertools import islice
 from collections import deque
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import conquest_species, conquest_coordinates_processor, Atom
+from conquest2a.conquest import conquest_species, conquest_coordinates, Atom
 
 
 class read_static_output:
-    def __init__(
-        self, output_file: c2at.FILE_PATH, conquest_processor: conquest_coordinates_processor
-    ) -> None:
-        self.output_file = output_file
-        self.conquest_processor = conquest_processor
+    def __init__(self, output_file: str, conquest_coords: conquest_coordinates) -> None:
+        self.output_file: str = output_file
+        self.coords: conquest_coordinates = conquest_coords
 
         self.buffer: deque[str]
         self.harris_foulkes_energy: c2at.REAL_NUMBER = 0.0  # [Ha]
@@ -50,7 +48,7 @@ class read_static_output:
             # Then a block is printed for the forces for each atom
             # And also 2 extra kines for the force header
             # New line +  3 lines for Harris-Foulkes+DFT+Ground state energies
-            lines = deque(file, maxlen=25 + int(self.conquest_processor.coords.natoms) + 5)
+            lines = deque(file, maxlen=25 + int(self.coords.natoms) + 5)
             self.buffer = lines
             for line in lines:
                 line = line.strip()
@@ -64,7 +62,7 @@ class read_static_output:
             if line_to_match in line:
                 buffer_line = line
                 break
-        matches = re.findall(self.conquest_processor.re_float, buffer_line)
+        matches = re.findall(self.coords.re_float, buffer_line)
         if not matches:
             print(err_str)
             return np.inf
@@ -102,7 +100,7 @@ class read_static_output:
             islice(
                 self.buffer,
                 header_index + 1,
-                header_index + int(self.conquest_processor.coords.natoms) + 1,
+                header_index + int(self.coords.natoms) + 1,
             )
         )
         formatted_temp: list[str] = []
@@ -112,17 +110,17 @@ class read_static_output:
             # At this point, every string is of the form "Atom number, force_x, force_y, force_z"
             # So just use regex matching again to assign everything
             # ASSUMES  THAT THE CORRECT COORDINATES FILE IS USED
-            atom_number = int(re.findall(self.conquest_processor.re_index, line)[0])
-            forces = np.array(re.findall(self.conquest_processor.re_float, line), dtype=np.float64)
+            atom_number = int(re.findall(self.coords.re_index, line)[0])
+            forces = np.array(re.findall(self.coords.re_float, line), dtype=np.float64)
             # Rather than iterating through of list of atoms every time, take advantage of the fact
             # that conquest_processor.atoms is sorted by coordinate file order
             # which is preserved by CONQUEST after every run
             # so we simply assign index directly
-            self.conquest_processor.coords.atoms[atom_number - 1].forces = forces
+            self.coords.atoms[atom_number - 1].forces = forces
 
     def get_max_force_atom(self) -> Atom:
-        atom_with_max_force = self.conquest_processor.coords.atoms[0]
-        for atom in self.conquest_processor.coords.atoms[1:]:
+        atom_with_max_force = self.coords.atoms[0]
+        for atom in self.coords.atoms[1:]:
             if np.max(np.abs(atom.forces)) > np.max(np.abs(atom_with_max_force.forces)):
                 atom_with_max_force = atom
         index = np.argmax(np.abs(atom_with_max_force.forces))
@@ -144,13 +142,3 @@ class read_static_output:
             self.stresses = np.array(stresses, dtype=np.float64)
         else:
             print("Stresses were not able to be located. Stress values have not been allocated.")
-
-
-if __name__ == "__main__":
-    conq_input = conquest_species({1: "O", 2: "Bi", 3: "Mn", 4: "Mn", 5: "Mn", 6: "Mn"})
-    conq_proc = conquest_coordinates_processor("tests/data/test_output_input_coords.in", conq_input)
-    output = read_static_output("tests/data/test_output.txt", conq_proc)
-
-    print(output.conquest_processor.coords.atoms)
-    print(output.stresses)
-    output.get_max_force_atom()

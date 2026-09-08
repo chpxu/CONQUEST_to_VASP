@@ -76,13 +76,7 @@ def test_read_percent_blocks_parses_multiple_blocks(tmp_path):
 
 
 def test_read_percent_blocks_endblock_without_name(tmp_path):
-    content = (
-        "%block LATTICE_ABC\n"
-        "ang\n"
-        "5.0 5.0 5.0\n"
-        "90.0 90.0 90.0\n"
-        "%endblock\n"
-    )
+    content = "%block LATTICE_ABC\n" "ang\n" "5.0 5.0 5.0\n" "90.0 90.0 90.0\n" "%endblock\n"
     reader = make_reader_unopened(tmp_path, "test.cell", content, "cell")
     blocks = reader._read_percent_blocks()
     assert "lattice_abc" in blocks

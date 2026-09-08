@@ -86,7 +86,6 @@ force-exclude = '''
   | .*_pb2.py
   | .nix*
   | _nix*
-  | tests/*
   | conquest2a/elements\.txt$
 )
 '''

@@ -2,7 +2,6 @@ import copy
 import itertools
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import conquest_coordinates_processor
 from conquest2a.conquest import conquest_species, Atom, conquest_coordinates
 
 
@@ -20,11 +19,15 @@ class transform_unit_cell:
     :param tol:  numerical tolerance used when wrapping/deduplicating atoms, defaults to 1e-4
     :type tol: float, optional
     """
+
     def __init__(self, cq_coordinates: conquest_coordinates, tol: float = 1e-4) -> None:
         self.coords = cq_coordinates
         self.tol = tol
         self.transformed_cell_coords: conquest_coordinates
-    def _print_lattice_parameters(self, a: float, b: float, c: float, alpha: float, beta: float, gamma: float) -> None:
+
+    def _print_lattice_parameters(
+        self, a: float, b: float, c: float, alpha: float, beta: float, gamma: float
+    ) -> None:
         print(" === LATTICE PARAMETERS ===")
         print(
             f"a: {a}; b: {b}; c: {c}; alpha: {np.degrees(alpha)}, beta: {np.degrees(beta)}, gamma: {np.degrees(gamma)}"
@@ -202,18 +205,3 @@ class transform_unit_cell:
         self.transformed_cell_coords = new_cq_coord
         self._print_lattice_parameters(*new_params)
         return new_cq_coord
-
-
-if __name__ == "__main__":
-    from conquest2a.writers import conquest_writer
-
-    conquest_spec = conquest_species({1: "O", 2: "Bi", 3: "Mn", 4: "Mn"})
-    ccp = conquest_coordinates_processor(r"tests/data/transforms/unitcell.dat", conquest_spec)
-    tuc = transform_unit_cell(ccp.coords)
-    P = np.array([[1 / 2, 0, 1 / 2], [0, 1, 0], [-1 / 2, 0, 1 / 2]])
-    tuc.transform(P)
-    if tuc.transformed_cell_coords is not None:
-        conquest_writer(
-            r"tests/data/transforms/unitcell_transform_result.dat",
-            tuc.transformed_cell_coords,
-        )

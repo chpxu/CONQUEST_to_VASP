@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from conquest2a.conquest import conquest_coordinates, conquest_coordinates_processor, Atom
+from conquest2a.conquest import conquest_coordinates, conquest_species, Atom
 
 
 class supercell:
@@ -12,8 +12,8 @@ class supercell:
     :type repeats_y: ``int``
     :param repeats_z: Number of repeats along the :math:`c` lattice vector
     :type repeats_z: ``int``
-    :param coords_proc: The :class:`conquest_coordinates_processor` to use.
-    :type coords_proc: conquest_coordinates_processor
+    :param coords_proc: The :class:`conquest_coordinates` to use.
+    :type coords_proc: conquest_coordinates
     :raises ValueError: If any of the ``repeats_*`` is not a positive integer
     """
 
@@ -22,7 +22,7 @@ class supercell:
         repeats_x: int,
         repeats_y: int,
         repeats_z: int,
-        coords_proc: conquest_coordinates_processor,
+        orig_coords: conquest_coordinates,
     ) -> None:
 
         if repeats_x < 0 or repeats_y < 0 or repeats_z < 0:
@@ -33,10 +33,10 @@ class supercell:
         self.repeats_x: int = repeats_x
         self.repeats_y: int = repeats_y
         self.repeats_z: int = repeats_z
-        self.coords_proc: conquest_coordinates_processor = coords_proc
+        self.orig_coords: conquest_coordinates = orig_coords
         # Create new CONQUEST_COORDINATES
         supercell_coords_instance: conquest_coordinates = conquest_coordinates(
-            self.coords_proc.coords.conquest_input
+            self.orig_coords.conquest_input
         )
         self.supercell_coords: conquest_coordinates = supercell_coords_instance
         self.scale_lattice_vectors()
@@ -57,7 +57,7 @@ class supercell:
             ]
         )
         self.supercell_coords.lattice_vectors = np.matmul(
-            self.coords_proc.coords.lattice_vectors, repeat_matrix
+            self.orig_coords.lattice_vectors, repeat_matrix
         )
 
     def new_num_atoms(self) -> int:
@@ -99,10 +99,10 @@ class supercell:
         """
         # No repeats at all -> just return original crystal
         if self.repeats_x == 0 and self.repeats_y == 0 and self.repeats_z == 0:
-            self.supercell_coords.atoms = copy.deepcopy(self.coords_proc.coords.atoms)
-            self.supercell_coords.natoms = self.coords_proc.coords.natoms
+            self.supercell_coords.atoms = copy.deepcopy(self.orig_coords.atoms)
+            self.supercell_coords.natoms = self.orig_coords.natoms
             return
-        for atom in self.coords_proc.coords.atoms:
+        for atom in self.orig_coords.atoms:
             for l in self.range(self.repeats_x):
                 for m in self.range(self.repeats_y):
                     for n in self.range(self.repeats_z):

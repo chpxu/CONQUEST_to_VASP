@@ -275,17 +275,18 @@ class read_coords(processor_base):
         self,
         path: str,
         species: conquest_species,
-        format: Literal["vasp", "cell"] | None = None,
+        format: Literal["vasp", "cell", "cq"] | None = None,
         encoding: str = "utf-8",
         cq_units: Literal["bohr", "ang"] = "bohr",
     ) -> None:
         self._FORMATS: dict[str, str] = {
             "cell": "read_cell",
             "vasp": "read_poscar",
+            "cq": "read_conquest",
         }
         self.path: str = path
         self.species: conquest_species = species
-        self.format: Literal["vasp", "cell"] = (
+        self.format: Literal["vasp", "cell", "cq"] = (
             format if format is not None else self._get_format_from_path()
         )
         self.file: IO[Any]
@@ -299,8 +300,8 @@ class read_coords(processor_base):
         # This will store the data of the read file
         self.coords: conquest_coordinates = conquest_coordinates(self.species)
         self.read()
-        self.coords.natoms = str(self._atom_counter)
-        # self.coords.get_cartesian_positions()
+        self.coords.get_cartesian_positions()
+        self.coords.assign_atom_labels()
         self.coords.index_to_atom_map()
         self.close_file(self.file)
 
@@ -311,13 +312,13 @@ class read_coords(processor_base):
     def close_file(self, file: TextIOWrapper | IO[Any]) -> None:
         file.close()
 
-    def _get_format_from_path(self) -> Literal["vasp", "cell"]:
+    def _get_format_from_path(self) -> Literal["vasp", "cell", "cq"]:
         extension: str = Path(self.path).suffix
         if extension == ".cell":
             return "cell"
         if extension == ".vasp":
             return "vasp"
-        raise ValueError("Class read_coords currently only supports cell and poscar")
+        raise ValueError("Class read_coords currently only supports conquest, cell and poscar")
 
     def _resolve_species_names(self, counts: list[int], elements: list[str] | None) -> list[str]:
         if elements is not None:
@@ -466,6 +467,35 @@ class read_coords(processor_base):
             raise RuntimeError("Must contain exactly three lattice vectors.")
         return lattice_vect
 
+    def read_conquest(self) -> None:
+        """This method reads a CONQUEST coordinate file.
+
+        CONQUEST coords file split into 3 main chunks:
+            * first 3 lines are lattice vectors
+            * fourth line is the total number of atoms in the unit cell
+            * the following lines describe each atom and look like
+                <double> <double> <double> <int> <char> <char> <char>
+        """
+
+        conquest_lattice_data_str: list[str] = [next(self.file).strip() for _ in range(3)]
+
+        self.coords.lattice_vectors = self._read_lattice_vectors(conquest_lattice_data_str)
+        self.coords.natoms = next(self.file)
+        atom_data: list[str] = self.file.readlines()
+        atom_data_stripped: list[str] = [atom for atom in atom_data if atom.strip()]
+        atom_number = 1
+        for atom in atom_data_stripped:
+            split_atom_data: list[str] = atom.strip().split()
+            self.coords.atoms.append(
+                Atom(
+                    species=int(split_atom_data[3]),
+                    can_move=split_atom_data[4:],
+                    coords=np.array(split_atom_data[:3]).astype(float),
+                    number=atom_number,
+                )
+            )
+            atom_number += 1
+
     def read_cell(self) -> None:
         """Parse a CASTEP cell file completely and fill out a ``conquest_coordinate`` instance
 
@@ -589,6 +619,7 @@ class read_coords(processor_base):
                 a, b, c = a * BOHR_TO_ANGSTROM, b * BOHR_TO_ANGSTROM, c * BOHR_TO_ANGSTROM
             alpha, beta, gamma = np.radians(alpha), np.radians(beta), np.radians(gamma)
             self.coords.lattice_vectors = self._make_triclinic_lattice(a, b, c, alpha, beta, gamma)
+
         # Atom position and spin
         if "positions_frac" in blocks and "positions_abs" in blocks:
             raise ValueError(
@@ -606,6 +637,7 @@ class read_coords(processor_base):
             atoms = params[1:]
             for atomline in atoms:
                 self.coords.atoms.append(_parse_atom(atomline, cart=True))
+        self.coords.natoms = str(self._atom_counter)
 
     def read_poscar(self) -> None:
         """Method which reads a POSCAR file extracting only what is needed to make a CONQUEST coordinates instance
@@ -683,6 +715,7 @@ class read_coords(processor_base):
                 )
                 self.coords.atoms.append(atom)
                 self._atom_counter += 1
+        self.coords.natoms = str(self._atom_counter)
 
     def read(self) -> None:
         """Wrapper function to read file based off ``self.format``.

@@ -1,8 +1,6 @@
 import importlib.resources
-from typing import Any
 from ase.units import Bohr, Hartree
 import matplotlib as mpl
-from matplotlib import RcParams
 import matplotlib.pyplot as plt
 import scienceplots
 

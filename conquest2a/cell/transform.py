@@ -2,7 +2,7 @@ import copy
 import itertools
 import numpy as np
 import conquest2a._types as c2at
-from conquest2a.conquest import conquest_species, Atom, conquest_coordinates
+from conquest2a.conquest import Atom, conquest_coordinates
 
 
 class transform_unit_cell:
@@ -21,9 +21,9 @@ class transform_unit_cell:
     """
 
     def __init__(self, cq_coordinates: conquest_coordinates, tol: float = 1e-4) -> None:
-        self.coords = cq_coordinates
-        self.tol = tol
-        self.transformed_cell_coords: conquest_coordinates
+        self.coords: conquest_coordinates = cq_coordinates
+        self.tol: float = tol
+        self.transformed_cell_coords: conquest_coordinates = conquest_coordinates(self.coords.conquest_input)
 
     def _print_lattice_parameters(
         self, a: float, b: float, c: float, alpha: float, beta: float, gamma: float

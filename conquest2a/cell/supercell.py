@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from conquest2a.conquest import conquest_coordinates, conquest_species, Atom
+from conquest2a.conquest import conquest_coordinates, Atom
 
 
 class supercell:

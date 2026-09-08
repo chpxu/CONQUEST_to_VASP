@@ -1,20 +1,19 @@
-from dataclasses import dataclass, field
-from re import Pattern
-from typing import Callable
+import os
 import sys
+import re
+from re import Pattern
+from dataclasses import dataclass, field
+from typing import Callable
 
 if sys.version_info >= (3, 12):
     from typing import override
 else:
     from typing_extensions import override
-import os
-import re
 import importlib.resources
 from pathlib import Path
 from collections.abc import Sequence
 import numpy as np
 import ase
-from conquest2a.constants import BOHR_TO_ANGSTROM_VOLUME
 import conquest2a._types as c2at
 
 

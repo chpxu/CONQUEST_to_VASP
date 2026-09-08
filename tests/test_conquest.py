@@ -1,6 +1,5 @@
 from conquest2a.conquest import *
 from conquest2a.supercell import *
-from conquest2a.io.writers import *
 import numpy as np
 import pytest
 

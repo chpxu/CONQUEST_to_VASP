@@ -93,13 +93,18 @@ class conquest_species:
         self.species_dict: dict[int, str] = species_dict
         self.element_to_species_dict: dict[str, list[int]] = {}
         self.create_element_to_species_dict()
-        # elements_from_file = LIBRARY.joinpath(self.element_file)
         elements_from_file: str = importlib.resources.read_text("conquest2a", self.element_file)
         self.elements: list[str] = [e.strip() for e in elements_from_file.split(",")]
         self.allowed_element_labels: list[str] = self.elements
         if not self.dict_contains_only_real_elements():
             raise ValueError("Provided species map contains fake chemical elements.")
         self.unique_elements: list[str] = list(set(self.species_dict.values()))
+
+    @override
+    def __str__(self) -> str:
+        for key, val in self.element_to_species_dict.items():
+            print(f"{key}: {val}")
+        return str(self.element_to_species_dict)
 
     def dict_contains_only_real_elements(self) -> bool:
         species_dict_values: list[str] = list(self.species_dict.values())

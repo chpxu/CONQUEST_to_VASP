@@ -1,15 +1,29 @@
 # 0.4.0
 
 ## Features
-- New density API
+- New density API, `conquest2a.density`
     - generic processing is handled by the `density` class inside the `density` module. It now handles a generic set of parameters to slice and extract the relevant data from supplied files. It now supports combining an arbitrary amount of files in a specified way. For example, if you pass in files `["a", "b", "c"]` and "+*" then the class will contain the resulting data as `(a + b) * c`, i.e. it applies operations sequentially and left-to-right like VESTA.
     - Subclasses `chden` and `bandden` handle file searching for charge density output or band density output.These classes then attach a `density` instance to themselves with the filtered files
     - `bandden` supports filtering by band number, $k$-point and spin
     - `chden` supports filtering for spin-(un)polarised calculations, as well as searching for stubs instead.
+- New IO API, `conquest2a.io`
+    - File writing and reading is now handled entirely by the new `io.write_coords` and `io.read_coords`, no need to go class hunting
+    - Improved object-oriented API: define `conquest_species`, create `write/read_coords` which will automaticaly write file for you
+    - Automatic file extension detection if you don't supply a format
+- New `cell` module, `conquest2a.cell`
+    - VESTA-like unit cell transformations are handled with the new `cell.transform` module. There is only one class: `transform_unit_cell`
+    - Define a transformation matrix $P$ and call it as `transform_unit_cell.transform(P)` which will return a new `conquest_coordinates` instance you can use
+    - The `Atom` class now has a new member: `symmetry_number`. When doing unit cell transforms, it is set to the original atom number which created it. This may be useful for identifying a bulk set of atoms to manipulate.
 
 ## Other
 - Tests introduced for `conquest` module
 - Tests introduced for new `density` module on real data
+- Tests introduced for new `io` module
+- Original `supercell` module now moved under `cell.supercell`
+
+## Bug fixes
+- Unit conversion errors (everyone's favourite)
+
 # 0.3.0
 
 ## Features
@@ -23,7 +37,7 @@
 
 - Fix calculation of grid vectors in charge density plot
 - Fix incorrect placement of atom labels in charge density plot
-- Convert `chden` to use Bohr units completely 
+- Convert `chden` to use Bohr units completely
 
 ## Other
 - BREAKING: the `conquest_input` class has been renamed to `conquest_species` to better reflect its purpose. The argument `conquest_input` will now take in this new class instead.
@@ -45,7 +59,7 @@
 <!-- - Classes generating a Conquest_input file with sane defaults is in `src/generate_run.py` (NEW)-->
 - `xsf` file-format with spin (NEW)
     - Modify the `Atom` class with a `spin` attribute that can optionally be filed
-    - Create a `atom_charge` class to process `AtomCharge.dat` 
+    - Create a `atom_charge` class to process `AtomCharge.dat`
     - create an `xsf_writer` class in `src/writers.py` to write this data, including the spin
 - pDOS processing (NEW!)
     - Supports reading pDOS files for $l,m$ and $l$ decomposed situations

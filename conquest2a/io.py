@@ -14,6 +14,7 @@ from conquest2a.conquest import Atom, conquest_species, conquest_coordinates, pr
 from conquest2a.constants import BOHR_TO_ANGSTROM, ANGSTROM_TO_BOHR
 from conquest2a._types import REAL_ARRAY
 
+
 class write_coords(processor_base):
     """
     Class to convert data held in a :class:`conquest_coordinates` instance into various coordinate file formats: xsf, cell, vasp, xyz and extxyz.
@@ -24,7 +25,7 @@ class write_coords(processor_base):
     :param cq_coords: :class:`conquest_coordinates` instance with data
     :type cq_coords: conquest_coordinates
     :param format: Type of coordinate file to write
-    :type format: Literal[&quot;vasp&quot;,&quot;cell&quot;,&quot;xyz&quot;,&quot;extxyz&quot;, &quot;xsf&quot;]
+    :type format: Literal["cq","vasp","cell","xyz","extxyz", "xsf"]
     :param precision: Number of decimal places, defaults to 10
     :type precision: int, optional
     :param mode: File IO mode, defaults to "w"
@@ -32,8 +33,8 @@ class write_coords(processor_base):
     :param encoding: File encoding, defaults to "utf-8"
     :type encoding: str, optional
     :param convert_to: Whether to convert lattice parameters and cartesian coordinates to specified units, defaults to None (data is preserved as-is)
-    :type convert_to: Literal[&quot;bohr&quot;, &quot;ang&quot;] | None, optional
-    :param comment_line: _description_, defaults to ""
+    :type convert_to: Literal["bohr", "ang"] | None, optional
+    :param comment_line: What unit factor to target, defaults to ``None`` (content written as-is)
     :type comment_line: str, optional
     :param time: Animation time (extxyz only), defaults to 0.0
     :type time: float, optional
@@ -43,8 +44,28 @@ class write_coords(processor_base):
     :type write_force: bool, optional
     :raises ValueError: If write_force and write_spin are True, error out.
     """
-    def __init__(self, dest: str, cq_coords: conquest_coordinates, format: Literal["vasp","cell","xyz","extxyz", "xsf", "other"],
-        precision: int = 10, mode: str = "w", encoding: str = "utf-8", convert_to: Literal["bohr", "ang"] | None = None, comment_line: str = "", time: float = 0.0, write_spin: bool = False, write_force: bool = False) -> None:
+
+    def __init__(
+        self,
+        dest: str,
+        cq_coords: conquest_coordinates,
+        format: Literal["cq", "vasp", "cell", "xyz", "extxyz", "xsf"],
+        precision: int = 10,
+        mode: str = "w",
+        encoding: str = "utf-8",
+        convert_to: Literal["bohr", "ang"] | None = None,
+        comment_line: str = "",
+        time: float = 0.0,
+        write_spin: bool = False,
+        write_force: bool = False,
+    ) -> None:
+        self._FORMATS: dict[str, str] = {
+            "cell": "write_cell",
+            "cq": "write_conquest",
+            "vasp": "write_poscar",
+            "xyz": "write_xyz",
+            "extxyz": "write_extxyz",
+        }
         self.mode: str = mode
         self.data: conquest_coordinates = cq_coords
         self.format: str = format
@@ -56,13 +77,16 @@ class write_coords(processor_base):
         self.write_spin: bool = write_spin
         self.write_force: bool = write_force
         if self.write_force and self.write_spin:
-            raise ValueError("Cannot write both atom forces and atom spins to same coordinate file.")
+            raise ValueError(
+                "Cannot write both atom forces and atom spins to same coordinate file."
+            )
         super().__init__(path=dest)
-        self.resolve_path(self.dest_path)
         self.comment_line: str = comment_line
         self.file: IO[Any]
 
         self.open_file()
+        self.write()
+        self.close_file(self.file)
 
     @override
     def open_file(self) -> None:
@@ -73,15 +97,15 @@ class write_coords(processor_base):
 
     def _write_2d_array_with_precision(self, arr: REAL_ARRAY) -> str:
         prec = self.precision
-        return "\n".join("\t".join(f"%0.{prec}f" % x for x in y) for y in arr)
+        return "\n".join(" ".join(f"%0.{prec}f" % x for x in y) for y in arr)
 
     def _write_1d_array_with_precision(self, arr: REAL_ARRAY) -> str:
         prec = self.precision
-        return "\n".join("\t".join(f"%0.{prec}f" % x for x in arr))
+        return "".join(" ".join(f"%0.{prec}f" % x for x in arr))
 
     def _lattice_vect_units_converter(self, arr: REAL_ARRAY) -> REAL_ARRAY:
         if self.convert_units == "bohr":
-            return arr / ANGSTROM_TO_BOHR
+            return arr * ANGSTROM_TO_BOHR
         elif self.convert_units == "ang":
             return arr * BOHR_TO_ANGSTROM
         return arr
@@ -98,11 +122,13 @@ class write_coords(processor_base):
         return ele_string, num_string
 
     def write_conquest(self) -> None:
-        """Method to write a CONQUEST coordinates file given a :class:`conquest_coordinates` instance.
-        """
+        """Method to write a CONQUEST coordinates file given a :class:`conquest_coordinates` instance."""
         self.file.write(
-        self._write_2d_array_with_precision(self._lattice_vect_units_converter(self.data.lattice_vectors))
+            self._write_2d_array_with_precision(
+                self._lattice_vect_units_converter(self.data.lattice_vectors)
+            )
         )
+        self.file.write("\n")
         self.file.write(self.data.natoms)
         self.file.write("\n")
         for atom in self.data.atoms:
@@ -116,7 +142,7 @@ class write_coords(processor_base):
 
         :param dest: Path to write the new coordinates file.
         :type dest: ``str``
-        :param data: :class:`~conquest.conquest_coordinates` instance to write.
+        :param data: :class:`conquest.conquest_coordinates` instance to write.
         :type data: ``conquest_coordinates``
         :param encoding: File encoding, defaults to "utf-8"
         :type encoding: ``str``, optional
@@ -128,7 +154,9 @@ class write_coords(processor_base):
         self.file.write(f"{ele_string}\n")
         self.file.write("1.0\n")
         self.file.write(
-        self._write_2d_array_with_precision(self._lattice_vect_units_converter(self.data.lattice_vectors))
+            self._write_2d_array_with_precision(
+                self._lattice_vect_units_converter(self.data.lattice_vectors)
+            )
         )
         self.file.write(f"{ele_string}\n")
         self.file.write(f"{num_string}\n")
@@ -137,25 +165,27 @@ class write_coords(processor_base):
             for atom in self.data.element_map[atoms]:
                 self.file.write(self._write_1d_array_with_precision(atom.coords))
                 self.file.write("\n")
+
     def write_cell(self):
         pass
 
     def write_xyz(self) -> None:
-        """Method to write a ``.xyz`` for a basic XYZ file given a :class:`~conquest.conquest_coordinates` instance.
-        """
+        """Method to write a ``.xyz`` for a basic XYZ file given a :class:`~conquest.conquest_coordinates` instance."""
         self.file.write(f"{self.data.natoms}")
         self.file.write(f"{self.comment_line}\n")
         for atoms in self.data.element_map:
             for atom in self.data.element_map[atoms]:
                 self.file.write(
-                    rf'{atoms} {self._write_1d_array_with_precision(self._lattice_vect_units_converter(atom.cart_coords))}'
+                    rf"{atoms} {self._write_1d_array_with_precision(self._lattice_vect_units_converter(atom.cart_coords))}"
                 )
                 self.file.write("\n")
+
     def write_extxyz(self):
         """Method to write a ``.extxyz`` for a basic XYZ file given a :class:`~conquest.conquest_coordinates` instance.
 
         The main advantage of `.extxyz` is the ability to specify columns and the time, which is very useful for animations. I recommend just using CONQUEST's ability to output ``.extxyz`` files at different timesteps however.
         """
+
         def extxyz_comment_line() -> str:
             """Creates the ``.extxyz`` comment line: specifies columns, formats and time.
 
@@ -171,23 +201,26 @@ class write_coords(processor_base):
             time_str: str = f"Time={str(self.time)}"
             lat: str = " ".join(str(x) for x in lattice)
             return f'Lattice="{lat}" {property_str} {time_str}'
+
         self.comment_line = extxyz_comment_line()
         self.write_xyz()
 
-
     def write_xsf(self) -> None:
-        """Method to write an XSF file optionally with a vector attached to each atom
-        """
+        """Method to write an XSF file optionally with a vector attached to each atom"""
         self.file.write("CRYSTAL\n")
         self.file.write("PRIMVEC\n")
-        self._write_2d_array_with_precision(self._lattice_vect_units_converter(self.data.lattice_vectors))
+        self._write_2d_array_with_precision(
+            self._lattice_vect_units_converter(self.data.lattice_vectors)
+        )
         self.file.write("PRIMCOORD\n")
         natom_line: str = f'{" ".join(self.data.natoms.split())} 1\n'
         self.file.write(natom_line)
         for element, atoms in self.data.element_map.items():
             for atom in atoms:
-                pos_string: str = self._write_1d_array_with_precision(self._lattice_vect_units_converter(atom.cart_coords))
-                extra: REAL_ARRAY = np.array([0.0,0.0,0.0])
+                pos_string: str = self._write_1d_array_with_precision(
+                    self._lattice_vect_units_converter(atom.cart_coords)
+                )
+                extra: REAL_ARRAY = np.array([0.0, 0.0, 0.0])
                 if self.write_spin:
                     extra = atom.spins
                 elif self.write_force:
@@ -195,40 +228,58 @@ class write_coords(processor_base):
                 extra2: str = self._write_1d_array_with_precision(extra)
                 self.file.write(f" {element} {pos_string} {extra2}\n")
 
+    def write(self) -> None:
+        """Wrapper function to write file based off ``self.format``.
+        :raises ValueError: If ``self.format`` is unsupported.
+        """
+        try:
+            method_name = self._FORMATS[self.format]
+        except KeyError:
+            supported = ", ".join(sorted(self._FORMATS))
+            raise ValueError(
+                f"Unsupported format '{self.format}'; supported formats are: {supported}"
+            ) from None
 
+        reader = getattr(self, method_name)
+        reader()
+
+
+# Reading
 class read_coords(processor_base):
     """Class to read external coordinates data and store them in a :class:`conquest_coordinates` instance.
 
-        :param path: Path to file to read
-        :type path: str
-        :param species: :class:`conquest_species` instance
-        :type species: conquest_species
-        :param format: File format, defaults to ``None`` in which case it will infer from the file extension of ``path``
-        :type format: Literal[&quot;vasp&quot;, &quot;cell&quot;] | None, optional
-        :param encoding: File encoding, defaults to "utf-8"
-        :type encoding: str, optional
-        :param convert_from: Units of the system, defaults to "bohr". `vasp` is assumed to be entirely in angstroms.
-        :type convert_from: Literal[&quot;bohr&quot;, &quot;ang&quot;], optional
+    :param path: Path to file to read
+    :type path: str
+    :param species: :class:`conquest_species` instance
+    :type species: conquest_species
+    :param format: File format, defaults to ``None`` in which case it will infer from the file extension of ``path``
+    :type format: Literal["vasp", "cell"] | None, optional
+    :param encoding: File encoding, defaults to "utf-8"
+    :type encoding: str, optional
+    :param cq_units: Units to use in :class:`conquest_coordinates`, defaults to "bohr". `vasp` is assumed to be read entirely in angstroms.
+    :type cq_units: Literal["bohr", "ang"], optional
     """
+
     def __init__(
         self,
         path: str,
         species: conquest_species,
         format: Literal["vasp", "cell"] | None = None,
         encoding: str = "utf-8",
-        convert_from: Literal["bohr", "ang"] = "bohr"
+        cq_units: Literal["bohr", "ang"] = "bohr",
     ) -> None:
-        self._FORMAT_READERS: dict[str, str] = {
+        self._FORMATS: dict[str, str] = {
             "cell": "read_cell",
             "vasp": "read_poscar",
         }
         self.path: str = path
         self.species: conquest_species = species
-        self.format: str | None = format
-        if self.format is None: self._get_format_from_path()
+        self.format: Literal["vasp", "cell"] = (
+            format if format is not None else self._get_format_from_path()
+        )
         self.file: IO[Any]
         self.encoding: str = encoding
-        self.convert_from: Literal["bohr", "ang"] = convert_from
+        self.cq_units: Literal["bohr", "ang"] = cq_units
         self._atom_counter: int = 0
         self.fix_ions: bool = False
         super().__init__(self.path)
@@ -237,6 +288,9 @@ class read_coords(processor_base):
         # This will store the data of the read file
         self.coords: conquest_coordinates = conquest_coordinates(self.species)
         self.read()
+        self.coords.natoms = str(self._atom_counter)
+        # self.coords.get_cartesian_positions()
+        self.coords.index_to_atom_map()
         self.close_file(self.file)
 
     @override
@@ -245,11 +299,15 @@ class read_coords(processor_base):
 
     def close_file(self, file: TextIOWrapper | IO[Any]) -> None:
         file.close()
-    def _get_format_from_path(self) -> str:
+
+    def _get_format_from_path(self) -> Literal["vasp", "cell"]:
         extension: str = Path(self.path).suffix
-        if extension not in ["cell", "vasp"]:
-            raise ValueError("Class read_coords currently only supports cell and poscar")
-        return extension
+        if extension == ".cell":
+            return "cell"
+        if extension == ".vasp":
+            return "vasp"
+        raise ValueError("Class read_coords currently only supports cell and poscar")
+
     def _resolve_species_names(self, counts: list[int], elements: list[str] | None) -> list[str]:
         if elements is not None:
             return [element.strip() for element in elements]
@@ -260,9 +318,7 @@ class read_coords(processor_base):
                 labels.append(label)
                 seen.add(label)
         if len(labels) != len(counts):
-            raise RuntimeError(
-                "Number of element types and number of counts are mismatched"
-            )
+            raise RuntimeError("Number of element types and number of counts are mismatched")
         return labels
 
     def _resolve_species_id(self, label: str) -> int:
@@ -351,11 +407,12 @@ class read_coords(processor_base):
                 # Inside a block, so store the line.
                 # Do not do a full trim as entries are whitespace-separated
                 stripped = line.rstrip("\n")
-                if stripped != "": current_lines.append(stripped)
+                if stripped != "":
+                    current_lines.append(stripped)
         result: dict[str, list[str]] = {}
         for name, data in blocks.items():
             if len(data) > 1:
-                raise ValueError(f"File {self.path} had multiple blocks with {name}" )
+                raise ValueError(f"File {self.path} had multiple blocks with {name}")
             result[name] = data[0]
         return result
 
@@ -378,9 +435,9 @@ class read_coords(processor_base):
 
         :param lines: List of string to convert to lattice vector arrays
         :type lines: list[str]
-        :raises RuntimeError: _description_
-        :raises RuntimeError: _description_
-        :return: _description_
+        :raises RuntimeError: If a string to convert to lattice vector does not have 3 space-separated entries
+        :raises RuntimeError: If there are not exactly 3 lattice vectors at the end of the conversion
+        :return: 2D array of lattice vectors. Each row is a lattice vector
         :rtype: REAL_ARRAY
         """
         if len(lines) != 3:
@@ -400,7 +457,11 @@ class read_coords(processor_base):
 
     def read_cell(self) -> None:
         """Parse a CASTEP cell file completely and fill out a ``conquest_coordinate`` instance
+
+        :raises KeyError: If neither lattice_cart nor lattice_abc are in the cell file
+        :raises KeyError: If neither position_cart nor position_abs are in the cell file
         """
+
         def _parse_atom(line: str, cart: bool = False) -> Atom:
             """
             Parse an atom positions line of the form:
@@ -423,7 +484,7 @@ class read_coords(processor_base):
             if len(parts) < 4:
                 raise ValueError(f"Atom line is formatted incorrectly: {line!r}")
 
-            label = parts[0]
+            label: str = parts[0]
             if label not in self.coords.conquest_input.allowed_element_labels:
                 raise ValueError("Element label was not a valid element")
 
@@ -434,7 +495,7 @@ class read_coords(processor_base):
             if len(rest) > 0:
                 if rest[0].upper() != "SPIN":
                     raise ValueError(f"Unexpected trailing content in atom line: {line!r}")
-                spin_values = rest[1:]
+                spin_values: list[str] = rest[1:]
                 if len(spin_values) == 1:
                     spin = np.array([0.0, 0.0, float(spin_values[0])])
                 elif len(spin_values) == 3:
@@ -449,15 +510,17 @@ class read_coords(processor_base):
             atom_line: Atom = Atom(
                 species=spin_species[-1] if spin[2] < 0.0 else spin_species[0],
                 number=self._atom_counter,
-                coords=position if not cart else position @ np.linalg.inv(self.coords.lattice_vectors),
+                coords=(
+                    position if not cart else position @ np.linalg.inv(self.coords.lattice_vectors)
+                ),
                 label=label,
                 can_move=move_line,
                 spins=spin,
-                cart_coords=position if cart else position @ self.coords.lattice_vectors
+                cart_coords=position if cart else position @ self.coords.lattice_vectors,
             )
             self._atom_counter += 1
-
             return atom_line
+
         # Return back to read_cell
         block_data: dict[str, list[str]] = self._read_percent_blocks()
         flags: dict[str, str] = defaultdict(str)
@@ -478,25 +541,52 @@ class read_coords(processor_base):
             if parts[0].isalpha():
                 flags[parts[0]] = parts[1:]
                 continue
-            self.fix_ions = True if  flags[parts[0]] == "T" else False
+            self.fix_ions = True if flags[parts[0]] == "T" else False
         # in CELL file, can supply LATTICE_ABS or LATTICE_CART, which have different information
         blocks = block_data.keys()
         if "lattice_cart" in blocks and "lattice_abc" in blocks:
-            raise ValueError("Only one of LATTICE_CART and LATTICE_ABC may occur in a cell definition file.")
+            raise ValueError(
+                "Only one of LATTICE_CART and LATTICE_ABC may occur in a cell definition file."
+            )
+        if "lattice_cart" not in blocks and "lattice_abc" not in blocks:
+            raise KeyError(f"Neither lattice_cart nor lattice_abc was found in {self.path}.")
         if "lattice_cart" in blocks:
-            lattice_vect = self._read_lattice_vectors(block_data["lattice_cart"])
+            units = (block_data["lattice_cart"][0]).lower()
+            lattice_vect = self._read_lattice_vectors(block_data["lattice_cart"][1:])  # avoid units
+            if units == "ang" and "bohr" == self.cq_units:
+                lattice_vect *= ANGSTROM_TO_BOHR
+            if units == "bohr" and "ang" == self.cq_units:
+                lattice_vect *= BOHR_TO_ANGSTROM
             self.coords.lattice_vectors = lattice_vect
         if "lattice_abc" in blocks:
             params: list[str] = block_data["lattice_abc"]
-            a,b,c = params[1].split()
-            alpha,beta,gamma = params[2].split()
-            a,b,c,alpha,beta,gamma = float(a),float(b),float(c),float(alpha),float(beta),float(gamma)
-            alpha,beta,gamma = np.radians(alpha),np.radians(beta),np.radians(gamma)
-            self.coords.lattice_vectors = self._make_triclinic_lattice(a,b,c,alpha,beta,gamma)
+            units = params[0]
+            a, b, c = params[1].split()
+
+            alpha, beta, gamma = params[2].split()
+            a, b, c, alpha, beta, gamma = (
+                float(a),
+                float(b),
+                float(c),
+                float(alpha),
+                float(beta),
+                float(gamma),
+            )
+            if units == "ang" and "bohr" == self.cq_units:
+                a, b, c = a * ANGSTROM_TO_BOHR, b * ANGSTROM_TO_BOHR, c * ANGSTROM_TO_BOHR
+            if units == "bohr" and "ang" == self.cq_units:
+                a, b, c = a * BOHR_TO_ANGSTROM, b * BOHR_TO_ANGSTROM, c * BOHR_TO_ANGSTROM
+            alpha, beta, gamma = np.radians(alpha), np.radians(beta), np.radians(gamma)
+            self.coords.lattice_vectors = self._make_triclinic_lattice(a, b, c, alpha, beta, gamma)
         # Atom position and spin
         if "positions_frac" in blocks and "positions_abs" in blocks:
-            raise ValueError("Only one of POSITIONS_FRAC and POSITION_ABS may occur in a cell definition file.")
+            raise ValueError(
+                "Only one of POSITIONS_FRAC and POSITION_ABS may occur in a cell definition file."
+            )
+        if "positions_frac" not in blocks and "positions_abs" not in blocks:
+            raise KeyError(f"Neither POSITIONS_FRAC nor POSITION_ABS was found in in {self.path}.")
         if "positions_frac" in blocks:
+
             for atomline in block_data["positions_frac"]:
                 self.coords.atoms.append(_parse_atom(atomline))
         # positions_abs has first line determining units
@@ -510,6 +600,7 @@ class read_coords(processor_base):
         """Method which reads a POSCAR file extracting only what is needed to make a CONQUEST coordinates instance
 
         :raises ValueError: If the number of scaling factors is incorrect
+        :raises NotImplementedError: Negative scale factors
         """
         selective_dynamics: bool = False
         direct: bool = True
@@ -529,15 +620,17 @@ class read_coords(processor_base):
         if len(scale) != 3 and len(scale) != 1:
             raise ValueError("There were not 1 or 3 scale factors")
         # Normally scale factor is 1.0 so default is identity matrix
+        if any(float(s) < 0 for s in scale):
+            raise NotImplementedError("Negative scaling factors in POSCAR are unsupported")
         scale_matrix = np.eye(3)
         if len(scale) == 3:
             scale_matrix = np.diag([float(scale[0]), float(scale[1]), float(scale[2])])
         elif len(scale) == 1:
-            scale_matrix = np.diag([float(scale[0]),float(scale[0]),float(scale[0])])
+            scale_matrix = np.diag([float(scale[0]), float(scale[0]), float(scale[0])])
         # Now ion species and counts. We do not assume POTCAR available so require ion species and counts
         line_idx += 1
         # Lattice vectors
-        latt_str = [lines[line_idx],lines[line_idx+1],lines[line_idx+2]]
+        latt_str = [lines[line_idx], lines[line_idx + 1], lines[line_idx + 2]]
         self.coords.lattice_vectors = self._read_lattice_vectors(latt_str) @ scale_matrix
         line_idx += 3
         # The default is ang for POSCAR anyways
@@ -545,7 +638,7 @@ class read_coords(processor_base):
         # Ion species and numbers
         elements = lines[line_idx].split()  # store elements
         line_idx += 1
-        counts = [int(t) for t in lines[line_idx].split()] # store element counts
+        counts = [int(t) for t in lines[line_idx].split()]  # store element counts
         line_idx += 1
 
         labels = self._resolve_species_names(counts, elements)
@@ -568,7 +661,7 @@ class read_coords(processor_base):
                     pos = coord_vals % 1.0
                 else:
                     # Return to fractional coordinates, taking into account scaling and ang units
-                    pos = ANGSTROM_TO_BOHR * (coord_vals  @ scale_matrix @inv_lattice)
+                    pos = ANGSTROM_TO_BOHR * (coord_vals @ scale_matrix @ inv_lattice)
                 can_move = parts[3:6] if selective_dynamics and len(parts) >= 6 else ["T", "T", "T"]
                 atom = Atom(
                     species=species_id,
@@ -585,13 +678,23 @@ class read_coords(processor_base):
         :raises ValueError: If ``self.format`` is unsupported.
         """
         try:
-            method_name = self._FORMAT_READERS[self.format]
+            method_name = self._FORMATS[self.format]
+            reader = getattr(self, method_name)
+            reader()
         except KeyError:
-            supported = ", ".join(sorted(self._FORMAT_READERS))
+            supported = ", ".join(sorted(self._FORMATS))
             raise ValueError(
                 f"Unsupported format '{self.format}'; supported formats are: {supported}"
             ) from None
 
-        reader = getattr(self, method_name)
-        reader()
 
+def main() -> None:
+    kcuf3spec = conquest_species({1: "K", 2: "Cu", 3: "Cu", 4: "F"})
+    print(kcuf3spec)
+    cq = read_coords("tests/data/files/kcuf3.cell", species=kcuf3spec, format="cell")
+    print(cq.coords.lattice_vectors)
+    write_coords("tests/data/files/kcuf3.dat", cq.coords, format="cq", convert_to="bohr")
+
+
+if __name__ == "__main__":
+    main()

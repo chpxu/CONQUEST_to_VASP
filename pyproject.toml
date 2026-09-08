@@ -49,7 +49,7 @@ ignore_missing_imports = true
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_return_any = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 untyped_calls_exclude = ["ase"]
 
 [[tool.mypy.overrides]]
@@ -71,6 +71,7 @@ disable_error_code = [
   # "return",
   # "syntax",
   "unused-ignore",
+  "ignore-without-code",
   # "union-attr",
   # "var-annotated",
 ]
@@ -85,7 +86,6 @@ force-exclude = '''
   | .*_pb2.py
   | .nix*
   | _nix*
-  | tests/*
   | conquest2a/elements\.txt$
 )
 '''

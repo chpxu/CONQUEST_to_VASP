@@ -1,19 +1,19 @@
+import os
+import sys
+import re
+from os.path import abspath
 from pathlib import Path
 from re import Match
 from typing import Any, Literal
-import sys
 
 if sys.version_info >= (3, 12):
     from typing import override
 else:
     from typing_extensions import override
-import os
-import re
-from os.path import abspath
 import numpy as np
 import matplotlib.pyplot as plt
-from conquest2a.conquest import block_processor
 import conquest2a._types as c2at
+from conquest2a.conquest import block_processor
 
 
 class pdos_processor(block_processor):
@@ -101,7 +101,7 @@ class pdos_processor(block_processor):
         pdos_file_list: list[str] = []
         # The search is done because a directory can contain both lm, l resolved pDOS files
         for filename in file_list:
-            match: Match[str] | None = re.search(f"([0-9]{{7}})", filename)
+            match: Match[str] | None = re.search(r"([0-9]{7})", filename)
             if match:
                 self.pdos_atoms.append(int(match.group(1)))
             res: Match[str] | None = re.match(self.filename_regex, filename)
@@ -392,9 +392,7 @@ class pdos_lm_processor(pdos_processor):
         y_label = r"$\text{DOS} [\text{states/eV}]$"
         super().plot_pdos()
         if not set(atomnos).issubset(self.pdos_atoms):
-            raise ValueError(f"Some chosen atoms for pdos plotting was not in the atom list")
-        # energy_mask = np.ma.masked_inside(self.energy_values[1], x1, x2).mask #type: ignore
-        # x_energy = self.energy_values[1][energy_mask]
+            raise ValueError("Some chosen atoms for pdos plotting was not in the atom list")
         # Plot the same orbitals from each atom on the same plot
         _fig = plt.figure()
 

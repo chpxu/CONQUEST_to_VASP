@@ -1,31 +1,34 @@
 from conquest2a.conquest import *
 from conquest2a.cell.supercell import *
-from conquest2a.writers import *
+from conquest2a.io import read_coords
 import pytest
 
 test_input = conquest_species({1: "Bi", 2: "Mn", 3: "Mn", 4: "O"})
-test_coords_proc = conquest_coordinates_processor("tests/data/test.dat", test_input)
+temp = read_coords("tests/data/test.dat", test_input, format="cq")
+test_coords_proc: conquest_coordinates = temp.coords
 
 
 def test_integer_params() -> None:
     single_cell: supercell = supercell(
-        repeats_x=1, repeats_y=1, repeats_z=1, coords_proc=test_coords_proc
+        repeats_x=1, repeats_y=1, repeats_z=1, orig_coords=test_coords_proc
     )
-    assert single_cell.coords_proc.coords is not None
+    assert single_cell.orig_coords is not None
 
 
 def test_at_least_zero() -> None:
     with pytest.raises(ValueError):
-        supercell(repeats_x=-1, repeats_y=1, repeats_z=1, coords_proc=test_coords_proc)
-        supercell(repeats_x=1, repeats_y=-32, repeats_z=1, coords_proc=test_coords_proc)
-        supercell(repeats_x=1, repeats_y=1, repeats_z=-1, coords_proc=test_coords_proc)
+        supercell(repeats_x=-1, repeats_y=1, repeats_z=1, orig_coords=test_coords_proc)
+        supercell(repeats_x=1, repeats_y=-32, repeats_z=1, orig_coords=test_coords_proc)
+        supercell(repeats_x=1, repeats_y=1, repeats_z=-1, orig_coords=test_coords_proc)
 
 
 def test_single_repeat_x() -> None:
-    new_cell: supercell = supercell(repeats_x=1, repeats_y=0, repeats_z=0, coords_proc=test_coords_proc)
+    new_cell: supercell = supercell(
+        repeats_x=1, repeats_y=0, repeats_z=0, orig_coords=test_coords_proc
+    )
     num_repeats = (new_cell.repeats_x + new_cell.repeats_y + new_cell.repeats_z) + 1
-    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords_proc.coords.natoms)
-    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords_proc.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.orig_coords.natoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.orig_coords.atoms)
     assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.92770000
@@ -45,10 +48,12 @@ def test_single_repeat_x() -> None:
 
 
 def test_single_repeat_y() -> None:
-    new_cell: supercell = supercell(repeats_x=0, repeats_y=1, repeats_z=0, coords_proc=test_coords_proc)
+    new_cell: supercell = supercell(
+        repeats_x=0, repeats_y=1, repeats_z=0, orig_coords=test_coords_proc
+    )
     num_repeats = (new_cell.repeats_x + new_cell.repeats_y + new_cell.repeats_z) + 1
-    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords_proc.coords.natoms)
-    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords_proc.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.orig_coords.natoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.orig_coords.atoms)
     assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.92770000
@@ -68,10 +73,12 @@ def test_single_repeat_y() -> None:
 
 
 def test_single_repeat_z() -> None:
-    new_cell: supercell = supercell(repeats_x=0, repeats_y=0, repeats_z=1, coords_proc=test_coords_proc)
+    new_cell: supercell = supercell(
+        repeats_x=0, repeats_y=0, repeats_z=1, orig_coords=test_coords_proc
+    )
     num_repeats = (new_cell.repeats_x + 1) * (new_cell.repeats_y + 1) * (new_cell.repeats_z + 1)
-    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords_proc.coords.natoms)
-    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords_proc.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.orig_coords.natoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.orig_coords.atoms)
     assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.92770000
@@ -91,10 +98,12 @@ def test_single_repeat_z() -> None:
 
 
 def test_single_repeat_all() -> None:
-    new_cell: supercell = supercell(repeats_x=2, repeats_y=1, repeats_z=0, coords_proc=test_coords_proc)
+    new_cell: supercell = supercell(
+        repeats_x=2, repeats_y=1, repeats_z=0, orig_coords=test_coords_proc
+    )
     num_repeats = (new_cell.repeats_x + 1) * (new_cell.repeats_y + 1) * (new_cell.repeats_z + 1)
-    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.coords_proc.coords.natoms)
-    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.coords_proc.coords.atoms)
+    assert int(new_cell.supercell_coords.natoms) == num_repeats * int(new_cell.orig_coords.natoms)
+    assert len(new_cell.supercell_coords.atoms) == num_repeats * len(new_cell.orig_coords.atoms)
     assert int(new_cell.supercell_coords.natoms) == len(new_cell.supercell_coords.atoms)
     assert (
         (new_cell.repeats_x + 1) * 5.927799999

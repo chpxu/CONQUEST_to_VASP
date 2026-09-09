@@ -86,8 +86,8 @@ def test_atom_str_contains_key_fields() -> None:
     rendered = str(atom)
     assert f"Atom {atom.number} ({atom.label})" in rendered
     assert "Species Index" in rendered
-    assert "Frac coords" in rendered
-    assert "Cart coords" in rendered
+    assert "Frac. Coords" in rendered
+    assert "Cart. Coords" in rendered
 
 
 def test_atom_to_ase_conversion() -> None:

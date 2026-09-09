@@ -47,6 +47,7 @@ class Atom:
     cart_coords: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     forces: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     spins: c2at.REAL_ARRAY = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
+    symmetry_number: int = 0
 
     def __str__(self) -> str:
         def fmt_array(arr: c2at.REAL_ARRAY) -> str:
@@ -56,11 +57,12 @@ class Atom:
         return (
             f"Atom {self.number} ({self.label})\n"
             f"  Species Index : {self.species}\n"
-            f"  Frac coords   : {fmt_array(self.coords)}\n"
-            f"  Cart coords   : {fmt_array(self.cart_coords)}\n"
-            f"  Can move      : {', '.join(self.can_move)}\n"
+            f"  Frac. Coords  : {fmt_array(self.coords)}\n"
+            f"  Cart. Coords  : {fmt_array(self.cart_coords)}\n"
+            f"  Movable       : {', '.join(self.can_move)}\n"
             f"  Force         : {fmt_array(self.forces)}\n"
             f"  Spin          : {fmt_array(self.spins)}\n"
+            f"  Sym. Number   : {self.symmetry_number}\n"
         )
 
     def to_ase(self) -> ase.Atom:
@@ -74,6 +76,11 @@ class Atom:
         return ase.Atom(
             symbol=self.label, position=self.coords, magmom=self.spins, momentum=self.forces
         )
+
+    def reset_symmetry(self) -> None:
+        """Resets ``self.symmetry_number`` back to ``0``.
+        """
+        self.symmetry_number = 0
 
 
 class conquest_species:
@@ -224,6 +231,37 @@ class conquest_coordinates:
             num_eles[element] = len(self.element_map[element])
         return num_eles
 
+    def reset_symmetry(self, atom_number: int = 0) -> None:
+        """Set all atoms' or a specific atom's symmetry number back to ``0``.
+
+        :param atom_number: _description_, defaults to 0
+        :type atom_number: int, optional
+        :raises ValueError: _description_
+        """
+        if atom_number < 0:
+            raise ValueError("Cannot select negative atom number")
+        if atom_number == 0:
+            for atom in self.atoms:
+                atom.reset_symmetry()
+            return
+        for atom in self.atoms:
+            if atom.number == atom_number: atom.reset_symmetry()
+        return
+
+    def reset_symmetry_site(self, symmetry_number: int = 0) -> None:
+        """Set all atoms with the same symmetry number back to ``0``.
+
+        :param symmetry_number: _description_, defaults to 0
+        :type symmetry_number: int, optional
+        :raises ValueError: _description_
+        """
+        if symmetry_number < 0:
+            raise ValueError("Cannot select negative symmetry number")
+        for atom in self.atoms:
+            if atom.symmetry_number == symmetry_number: atom.reset_symmetry()
+        return
+
+
 
 class atom_charge(processor_base):
     """
@@ -232,7 +270,7 @@ class atom_charge(processor_base):
     It is assumed each row of AtomCharge.dat is arranged such that it is equivalent to the
     same CONQUEST input coordinates file.
 
-    In particular, make use of the conquest_coordinates class to contain the list of Atoms
+    In particular, make use of the :class:`conquest_coordinates` class to contain the list of Atoms
 
     :param coordinates: The :class:`conquest_coordinates` instance to use
     :type coordinates: :class:`conquest_coordinates`
@@ -240,11 +278,11 @@ class atom_charge(processor_base):
     :type atom_charge_path: ``str``
     """
 
-    def __init__(self, coordinates: conquest_coordinates, atom_charge_path: str) -> None:
+    def __init__(self, atom_charge_path: str, coordinates: conquest_coordinates) -> None:
         processor_base.__init__(
             self,
             path=atom_charge_path,
-            err_str="Error opening specified CONQUEST AtomCharge.dat file.",
+            err_str=f"Error opening specified CONQUEST AtomCharge.dat file at {atom_charge_path}.",
         )
         self.coordinates: conquest_coordinates = coordinates
         self.atom_charge_path: str = atom_charge_path

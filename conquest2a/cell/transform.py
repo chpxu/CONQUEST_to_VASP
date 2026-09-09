@@ -190,6 +190,7 @@ class transform_unit_cell:
                     should_be_added.add(key)
                 new_atom: Atom = copy.deepcopy(atom)
                 new_atom.coords = wrapped_pos
+                new_atom.symmetry_number = atom.number
                 new_atoms.append(new_atom)
 
         # initialise new coordinates instance

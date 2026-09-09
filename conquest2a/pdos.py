@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import sys
 import re
@@ -15,13 +16,12 @@ import matplotlib.pyplot as plt
 import conquest2a._types as c2at
 from conquest2a.conquest import block_processor
 
+class pdos(block_processor):
+    """Initialise generic (p)DOS processor class.
 
-class pdos_processor(block_processor):
-    """Initialise generic PDOS processor class.
+    CONQUEST can produce a ``DOS.dat`` containing the total DOS and the local DOS, which ``lm="t"`` will process. To process :math:`l` and :math:`lm`-resolved PDOS files, set ``lm="l"`` and ``lm="lm"` respectively.`
 
-    CONQUEST can produce a ``DOS.dat`` containing the total DOS and the local DOS, which ``lm="t"`` will process. To process :math:`l` and :math:`lm`-resolved PDOS files, initialise an instance of :class:`pdos_l_processor` and :class:`pdos_lm_processor` respectively.
-
-    :param conquest_rundir: String or Path to the directory containing the PDOS files generated from CONQUEST's PostProcessing tool.
+    :param conquest_rundir: String or Path to the directory containing the (P)DOS files generated from CONQUEST's ``PostProcess`` tool.
     :type conquest_rundir: ``string | Path``
     :param lm: Determines the file-processing mode. Defaults to ``"t"``.
 
@@ -29,19 +29,19 @@ class pdos_processor(block_processor):
     """
 
     def __init__(self, conquest_rundir: str | Path, lm: Literal["lm", "l", "t"] = "t") -> None:
-        # self.dos_file = dos_file
-        self.lm = lm
+        self.lm: Literal["lm", "l", "t"] = lm
         self.blocks: list[c2at.REAL_ARRAY] = []
-        self.filename_regex = rf"Atom[0-9]{{7}}DOS\_{self.lm}\.dat"
+        self.filename_regex: str = rf"Atom[0-9]{{7}}DOS\_{self.lm}\.dat"
         self.all_pdos_files: list[str] = []
         self.pdos_atoms: list[int] = []
-        self.conquest_rundir = conquest_rundir
+        self.conquest_rundir: str | Path = conquest_rundir
         self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
         self.current_block: list[Any] = []
         super().__init__()
         self.fermi_level: float = 0.0
         self.is_shifted_to_fermi: bool = True
         self.num_spins: int = 0
+        self.pdos_dict: dict[str, list[c2at.REAL_ARRAY]] = defaultdict(list)
         self.resolve_path()
         self.locate_pdos_files()
 
@@ -84,7 +84,7 @@ class pdos_processor(block_processor):
     def locate_pdos_files(self) -> list[str]:
         """Gets the paths to all PDOS files of the right type and stores it in a list.
 
-        :return: List of all paths to PDOS files.
+        :return: List of all paths to PDOS files given the mode.
         :rtype: ``list[str]``
         """
         if len(self.all_pdos_files) > 0:
@@ -112,10 +112,17 @@ class pdos_processor(block_processor):
             self.all_pdos_files.append(f"{abspath(self.conquest_rundir)}/{file}")
         return self.all_pdos_files
 
-    def get_pdos(self, atom: int) -> None:
+    def read_dos_file(self) -> None:
+        """Reads in a DOS.dat."""
+        self.energy_values = {}
+        for filename in self.all_pdos_files:
+            self.read_file(filename)
+
+
+    def read_pdos_file(self, atom: int) -> None:
         """Reads in the PDOS data of a file corresponding to an atom.
 
-        CONQUEST outputs pdos filenames pf the form ``AtomNNNNNNNDOS_lm.dat`` or ``AtomNNNNNNNDOS_l.dat``
+        CONQUEST outputs pdos filenames of the form ``AtomNNNNNNNDOS_lm.dat`` or ``AtomNNNNNNNDOS_l.dat``
         where NNNNNNN is a zero-padded atom number (as ordered in the coordinates file). This method is modified by the children :class:`pdos_l_processor` and :class:`pdos_lm_processor` for their purposes.
 
         :param atom: The atom to find and read in the PDOS for.
@@ -125,212 +132,41 @@ class pdos_processor(block_processor):
         if atom not in self.pdos_atoms:
             raise ValueError("Chosen atom for pdos was not in the atom list")
         id: str = f"{atom:07d}"
-        # self.all_pdos_files will be absolute oaths, use searchc
         for filename in self.all_pdos_files:
             match: Match[str] | None = re.search(rf"Atom{id}DOS_{self.lm}\.dat", filename)
             if match:
                 self.read_file(filename)
                 return
 
-    def plot_pdos(self, *args, **kwargs) -> None:  # type: ignore
-        """Method which plots the PDOS and LDOS inside `DOS.dat`."""
-        if self.lm == "t":
-            self.energy_values = {}
-            for filename in self.all_pdos_files:
-                self.read_file(filename)
-            _fig = plt.figure(figsize=(3, 2))
-            # print(self.blocks)
-            energy: c2at.REAL_ARRAY = self.blocks[0][:, 0]
-            self.energy_values[0] = energy
-            tdos_up: c2at.REAL_ARRAY = self.blocks[0][:, 1]
-            tdos_dn: c2at.REAL_ARRAY = self.blocks[1][:, 1]
-            ldos_up: c2at.REAL_ARRAY = self.blocks[0][:, 2]
-            ldos_dn: c2at.REAL_ARRAY = self.blocks[1][:, 2]
+    def _tdos(self) -> None:
+        energy: c2at.REAL_ARRAY = self.blocks[0][:, 0]
+        self.energy_values[0] = energy
+        tdos_up: c2at.REAL_ARRAY = self.blocks[0][:, 1]
+        tdos_dn: c2at.REAL_ARRAY = self.blocks[1][:, 1]
+        ldos_up: c2at.REAL_ARRAY = self.blocks[0][:, 2]
+        ldos_dn: c2at.REAL_ARRAY = self.blocks[1][:, 2]
+        self.pdos_dict["tdos"] = [tdos_up, tdos_dn]
+        self.pdos_dict["ldos"] = [ldos_up, ldos_dn]
 
-            plt.plot(energy, tdos_up, color="red", label="Spin up")
-            plt.plot(energy, -1 * tdos_dn, color="blue", label="Spin down")
-            plt.savefig("DOS.png")
-
-            plt.plot(energy, ldos_up, color="red", label="Spin up")
-            plt.plot(energy, -1 * ldos_dn, color="blue", label="Spin down")
-            plt.savefig("LDOS.png")
-
-
-class pdos_l_processor(pdos_processor):
-    def __init__(self, conquest_rundir: str | Path) -> None:
-        """Class to process and plot :math:`l`-resolved PDOS.
-
-        * PDOS file is split into blocks separated by "&" lines.
-        * The first block is the spin-up and second is spin-down.
-        * Column 1 records the energy in electronvolts
-        * Column 2 records the sum over all :math:`l`-PDOS at that energy
-        * From column 3 onwards, records specific :math:`l`-contributions, and columns are sorted by ascending :math:`l` values.
-
-        :param conquest_rundir:  String or Path to the directory containing the PDOS files generated from CONQUEST's `PostProcess` binary.
-        :type conquest_rundir: ``str | Path``
-        """
-        super().__init__(conquest_rundir=conquest_rundir, lm="l")
-        self.l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
-
-        # e.g., l = 0,  l =1,  l = 2, etc.
-        # So dict will be of the form {"l": [array(spin1), array(spin2), ...],}
-        self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
-        self.color_dict: dict[str, str] = {
-            "0": "blue",
-            "1": "cyan",
-            "2": "magenta",
-            "3": "red",
-        }
-
-        self.label_dict: dict[str, str] = {
-            "0": r"$l = 0$",
-            "1": r"$l = 1$",
-            "2": r"$l = 2$",
-            "3": r"$l = 3$",
-        }
-
-    def l_map(self) -> None:
-        """Reads and stores the columns of an :math:`l`-resolved PDOS file."""
-        l_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
+    def _l_pdos(self) -> None:
+        l_dict: dict[str, list[c2at.REAL_ARRAY]] = defaultdict(list)
         for idx, block in enumerate(self.blocks):
             energy: c2at.REAL_ARRAY = block[:, 0]
             self.energy_values[idx + 1] = energy
             pdos_values: c2at.REAL_ARRAY = block[:, 2:]
             num_l = pdos_values.shape[1]
             for l in range(num_l):
-                if str(l) not in l_dict:
-                    l_dict[str(l)] = []
                 l_dict[str(l)].append(pdos_values[:, l])
-        self.l_dict = l_dict
+        self.pdos_dict = l_dict
 
-    @override
-    def get_pdos(self, atom: int) -> None:
-        """Method which clears the data, calls :func:`~get_pdos` on the ``atom``, and :func:`~l_map` in one go.
-
-        :param atom: The atom to get the PDOS for.
-        :type atom: ``int``
-        :raises ValueError: If the chosen atom to plot does not have a pDOS file, the method will abort without doing anything.
-        """
-        if atom not in self.pdos_atoms:
-            raise ValueError("Some chosen atoms for pdos plotting was not in the atom list")
-        self.l_dict = {}
-        super().get_pdos(atom)
-        self.l_map()
-
-    @override
-    def plot_pdos(
-        self,
-        atomno: int,
-        ang_mom: int,
-        x1: float | None,
-        x2: float | None,
-        y1: float | None,
-        y2: float | None,
-        filename: str,
-    ) -> None:
-        """Plots the :math:`l` pDOS for an atom.
-
-        :param atomno: The atom number as defined in the coordinates.
-        :type atomno: ``int``
-        :param ang_mom: The angular momentum value to plot.
-        :type ang_mom: ``int``
-        :param x1: Lower energy limit. If ``None``, defaults to the lowest energy in the data.
-        :type x1: ``float | None``
-        :param x2: Upper energy limit. If ``None``, defaults to the highest energy in the data.
-        :type x2: ``float | None``
-        :param y1: Lower y-limit
-        :type y1: ``float | None``
-        :param y2: Upper y-limit
-        :type y2: ``float | None``
-        :param filename: Filename of plot.
-        :type filename: ``str``
-        """
-        x_label = r"$E - E_F~[\text{eV}]$" if self.is_shifted_to_fermi else r"$E~[\text{eV}]$"
-        y_label = r"$\text{DOS} [\text{states/eV}]$"
-
-        _fig = plt.figure()
-
-        self.get_pdos(atomno)
-        key: str = str(ang_mom)
-        plt.plot(
-            self.energy_values[0],
-            self.l_dict[key][0],
-            label=self.label_dict[key],
-            color=self.color_dict[key],
-        )
-        plt.plot(
-            self.energy_values[1], -self.l_dict[key][1], linestyle="--", color=self.color_dict[key]
-        )
-        plt.legend()
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
-        plt.ylim(y1, y2)
-        plt.xlim(x1, x2)
-        plt.savefig(filename)
-        plt.close()
-
-
-class pdos_lm_processor(pdos_processor):
-    def __init__(self, conquest_rundir: str | Path) -> None:
-        """Class to process and plot :math:`lm`-resolved PDOS.
-
-        * PDOS file is split into blocks separated by "&" lines. The first block is the spin-up and second is spin-down.
-        * Column 1 records the energy in electronvolts
-        * Column 2 records the sum over all :math:`lm`-PDOS at that energy
-        * From column 3 onwards, records specific contributions, and columns are sorted by ascending :math:`l` values, and ascending :math:`m` values.
-            *  E.g., (l = 0),  (l =1), m = -1, 0, 1, (l = 2), m = -2, -1, 0, 1, 2, etc.
-
-        :param conquest_rundir:  String or Path to the directory containing the PDOS files generated from CONQUEST's `PostProcess` binary.
-        :type conquest_rundir: ``str | Path``
-        """
-        super().__init__(conquest_rundir=conquest_rundir, lm="lm")
-        self.lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
-        # PDOS file is split into blocks separated by "&" lines
-        # The first column of each block is the energy values
-        # The second column is the total PDOS, i.e sum of all l and m, at that energy
-        # Subsequent columns are the PDOS values for each lm component, sorted in
-        # ascending order of l and m
-
-        # So dict will be of the form {"l,m": [array(spin1), array(spin2), ...],}
-        self.energy_values: dict[int, c2at.REAL_ARRAY] = {}
-
-        self.color_dict: dict[str, str] = {
-            "0,0": "blue",
-            "1,-1": "cyan",
-            "1,0": "magenta",
-            "1,1": "red",
-            "2,-2": "red",
-            "2,-1": "cyan",
-            "2,0": "pink",
-            "2,1": "blue",
-            "2,2": "black",
-        }
-
-        self.label_dict: dict[str, str] = {
-            "0,0": r"$s$",
-            "1,-1": r"$p_y$",
-            "1,0": r"$p_z$",
-            "1,1": r"$p_x$",
-            "2,-2": r"$d_{xy}$",
-            "2,-1": r"$d_{yz}$",
-            "2,0": r"$d_{z^2}$",
-            "2,1": r"$d_{xz}$",
-            "2,2": r"$d_{x^2 - y^2}$",
-        }
-
-    def lm_map(self) -> None:
-        """Reads and stores the columns of an :math:`lm`-resolved PDOS file.
-
-        * For every :math:`l`, there are :math:`2l + 1` columns of PDOS. These become the keys of a dictionary and will be accessed in the form ``["l,m"]``.
-        * The values of this dictionary will be a list of NumPy arrays, ordered first by spin-up and then spin-down.
-        """
-
-        lm_dict: dict[str, list[c2at.REAL_ARRAY]] = {}
+    def _lm_pdos(self) -> None:
+        lm_dict: dict[str, list[c2at.REAL_ARRAY]] = defaultdict(list)
         for idx, block in enumerate(self.blocks):
             energy = block[:, 0]
             self.energy_values[idx + 1] = energy
             pdos_values = block[:, 2:]
             num_lm = pdos_values.shape[1]
+
             l: int = 0
             m_count: int = 0
             m: int = 0
@@ -340,81 +176,33 @@ class pdos_lm_processor(pdos_processor):
                     m_count = 0
                 m = -l + m_count
                 lm_key: str = f"{l},{m}"
-                if lm_key not in lm_dict:
-                    lm_dict[lm_key] = []
                 lm_dict[lm_key].append(pdos_values[:, i])
                 m_count += 1
-        self.lm_dict = lm_dict
+        self.pdos_dict = lm_dict
 
-    @override
-    def get_pdos(self, atom: int) -> None:
-        """Method which clears the data, calls :func:`~get_pdos` on the ``atom``, and :func:`~lm_map` in one go.
+    def _clear_pdos(self) -> None:
+        self.pdos_dict = {}
 
-        :param atom: The atom to get the PDOS for.
-        :type atom: ``int``
-        :raises ValueError: If the chosen atom to plot does not have a pDOS file, the method will abort without doing anything.
-        """
-        if atom not in self.pdos_atoms:
-            raise ValueError("Chosen atom for pdos was not in the atom list")
-        self.lm_dict = {}
-        super().get_pdos(atom)
-        self.lm_map()
+    def get_pdos(self, atom_number: int = 0) -> None:
+        """Reads and stores the columns of a (p)DOS file in a dictionary sorted by ascending order of angular momentum :math:`l` and ascending order of :math:`m`."""
+        self._clear_pdos()
+        _pdos_funcs: dict[str, str] = {
+            "lm": "_lm_pdos",
+            "l": "_l_pdos",
+            "t": "_tdos"        }
 
-    @override
-    def plot_pdos(
-        self,
-        atomnos: list[int],
-        orbitals: list[str],
-        x1: float | None,
-        x2: float | None,
-        y1: float | None,
-        y2: float | None,
-        filename: str,
-    ) -> None:
-        """Plots the :math:`l` pDOS for an atom.
+        try:
+            method_name = _pdos_funcs[self.lm]
+        except KeyError:
+            supported = ", ".join(sorted(_pdos_funcs))
+            raise ValueError(
+                f"Unsupported DOS mode '{self.lm}'; supported formats are: {supported}"
+            ) from None
 
-        :param atomnos: The atom numbers as defined in the coordinates, to plot.
-        :type atomnos: ``int``
-        :param orbitals: The orbitals to plot. These are a list of the keys in the dictionary.
-        :type orbitals: ``list[int]``
-        :param x1: Lower energy limit. If ``None``, defaults to the lowest energy in the data.
-        :type x1: ``float | None``
-        :param x2: Upper energy limit. If ``None``, defaults to the highest energy in the data.
-        :type x2: ``float | None``
-        :param y1: Lower y-limit
-        :type y1: ``float | None``
-        :param y2: Upper y-limit
-        :type y2: ``float | None``
-        :param filename: Filename of plot.
-        :type filename: ``str``
-        """
-        x_label = r"$E - E_F~[\text{eV}]$" if self.is_shifted_to_fermi else r"$E~[\text{eV}]$"
-        y_label = r"$\text{DOS} [\text{states/eV}]$"
-        super().plot_pdos()
-        if not set(atomnos).issubset(self.pdos_atoms):
-            raise ValueError("Some chosen atoms for pdos plotting was not in the atom list")
-        # Plot the same orbitals from each atom on the same plot
-        _fig = plt.figure()
-
-        for atom in atomnos:
-            self.get_pdos(atom)
-            for key in orbitals:
-                plt.plot(
-                    self.energy_values[0],
-                    self.lm_dict[key][0],
-                    label=self.label_dict[key],
-                    color=self.color_dict[key],
-                )
-                plt.plot(
-                    self.energy_values[1],
-                    -self.lm_dict[key][1],
-                    linestyle="--",
-                    color=self.color_dict[key],
-                )
-        plt.legend()
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
-        plt.ylim(y1, y2)
-        plt.xlim(x1, x2)
-        plt.savefig(filename)
-        plt.close()
+        reader = getattr(self, method_name)
+        if atom_number > 0 and self.lm != "t":
+            self.read_pdos_file(atom_number)
+            reader()
+        else:
+            self.read_dos_file()
+            reader()

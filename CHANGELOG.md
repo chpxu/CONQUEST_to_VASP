@@ -14,6 +14,11 @@
     - VESTA-like unit cell transformations are handled with the new `cell.transform` module. There is only one class: `transform_unit_cell`
     - Define a transformation matrix $P$ and call it as `transform_unit_cell.transform(P)` which will return a new `conquest_coordinates` instance you can use
     - The `Atom` class now has a new member: `symmetry_number`. When doing unit cell transforms, it is set to the original atom number which created it. This may be useful for identifying a bulk set of atoms to manipulate.
+- Refactored DOS API
+    - Everything now happens inside the new `pdos` class. It accepts the same parameters as before: path to a directory and what mode
+    - Now, you just need to instantiate the class, e.g. `pdos_instance = pdos("thisdir", "lm)`. Then you need to just call `pdos_instance.get_pdos()`. If you supply a positive integer, it will automatically search for $l$ or $lm$-resolved pDOS files in the directory, otherwise it will look for `DOS.dat`.
+    - Resulting DOS/pDOS data now accessible via `pdos_dict` and `energy_values` attributes. For DOS, the keys `pdos_dict` are `tdos` and `ldos`, whilst for pDOS they keys are still `l` or `l,m` and they are still sorted by ascending angular momentum
+    - The fundamental searching and processing is identical to v0.3.0
 
 ## Other
 - Tests introduced for `conquest` module
@@ -23,7 +28,9 @@
 
 ## Bug fixes
 - Unit conversion errors (everyone's favourite)
-
+- Fix newline bug in writing CONQUEST cooordinate files
+- Make resetting pDOS more robust
+<!--  -->
 # 0.3.0
 
 ## Features
@@ -47,7 +54,7 @@
 - Add more type hints throughout
 - Add `@override` where appropriate
 - Update Nix deps to 26.05
-
+<!--  -->
 # 0.2.0
 
 ## Features

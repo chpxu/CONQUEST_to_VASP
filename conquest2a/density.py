@@ -462,9 +462,9 @@ class bandden(processor_base):
         hkl: tuple[int, int, int],
         offset: float,
         operations: str,
-        band: int,
+        bands: list[int],
         spin: int | None = None,
-        kpt: int | None = None,
+        kpts: list[int] | None = None,
     ) -> None:
         self.all_dens_files: list[str] = []
         self.filtered_dens_files: list[str] = []
@@ -477,7 +477,7 @@ class bandden(processor_base):
         self.directory: str = directory
         super().__init__(path=directory)
         self.locate_banddens_files()
-        self._filter_banddens_files(band, spin=spin, kpt=kpt)
+        self._filter_banddens_files(bands, spin=spin, kpt=kpts)
         self.density: density = density(
             hkl, offset, paths=self.filtered_dens_files, operations=operations
         )
@@ -518,15 +518,15 @@ class bandden(processor_base):
         return self.all_dens_files
 
     def _filter_banddens_files(
-        self, band: int, spin: int | None = None, kpt: int | None = None
+        self, band: list[int], spin: int | None = None, kpt: list[int] | None = None
     ) -> list[str]:
         """Method to filter band densities by band number, and optionally spin and k-point.
 
-        :param band: Band index
-        :type band: ``int``
+        :param band: Band indices to filter for
+        :type band: ``list[int]``
         :param spin: Spin index. 1 is usually up and 2 is down. ``None`` fetches all spins associated with a band and k-point
         :type spin: ``int | None``
-        :param kpt: k-point number. If ``None``, will look for band density files that have summed over k-points instead.
+        :param kpt: k-point indices to filter for. If ``None`` (default), will look for band density files that have summed over k-points instead.
         :type kpt: ``int | None``
         :raises ValueError: If ``band`` index supplied is not found.
         :raises ValueError: If ``spin`` index supplied is less than 1.
@@ -536,11 +536,13 @@ class bandden(processor_base):
         """
         if spin is not None and spin < 1:
             raise ValueError("Spin index cannot be less than 1.")
-        if kpt is not None and kpt < 1:
+        if kpt is not None and any(k < 1 for k in kpt):
             raise ValueError("k-point index cannot be less than 1.")
-        if band not in self.bands:
-            raise ValueError("Selected band(s) is not in the directory")
+        if any(band not in self.bands for band in self.bands):
+            raise ValueError(f"Selected band(s) {band} is not in the directory")
 
+        band_set: set[int] = set(band)
+        kpt_set: set[int] | None = None if kpt is None else set(kpt)
         # Filter by kpt or kpt sum
         pattern: re.Pattern[str] = self._bykpt_regex if kpt is not None else self._sumkpt_regex
         compiled: re.Pattern[str] = re.compile(pattern)
@@ -550,13 +552,13 @@ class bandden(processor_base):
             match: re.Match[str] | None = compiled.search(basename(filepath))
             if match is None:
                 continue
-            if kpt is not None and int(match.group(2)) != kpt:
+            if kpt_set is not None and int(match.group(2)) not in kpt_set:
                 continue
             category_matches.append((filepath, match))
 
         # band number
         band_matches: list[tuple[str, re.Match[str]]] = [
-            (filepath, match) for filepath, match in category_matches if int(match.group(1)) == band
+            (filepath, match) for filepath, match in category_matches if int(match.group(1)) in band_set
         ]
 
         # If spin is none, just return the remaining filtered files

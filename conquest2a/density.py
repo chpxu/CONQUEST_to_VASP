@@ -263,6 +263,7 @@ class density(processor_base):
         self,
         n_points: int = 1000,
         interp_order: int = 5,
+        shift: tuple[float, float] = (0.0, 0.0)
     ) -> tuple[Any, REAL_ARRAY, REAL_ARRAY, REAL_ARRAY, REAL_ARRAY, REAL_ARRAY]:
         """Sample the charge density on the :math:`[hkl]` plane at fractional ``offset``.
 
@@ -278,6 +279,8 @@ class density(processor_base):
         :type n_points: ``int``, optional
         :param interp_order: The polynomial degree for interpolation, defaults to 5
         :type interp_order: ``int``, optional
+        :param shift: Vector to shift the origin on the plane by
+        :type shift: ``tuple[float, float]``, optional
         :returns: A tuple containing:
 
             - **density** (:ref:`REAL ARRAY <types>`) -- Charge density in :math:`e/a_0^3`, shape ``(n_points, n_points)``
@@ -288,7 +291,7 @@ class density(processor_base):
             - **origin** (``float``) -- Cartesian slice origin in Bohr
         """
         v1, v2, _ = self.inplane_basis()
-        origin = self.plane_origin()
+        origin = self.plane_origin() + (shift[0]*v1) + (shift[1]*v2)
 
         length_1, length_2 = self.inplane_range(v1, v2)
         t1 = np.linspace(-length_1 / 2, length_1 / 2, n_points)
@@ -305,6 +308,22 @@ class density(processor_base):
         ).reshape(n_points, n_points)
 
         return density, v1, v2, t1, t2, origin
+    def shift_onto_atom(self, atom_number: int) -> tuple[float, float]:
+        """Produce the vector shift needed to set an atom to be at the origin of the plane.
+
+        :param atom_number: The atom number to shift to
+        :type atom_number: int
+        :return: 2D vector to shift by
+        :rtype: tuple[float, float]
+        """
+        v1, v2, _ = self.inplane_basis()
+        origin = self.plane_origin()
+        pos = self.atoms.get_positions()[atom_number] / Bohr
+        disp = pos - origin
+        disp_frac = disp @ np.linalg.inv(self.cell)
+        disp_frac -= np.around(disp_frac)
+        disp2 = disp_frac @ self.cell
+        return disp2 @ v1, disp2 @ v2
 
     def project_atoms(
         self,
@@ -573,8 +592,8 @@ class plot_densities:
     """
 
     _DEFAULT_CBAR_LABELS: dict[type, str] = {
-        chden: r"$\rho$  [$e\,a_0^{-3}$]",
-        bandden: r"$|\psi_{nk}|^2$  [$a_0^{-3}$]",
+        chden: r"$\rho$  [$e a_0^{-3}$]",
+        bandden: r"$\rho$ [Bohr$^{-3}$]",
         density: r"$\rho$  [arb. units]",
     }
 
@@ -743,8 +762,10 @@ class plot_densities:
     def run(
         self,
         filename: str | None = None,
-        thickness: float = 0.5,
         log_scale: bool = False,
+        atom_number: int | None = None,
+        shift: tuple[float,float] = (0.0,0.0),
+        thickness: float = 1,
         vmin: float | None = 0.0,
         vmax: float | None = None,
         figsize: tuple[float, float] | None = None,
@@ -759,10 +780,14 @@ class plot_densities:
 
         :param filename: Filename to save as. Will save with a useful name if not provided, defaults to None
         :type filename: ``str | None``, optional
-        :param thickness: The Cartesian distance perpendicular to the plane to consider atoms as lying on the slice, defaults to 0.5 Bohr.
+        :param thickness: The Cartesian distance perpendicular to the plane to consider atoms as lying on the slice, defaults to 1 Bohr. Only useful if ``show_atoms=True``
         :type thickness: ``float``, optional
         :param log_scale: Whether to plot the density on a base-10 logarithmic scale, defaults to False
         :type log_scale: ``bool``, optional
+        :param atom_number: Atom number to center the density plot on
+        :type atom_number: ``int``, optional
+        :param shift: Vector to shift the origin on the plane by
+        :type shift: ``tuple[float, float]``, optional
         :param vmin: Minimum value to set the colour scale at, defaults to 0.0
         :type vmin: ``float | None``, optional
         :param vmax: Maximum value to set the colour scale at, defaults to None
@@ -774,7 +799,10 @@ class plot_densities:
         :param imshow_kwargs: Any further keyword arguments (e.g. ``cmap``,
             ``interpolation``) are forwarded to :func:`matplotlib.pyplot.imshow`.
         """
-        density_grid, v1, v2, t1, t2, origin = self.density.extract_slice()
+        if atom_number is not None and atom_number <= 0:
+            raise ValueError("Cannot have a negative atom number")
+        shift = self.density.shift_onto_atom(atom_number) if atom_number is not None else (0.0,0.0)
+        density_grid, v1, v2, t1, t2, origin = self.density.extract_slice(shift=shift)
         atom_data: tuple[REAL_ARRAY, REAL_ARRAY, list[str]] | None = None
         if self.show_atoms:
             _, _, n_hat = self.density.inplane_basis()

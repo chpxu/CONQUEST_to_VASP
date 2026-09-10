@@ -6,6 +6,7 @@
     - Subclasses `chden` and `bandden` handle file searching for charge density output or band density output.These classes then attach a `density` instance to themselves with the filtered files
     - `bandden` supports filtering by band number, $k$-point and spin
     - `chden` supports filtering for spin-(un)polarised calculations, as well as searching for stubs instead.
+    - The generic density plotter ``plot_densities`` also supports shifting the origin of the plot, either arbitrarily or by inputting an atom number.
 - New IO API, `conquest2a.io`
     - File writing and reading is now handled entirely by the new `io.write_coords` and `io.read_coords`, no need to go class hunting
     - Improved object-oriented API: define `conquest_species`, create `write/read_coords` which will automaticaly write file for you

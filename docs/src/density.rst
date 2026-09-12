@@ -21,6 +21,7 @@ Example Usage
 This example creates a final figure from two different band density instances. Each band density instance exposes its Axes so that we can use them on the external subplot.
 
 .. code-block:: python
+
   import matplotlib.pyplot as plt
   import numpy as np
   from conquest2a.density import density, bandden, plot_densities

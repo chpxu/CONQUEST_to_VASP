@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from copy import deepcopy
 from collections.abc import Sequence
 from typing import Any, Literal, overload
@@ -430,7 +431,7 @@ class chden(processor_base):
     """Class which looks for charge density files in a directory.
 
     :param directory: Path to directory containing band density files
-    :type density_instance: ``str``
+    :type directory: ``str``
     :param hkl: The :math:`hkl` slice of the crystal to plot charge densities in.
     :type hkl: :ref:`INT ARRAY <types>`
     :param offset: The :math:`hkl` direction defines a family of planes. Use ``offset`` to select which one (i.e. wherein the unit cell).
@@ -529,7 +530,7 @@ class bandden(processor_base):
     """Class which looks for band density files in a directory.
 
     :param directory: Path to directory containing band density files
-    :type density_instance: ``str``
+    :type directory: ``str``
     :param hkl: The :math:`hkl` slice of the crystal to plot charge densities in.
     :type hkl: :ref:`INT ARRAY <types>`
     :param offset: The :math:`hkl` direction defines a family of planes. Use ``offset`` to select which one (i.e. wherein the unit cell).
@@ -673,10 +674,10 @@ class bandden(processor_base):
 
 
 class plot_density:
-    """Helper class to slice, analyse, and plot volumetric density data.
+    """Helper class to slice, analyse, and plot slices of volumetric density data.
 
     Takes a :class:`density` instance directly, or with
-    :class:`chden` or :class:`bandden` that exposes a ``.density`` attribute
+    :class:`chden` or :class:`bandden` that exposes a ``self.density`` attribute
 
     :param source: The density data to plot.
     :type source: :class:`density` | :class:`chden` | :class:`bandden`
@@ -708,7 +709,7 @@ class plot_density:
 
     def __init__(
         self,
-        source: "density | chden | bandden",
+        source: density | chden | bandden,
         show_atoms: bool = False,
         extension: str = "png",
         cbar_label: str | None = None,
@@ -762,6 +763,8 @@ class plot_density:
         atom_fontsize: float = 5,
         atom_fontcolor: dict[str, str] | None = None,
         atom_bgcolor: dict[str, str] | None = None,
+        atom_edgecolor: dict[str, str] | None = None,
+        atom_kwargs: Mapping[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         def _atom_text(
@@ -799,18 +802,23 @@ class plot_density:
             if atom_symbols is not None and sym not in atom_symbols:
                 continue
             color = (
-                _ELEMENT_COLOURS.get(sym, "#00ff80") if atom_bgcolor is None else atom_bgcolor[sym]
+                _ELEMENT_COLOURS.get(sym, "#00000000") if atom_bgcolor is None else atom_bgcolor[sym]
             )
-            ax.scatter(
-                t1a,
-                t2a,
-                s=atom_size,
-                color=color,
-                edgecolors="white",
-                linewidths=0.8,
-                zorder=5,
-                clip_on=True,
+            edgecolor = (
+                _ELEMENT_COLOURS.get(sym, "#000000")
+                if atom_edgecolor is None
+                else atom_edgecolor[sym]
             )
+            scatter_args: Mapping[str, Any] = {
+                "s": atom_size,
+                "color": color,
+                "edgecolors":edgecolor,
+                "zorder":5,
+                "clip_on":True,
+            }
+            merged_args: Mapping[str, Any] ={**scatter_args, **(atom_kwargs or {})}
+            ax.scatter(t1a, t2a, **merged_args)
+
             if label_atoms:
                 _atom_text(
                     ax=ax,
@@ -845,13 +853,17 @@ class plot_density:
         title: str | None = None,
         show_colorbar: bool = True,
         show_ticks: bool = True,
-        tick_kwargs: dict[str, Any] | None = None,
+        tick_kwargs: Mapping[str, Any] | None = None,
         cmap: str = "Blues",
-        cbar_kwargs: dict[str, Any] | None = None,
+        cbar_kwargs: Mapping[str, Any] | None = None,
         atom_symbols: Sequence[str] | None = None,
         label_atoms: bool = True,
         atom_size: float = 160,
         atom_fontsize: float = 5,
+        atom_fontcolor: dict[str, str] | None = None,
+        atom_bgcolor: dict[str, str] | None = None,
+        atom_edgecolor: dict[str, str] | None = None,
+        atom_kwargs: Mapping[str, Any] | None = None,
         **imshow_kwargs: Any,
     ) -> tuple[Any, Any, Any]:
         """Create the plot and save it to disk.
@@ -866,13 +878,13 @@ class plot_density:
         :type v1: :ref:`REAL ARRAY <types>`
         :param v2: Second unit vector spanning the :math:`[hkl]` plane
         :type v2: :ref:`REAL ARRAY <types>`
-        :param atom_data: Data for atom labels, see :func:`density.project_atoms`, defaults to None
+        :param atom_data: Data for atom labels, see ``density.project_atoms``, defaults to None
         :type atom_data: ``tuple[REAL_ARRAY, REAL_ARRAY, list[str]] | None``, optional
         :param log_scale: Whether to plot the density on a base-10 logarithmic scale -
             useful for revealing details without colour clipping, defaults to False
         :type log_scale: ``bool``, optional
 
-        For extra params, please see :ref:`run <density>` below.
+        For extra params, please see ``plot_density.run()`` below.
         :returns: Tuple containing figure, axes and imshow instances created
         :rtype: ``tuple[Any, Any, Any]``
         """
@@ -894,7 +906,7 @@ class plot_density:
                 figsize = (fig_w, fig_w * (l2 / l1) + 0.5)
             fig, ax = plt.subplots(figsize=figsize)
 
-        imshow_args: dict[str, Any] = {
+        imshow_args: Mapping[str, Any] = {
             "origin": "lower",
             "extent": (t1[0], t1[-1], t2[0], t2[-1]),
             "cmap": cmap,
@@ -916,14 +928,14 @@ class plot_density:
             ax.set_ylim(*ylim)
 
         # Axes ticks
-        default_tick_args: dict[str, Any] = {"direction": "out", "which": "both"}
+        default_tick_args: Mapping[str, Any] = {"direction": "out", "which": "both"}
         if show_ticks:
             ax.tick_params(**tick_kwargs if tick_kwargs is not None else default_tick_args)
         else:
             ax.set_xticks([])
             ax.set_yticks([])
 
-        # Colorbar customisation
+        # Colorbar customisation if enabled
         if show_colorbar:
             divider = mal(ax)
             cax = divider.append_axes("right", size="5%", pad=0.1)
@@ -933,7 +945,7 @@ class plot_density:
                 fontsize=10,
             )
 
-        # Atom plot customisation
+        # Atom markers customisation
         if atom_data is not None:
             self._plot_atoms(
                 ax,
@@ -943,6 +955,10 @@ class plot_density:
                 label_atoms=label_atoms,
                 atom_size=atom_size,
                 atom_fontsize=atom_fontsize,
+                atom_fontcolor=atom_fontcolor,
+                atom_bgcolor=atom_bgcolor,
+                atom_edgecolor=atom_edgecolor,
+                atom_kwargs=atom_kwargs
             )
 
         # Labels and titles
@@ -967,7 +983,7 @@ class plot_density:
         vmin: float | None = 0.0,
         vmax: float | None = None,
         figsize: tuple[float, float] | None = None,
-        savefig_kwargs: dict[str, Any] | None = None,
+        savefig_kwargs: Mapping[str, Any] | None = None,
         ax: Any | None = None,
         save: bool = True,
         xlabel: str | bool | None = None,
@@ -978,12 +994,16 @@ class plot_density:
         show_colorbar: bool = True,
         show_ticks: bool = True,
         cmap: str = "Blues",
-        cbar_kwargs: dict[str, Any] | None = None,
+        cbar_kwargs: Mapping[str, Any] | None = None,
         atom_symbols: Sequence[str] | None = None,
         atom_indices: Sequence[int] | None = None,
         label_atoms: bool = True,
+        atom_fontcolor: dict[str, str] | None = None,
+        atom_bgcolor: dict[str, str] | None = None,
+        atom_edgecolor: dict[str, str] | None = None,
         atom_size: float = 160,
         atom_fontsize: float = 8,
+        atom_kwargs: Mapping[str, Any] | None = None,
         grid_points: int = 500,
         window_repeat: float | tuple[float, float] = 1.0,
         atom_repeat: int | tuple[int, int, int] = 1,
@@ -1012,7 +1032,7 @@ class plot_density:
         :param figsize: Override the auto-computed figure size, defaults to None
         :type figsize: ``tuple[float, float] | None``, optional
         :param savefig_kwargs: Extra keyword arguments forwarded to :func:`matplotlib.pyplot.savefig`, defaults to None
-        :type savefig_kwargs: ``dict[str, Any] | None``, optional
+        :type savefig_kwargs: ``Mapping[str, Any] | None``, optional
         :param imshow_kwargs: Any further keyword arguments (e.g. ``cmap``,
             ``interpolation``) are forwarded to :func:`matplotlib.pyplot.imshow`.
         :param ax: the Axes instance to plot into. Default ``None`` (create its own)
@@ -1032,21 +1052,28 @@ class plot_density:
         :param show_colorbar: Whether to produce a colourbar alongside the density plot, defaults to True
         :type show_colorbar: bool
         :param show_ticks: Whether to show ticks on the density plots, defaults to True
-        :type show_ticks: bool,
+        :type show_ticks: bool
         :param cmap: Colour theme to use. Defaults to matplotlib's "Blues". For publication, we recommend any theme with contrast, e.g. pure white background with a single colour gradient. Saves ink and easy to see!
         :type cmap: str, optional
         :param cbar_kwargs: Extra colourbar arguments to pass to matplotlib
-        :type cbar_kwarsg: dict[str, Any] | None, optional
+        :type cbar_kwargs: Mapping[str, Any] | None, optional
         :param atom_symbols: Atom labels to filter out. Default is None, which filters nothing
-        :type atom_symbols: Sequence[str] | None, optional,
-         :param atom_indices: Atoms to filter out. Default is None, which filters nothing
-        :type atom_indices: Sequence[str] | None, optional,
+        :type atom_symbols: Sequence[str] | None, optional
+        :param atom_indices: Atoms to filter out. Default is None, which filters nothing
+        :type atom_indices: Sequence[str] | None, optional
+        :param label_atoms: Whether atom markers should show the element label, defaults to True (why else would you want them?)
+        :param atom_fontcolor: Text colour of the atom labels
+        :type atom_fontcolor: dict[str, str] | None, optional
+        :param atom_bgcolor: Background colour of the marker corresponding to a specific element. Defaults to a specific colour dict (see source).
+        :type atom_bgcolor: dict[str, str] | None, optional
+        :param atom_edgecolor: Colour of the marker edge corresponding to a specific element. Defaults to white.
+        :type atom_edgecolor: dict[str, str] | None, optional
         :param label_atoms: Whether atom markers should show the element label, defaults to True (why else woudl you want them?)
         :type label_atoms: bool, optional
         :param atom_size: Size of atom marker
         :type atom_size: float = 160, optional
         :param atom_fontsize: Fontsize of atom label. Defaults to 8pt.
-        :type atom_fontsize: float = 8, optinal
+        :type atom_fontsize: float = 8, optional
         :param grid_points: Number of grid points to use for interpolation. Defaults to 500. Very expensive beyond 1000.
         :type grid_points: int = 500, optional
         :param window_repeat: How many repeats to look for.
@@ -1098,18 +1125,17 @@ class plot_density:
             label_atoms=label_atoms,
             atom_size=atom_size,
             atom_fontsize=atom_fontsize,
+            atom_fontcolor=atom_fontcolor,
+            atom_bgcolor=atom_bgcolor,
+            atom_edgecolor=atom_edgecolor,
+            atom_kwargs=atom_kwargs,
             **imshow_kwargs,
         )
         if save:
-            if owns_figure:
-                fig.tight_layout()
+            obj = plt if owns_figure else fig
+            if owns_figure: fig.tight_layout()
             output = filename or self._default_filename()
-            (
-                plt.savefig(output, **(savefig_kwargs or {}))
-                if owns_figure
-                else fig.savefig(output, **(savefig_kwargs or {}))
-            )
+            obj.savefig(output, **(savefig_kwargs or {}))
             print(f"Saved: {output}")
-            if owns_figure:
-                plt.close(fig)
+            if owns_figure: plt.close(fig)
         return fig, ax, im

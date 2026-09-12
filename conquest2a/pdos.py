@@ -20,7 +20,7 @@ from conquest2a.conquest import block_processor
 class pdos(block_processor):
     """Initialise generic (p)DOS processor class.
 
-    CONQUEST can produce a ``DOS.dat`` containing the total DOS and the local DOS, which ``lm="t"`` will process. To process :math:`l` and :math:`lm`-resolved PDOS files, set ``lm="l"`` and ``lm="lm"` respectively.`
+    CONQUEST can produce a ``DOS.dat`` containing the total DOS and the local DOS, which ``lm="t"`` will process. To process :math:`l` and :math:`lm`-resolved PDOS files, set ``lm="l"`` and ``lm="lm"`` respectively.
 
     :param conquest_rundir: String or Path to the directory containing the (P)DOS files generated from CONQUEST's ``PostProcess`` tool.
     :type conquest_rundir: ``string | Path``

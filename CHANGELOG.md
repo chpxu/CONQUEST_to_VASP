@@ -33,6 +33,7 @@
 - Unit conversion errors (everyone's favourite)
 - Fix newline bug in writing CONQUEST cooordinate files
 - Make resetting pDOS more robust
+- Fix atom labels in density being transposed the wrong way
 <!--  -->
 # 0.3.0
 

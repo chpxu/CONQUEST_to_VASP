@@ -1,7 +1,14 @@
-from collections.abc import Mapping
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import overload
+    from collections.abc import Mapping, MutableMapping
+else:
+    from typing_extensions import MutableMapping, Mapping, overload
+
 from copy import deepcopy
 from collections.abc import Sequence
-from typing import Any, Literal, overload
+from typing import Any, Literal
 from pathlib import Path
 import os
 from os.path import abspath, basename
@@ -908,7 +915,7 @@ class plot_density:
                 figsize = (fig_w, fig_w * (l2 / l1) + 0.5)
             fig, ax = plt.subplots(figsize=figsize)
 
-        imshow_args: Mapping[str, Any] = {
+        imshow_args: MutableMapping[str, Any] = {
             "origin": "lower",
             "extent": (t1[0], t1[-1], t2[0], t2[-1]),
             "cmap": cmap,

@@ -802,7 +802,9 @@ class plot_density:
             if atom_symbols is not None and sym not in atom_symbols:
                 continue
             color = (
-                _ELEMENT_COLOURS.get(sym, "#00000000") if atom_bgcolor is None else atom_bgcolor[sym]
+                _ELEMENT_COLOURS.get(sym, "#00000000")
+                if atom_bgcolor is None
+                else atom_bgcolor[sym]
             )
             edgecolor = (
                 _ELEMENT_COLOURS.get(sym, "#000000")
@@ -812,11 +814,11 @@ class plot_density:
             scatter_args: Mapping[str, Any] = {
                 "s": atom_size,
                 "color": color,
-                "edgecolors":edgecolor,
-                "zorder":5,
-                "clip_on":True,
+                "edgecolors": edgecolor,
+                "zorder": 5,
+                "clip_on": True,
             }
-            merged_args: Mapping[str, Any] ={**scatter_args, **(atom_kwargs or {})}
+            merged_args: Mapping[str, Any] = {**scatter_args, **(atom_kwargs or {})}
             ax.scatter(t1a, t2a, **merged_args)
 
             if label_atoms:
@@ -958,7 +960,7 @@ class plot_density:
                 atom_fontcolor=atom_fontcolor,
                 atom_bgcolor=atom_bgcolor,
                 atom_edgecolor=atom_edgecolor,
-                atom_kwargs=atom_kwargs
+                atom_kwargs=atom_kwargs,
             )
 
         # Labels and titles
@@ -1133,9 +1135,11 @@ class plot_density:
         )
         if save:
             obj = plt if owns_figure else fig
-            if owns_figure: fig.tight_layout()
+            if owns_figure:
+                fig.tight_layout()
             output = filename or self._default_filename()
             obj.savefig(output, **(savefig_kwargs or {}))
             print(f"Saved: {output}")
-            if owns_figure: plt.close(fig)
+            if owns_figure:
+                plt.close(fig)
         return fig, ax, im
